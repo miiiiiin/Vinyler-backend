@@ -8,9 +8,6 @@ import lombok.Setter;
 @Setter
 public class ClientRegisterReqeustDto {
     @NotEmpty
-    private String userId;
-
-    @NotEmpty
     private String email;
 
     @NotEmpty
