@@ -24,6 +24,6 @@ public class RegisterController {
     @PostMapping("/register")
     @Operation(description = "신규 회원가입")
     public void registerUser(@RequestBody @Valid ClientRegisterReqeustDto dto) {
-        registerService.registerUser(ServiceRegisterDto.of(dto.getEmail(), dto.getPassword(), dto.getNickname()));
+        registerService.registerUser(ServiceRegisterDto.of(dto.getEmail(), dto.getPassword(), dto.getNickname(), dto.getProfile(), dto.getBirthday()));
     }
 }

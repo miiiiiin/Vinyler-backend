@@ -34,6 +34,6 @@ public class RegisterServiceImpl implements RegisterService {
 
 //        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
 //        userRepository.save(user);
-        userRepository.save(User.of(dto.getEmail(), dto.getPassword(), dto.getNickname()));
+        userRepository.save(User.of(dto.getEmail(), dto.getPassword(), dto.getNickname(), dto.getProfile(), dto.getBirthday()));
     }
 }
