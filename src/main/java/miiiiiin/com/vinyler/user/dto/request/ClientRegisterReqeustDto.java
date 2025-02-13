@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 public class ClientRegisterReqeustDto {
@@ -15,4 +17,8 @@ public class ClientRegisterReqeustDto {
 
     @NotEmpty
     private String nickname;
+
+    private String profile;
+
+    private LocalDate birthday;
 }

@@ -1,7 +1,8 @@
 package miiiiiin.com.vinyler.user.service;
 
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
+import miiiiiin.com.vinyler.user.entity.User;
 
 public interface RegisterService {
-    void registerUser(ServiceRegisterDto dto);
+    User registerUser(ServiceRegisterDto dto);
 }

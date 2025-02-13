@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLRestriction;
 //import org.springframework.security.core.GrantedAuthority;
 //import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Objects;
@@ -38,6 +39,12 @@ public class User extends BaseEntity {//implements UserDetails {
     @Column(nullable = true)
     private ZonedDateTime deletedDate;
 
+    @Column(nullable = true)
+    private String profile; // profile 사진 url
+
+    @Column(nullable = true)
+    private LocalDate birthday;
+
 //    @Override
 //    public Collection<? extends GrantedAuthority> getAuthorities() {
 //        return null;
@@ -68,23 +75,26 @@ public class User extends BaseEntity {//implements UserDetails {
 //        return true;
 //    }
 
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(userId, user.userId) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(nickname, user.nickname) && Objects.equals(deletedDate, user.deletedDate);
+        return Objects.equals(userId, user.userId) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(nickname, user.nickname) && Objects.equals(deletedDate, user.deletedDate) && Objects.equals(profile, user.profile) && Objects.equals(birthday, user.birthday);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, email, password, nickname, deletedDate);
+        return Objects.hash(userId, email, password, nickname, deletedDate, profile, birthday);
     }
 
-    public static User of(String email, String password, String nickname) {
+    public static User of(String email, String password, String nickname, String profile, LocalDate birthday) {
         return User.builder()
                 .email(email)
                 .password(password)
                 .nickname(nickname)
+                .profile(profile)
+                .birthday(birthday)
                 .build();
     }
 
