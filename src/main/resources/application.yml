@@ -1,3 +1,52 @@
 spring:
   application:
-    name: Vinyler-backend
+    name: Vinyler-server
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: "95999eae4e3d13d3ac7e3ccd477e9af9"
+            client-secret: "ueqZglQkWE7nI1BSOSmGigxlhmNEo3Eo"
+            scope:
+              - profile_nickname
+              - profile_image
+              - account_email
+              - birthyear
+            redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
+            client-name: kakao
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/vinyler
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: vinyler-master
+    password: itsfrom90s
+  jpa:
+    hibernate:
+      ddl-auto: update # jpa가 엔티티 스캔해서 엔티티와 db 테이블을 비교하여 갱신해줌
+    show-sql: true
+springdoc:
+  swagger-ui:
+    groups-order: desc
+    tags-sorter: alpha
+    operations-sorter: method
+    disable-swagger-default-url: true
+    default-models-expand-depth: 2
+    default-model-expand-depth: 2
+  api-docs:
+    path: /api-docs
+  show-actuator: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  writer-with-default-pretty-printer: true
+  model-and-view-allowed: true
+  paths-to-match:
+    - /api/v1

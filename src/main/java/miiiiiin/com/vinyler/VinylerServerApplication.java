@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class VinylerBackendApplication {
+public class VinylerServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(VinylerBackendApplication.class, args);
+        SpringApplication.run(VinylerServerApplication.class, args);
     }
 
 }
