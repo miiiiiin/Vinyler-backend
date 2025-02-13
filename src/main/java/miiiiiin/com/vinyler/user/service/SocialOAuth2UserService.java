@@ -42,7 +42,6 @@ public class SocialOAuth2UserService extends DefaultOAuth2UserService {
                 .birthday(getBirthDay(map))
                 .build();
         return userRepository.save(user);
-//        return user;
     }
 
     private LocalDate getBirthDay(Map<String, Object> map) {

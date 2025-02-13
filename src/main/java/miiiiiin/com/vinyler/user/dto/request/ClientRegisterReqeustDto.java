@@ -20,6 +20,5 @@ public class ClientRegisterReqeustDto {
 
     private String profile;
 
-    @NotEmpty
     private LocalDate birthday;
 }
