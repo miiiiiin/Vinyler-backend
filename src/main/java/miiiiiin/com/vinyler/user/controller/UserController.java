@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.dto.request.ClientRegisterReqeustDto;
+import miiiiiin.com.vinyler.user.dto.request.LoginRequestBody;
+import miiiiiin.com.vinyler.user.dto.response.LoginResponseDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.entity.User;
 import miiiiiin.com.vinyler.user.service.UserService;
@@ -27,8 +29,14 @@ public class UserController {
     @PostMapping("/register")
     @Operation(description = "신규 회원가입")
     public ResponseEntity<UserResponseDto> registerUser(@RequestBody @Valid ClientRegisterReqeustDto dto) {
-        User user = userService.registerUser(ServiceRegisterDto.of(dto.getEmail(), dto.getPassword(), dto.getNickname(), dto.getProfile(), dto.getBirthday()));
-        var response = UserResponseDto.from(user);
+        var response = userService.registerUser(ServiceRegisterDto.of(dto.getEmail(), dto.getPassword(), dto.getNickname(), dto.getProfile(), dto.getBirthday()));
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/login")
+    @Operation(description = "로그인")
+    public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestBody requestBody) {
+        var response = userService.login(requestBody);
         return ResponseEntity.ok(response);
     }
 }

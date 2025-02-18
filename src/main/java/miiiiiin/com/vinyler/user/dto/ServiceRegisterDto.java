@@ -37,11 +37,15 @@ public class ServiceRegisterDto {
                 .build();
     }
 
-    public User toEntity(PasswordEncoder passwordEncoder) {
+    public void setPasword(PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(this.password);
+    }
+
+    public User toEntity() {
         return User.builder()
                 .email(this.email)
                 .nickname(this.nickname)
-                .password(passwordEncoder.encode(this.password))
+                .password(this.password)
                 .profile(this.profile)
                 .birthday(this.birthday)
                 .build();
