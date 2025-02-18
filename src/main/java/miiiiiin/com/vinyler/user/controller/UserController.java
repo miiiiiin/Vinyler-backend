@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.dto.request.ClientRegisterReqeustDto;
+import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.entity.User;
 import miiiiiin.com.vinyler.user.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +26,9 @@ public class UserController {
 
     @PostMapping("/register")
     @Operation(description = "신규 회원가입")
-    public ResponseEntity<User> registerUser(@RequestBody @Valid ClientRegisterReqeustDto dto) {
+    public ResponseEntity<UserResponseDto> registerUser(@RequestBody @Valid ClientRegisterReqeustDto dto) {
         User user = userService.registerUser(ServiceRegisterDto.of(dto.getEmail(), dto.getPassword(), dto.getNickname(), dto.getProfile(), dto.getBirthday()));
-        return ResponseEntity.ok(user);
+        var response = UserResponseDto.from(user);
+        return ResponseEntity.ok(response);
     }
 }
