@@ -6,14 +6,15 @@ import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.entity.User;
 import miiiiiin.com.vinyler.user.repository.UserRepository;
 //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class RegisterServiceImpl implements RegisterService {
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
-//    private final BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public User registerUser(ServiceRegisterDto dto) {
@@ -27,12 +28,7 @@ public class RegisterServiceImpl implements RegisterService {
             throw new UserAlreadyExistException(user.getNickname());
         });
 
-
-//        User user = dto.toEntity(passwordEncoder);
-
-//        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
-//        userRepository.save(user);
-        User user = userRepository.save(User.of(dto.getEmail(), dto.getPassword(), dto.getNickname(), dto.getProfile(), dto.getBirthday()));
+        User user = userRepository.save(dto.toEntity(passwordEncoder));
         return user;
     }
 }

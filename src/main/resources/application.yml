@@ -50,3 +50,6 @@ springdoc:
   model-and-view-allowed: true
   paths-to-match:
     - /api/v1
+
+jwt:
+  secret-key: dmlueWxlci1zY2FuLWl0LXJpZ2h0YXdheQo=

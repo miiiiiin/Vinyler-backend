@@ -2,6 +2,8 @@ package miiiiiin.com.vinyler.user.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import miiiiiin.com.vinyler.user.entity.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 //import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,12 +36,14 @@ public class ServiceRegisterDto {
                 .birthday(birthday)
                 .build();
     }
-//
-//    public User toEntity(PasswordEncoder passwordEncoder) {
-//        return User.builder()
-//                .email(this.email)
-//                .nickname(this.nickname)
-//                .password(passwordEncoder.encode(this.password))
-//                .build();
-//    }
+
+    public User toEntity(PasswordEncoder passwordEncoder) {
+        return User.builder()
+                .email(this.email)
+                .nickname(this.nickname)
+                .password(passwordEncoder.encode(this.password))
+                .profile(this.profile)
+                .birthday(this.birthday)
+                .build();
+    }
 }

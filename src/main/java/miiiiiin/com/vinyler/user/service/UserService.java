@@ -3,6 +3,6 @@ package miiiiiin.com.vinyler.user.service;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.entity.User;
 
-public interface RegisterService {
+public interface UserService {
     User registerUser(ServiceRegisterDto dto);
 }
