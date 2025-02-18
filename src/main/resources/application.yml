@@ -52,4 +52,4 @@ springdoc:
     - /api/v1
 
 jwt:
-  secret-key: dmlueWxlci1zY2FuLWl0LXJpZ2h0YXdheQo=
+  secret-key: dmlueWxlci1zY2FuLWl0LXJpZ2h0YXdheS1hdXRob3JpemF0aW9uCg==

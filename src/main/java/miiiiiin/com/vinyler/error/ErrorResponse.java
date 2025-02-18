@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 
 // DTO
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public record ClientErrorResponse(HttpStatus status, Object message) {
+public record ErrorResponse(HttpStatus status, Object message) {
 
 }

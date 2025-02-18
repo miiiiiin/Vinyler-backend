@@ -1,6 +1,6 @@
 package miiiiiin.com.vinyler.exception;
 
-import miiiiiin.com.vinyler.error.ClientErrorResponse;
+import miiiiiin.com.vinyler.error.ErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ClientErrorException.class)
-    public ResponseEntity<ClientErrorResponse> handleClientErrorException(ClientErrorException e) {
-        return new ResponseEntity<>(new ClientErrorResponse(e.getStatus(), e.getMessage()), e.getStatus());
+    public ResponseEntity<ErrorResponse> handleClientErrorException(ClientErrorException e) {
+        return new ResponseEntity<>(new ErrorResponse(e.getStatus(), e.getMessage()), e.getStatus());
     }
 
     /**
@@ -20,13 +20,13 @@ public class GlobalExceptionHandler {
      * @return
      */
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ClientErrorResponse> handleClientErrorException(RuntimeException e) {
+    public ResponseEntity<ErrorResponse> handleClientErrorException(RuntimeException e) {
         return ResponseEntity.internalServerError().build();
 
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ClientErrorResponse> handleClientErrorException(Exception e) {
+    public ResponseEntity<ErrorResponse> handleClientErrorException(Exception e) {
         return ResponseEntity.internalServerError().build();
     }
 }
