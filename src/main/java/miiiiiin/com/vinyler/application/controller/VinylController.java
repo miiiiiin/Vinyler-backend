@@ -7,7 +7,9 @@ import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
 import miiiiiin.com.vinyler.application.service.VinylService;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.service.UserService;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,7 +23,6 @@ public class VinylController {
     @PostMapping("/likes")
     public VinylLikeDto toggleLike(@RequestBody LikeRequestDto request,
                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
-
         return vinylService.toggleLike(request, userDetails.getUser());
     }
 }

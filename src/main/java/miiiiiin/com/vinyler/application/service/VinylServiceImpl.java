@@ -26,8 +26,10 @@ public class VinylServiceImpl implements VinylService {
     @Transactional
     public VinylLikeDto toggleLike(LikeRequestDto requestDto, User currentUser) {
         // Vinyl 엔티티가 DB에 존재하는지 확인, 없으면 저장
-        var vinylEntity = vinylRepository.findById(requestDto.toEntity().getVinylId())
-                .orElseGet(() -> vinylRepository.save(requestDto.toEntity()));
+//        var entity = requestDto.toEntity();
+        var vinylEntity = getVinyl(requestDto.toEntity().getVinylId());
+//        var vinylEntity = vinylRepository.findByVinylId(requestDto.toEntity().getVinylId())
+//                .orElseGet(() -> vinylRepository.save(requestDto.toEntity()));
 
         // 사용자와 Vinyl에 대한 Like 조회
         var likeEntity = likeRepository.findByUserAndVinyl(currentUser, vinylEntity);
@@ -44,7 +46,7 @@ public class VinylServiceImpl implements VinylService {
     }
 
     private Vinyl getVinyl(Long vinylId) {
-        return vinylRepository.findById(vinylId)
+        return vinylRepository.findByVinylId(vinylId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Vinyl Not Found"));
     }
 }

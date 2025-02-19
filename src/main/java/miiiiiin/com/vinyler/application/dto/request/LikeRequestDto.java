@@ -4,9 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
-import miiiiiin.com.vinyler.application.entity.Image;
-import miiiiiin.com.vinyler.application.entity.TrackList;
-import miiiiiin.com.vinyler.application.entity.Vinyl;
+import miiiiiin.com.vinyler.application.entity.*;
 
 import java.util.List;
 
@@ -22,6 +20,9 @@ public class LikeRequestDto {
     private String releasedFormatted;
     private List<TrackList> tracklist;
     private List<Image> images;
+    private List<Format> formats;
+    private List<Video> videos;
+    private List<ArtistDetail> artists;
 
     public Vinyl toEntity() {
         return Vinyl.builder()
@@ -33,6 +34,9 @@ public class LikeRequestDto {
                 .releasedFormatted(releasedFormatted)
                 .tracklist(tracklist)
                 .images(images)
+                .formats(formats)
+                .videos(videos)
+                .artists(artists)
                 .build();
     }
 }
