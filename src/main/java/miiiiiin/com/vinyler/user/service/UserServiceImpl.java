@@ -1,6 +1,8 @@
 package miiiiiin.com.vinyler.user.service;
 
 import lombok.RequiredArgsConstructor;
+import miiiiiin.com.vinyler.application.repository.LikeRepository;
+import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.auth.service.JwtService;
 import miiiiiin.com.vinyler.exception.user.UserAlreadyExistException;
 import miiiiiin.com.vinyler.exception.user.UserNotFoundException;
@@ -19,7 +21,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
+    private final VinylRepository vinylRepository;
+    private final LikeRepository likeRepository;
 
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -58,8 +63,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private User getUserEntity(String username) {
-        return userRepository.findByEmail(username)
-                .orElseThrow(() -> new UserNotFoundException(username));
+    private User getUserEntity(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
     }
 }

@@ -22,8 +22,8 @@ import java.util.Objects;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-//@SQLDelete(sql = "UPDATE member SET deletedDate = CURRENT_TIMESTAMP WHERE userid = ?") // soft delete
-//@SQLRestriction("deletedDate IS NULL")
+@SQLDelete(sql = "UPDATE user SET deletedDate = CURRENT_TIMESTAMP WHERE userid = ?") // soft delete
+@SQLRestriction("deletedDate IS NULL")
 public class User extends BaseEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
