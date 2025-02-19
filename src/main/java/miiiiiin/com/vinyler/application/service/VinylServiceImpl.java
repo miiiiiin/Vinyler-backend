@@ -3,6 +3,7 @@ package miiiiiin.com.vinyler.application.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
+import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
 import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.Vinyl;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
@@ -11,6 +12,8 @@ import miiiiiin.com.vinyler.user.entity.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +24,12 @@ public class VinylServiceImpl implements VinylService {
 
     @Override
     @Transactional
-    public VinylLikeDto toggleLike(Long vinylId, User currentUser) {
-        var vinylEntity = getVinyl(vinylId);
+    public VinylLikeDto toggleLike(LikeRequestDto requestDto, User currentUser) {
+        // Vinyl 엔티티가 DB에 존재하는지 확인, 없으면 저장
+        var vinylEntity = vinylRepository.findById(requestDto.toEntity().getVinylId())
+                .orElseGet(() -> vinylRepository.save(requestDto.toEntity()));
+
+        // 사용자와 Vinyl에 대한 Like 조회
         var likeEntity = likeRepository.findByUserAndVinyl(currentUser, vinylEntity);
 
         if (likeEntity.isPresent()) {
@@ -38,6 +45,6 @@ public class VinylServiceImpl implements VinylService {
 
     private Vinyl getVinyl(Long vinylId) {
         return vinylRepository.findById(vinylId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Vinyl Info Not Found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Vinyl Not Found"));
     }
 }

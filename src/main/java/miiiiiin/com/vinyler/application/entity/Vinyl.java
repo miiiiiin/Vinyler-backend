@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 사용자가 좋아요를 누르면 DB에 해당 Vinyl을 저장
+ */
+
 @Table(name = "vinyls", indexes = @Index(name = "vinyl_userid_idx", columnList = "userid"))
 @Builder
 @AllArgsConstructor
@@ -18,6 +22,7 @@ import java.util.Objects;
 @Entity
 public class Vinyl {
 
+    // Discogs API의 Release ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long vinylId;
@@ -46,9 +51,24 @@ public class Vinyl {
     @OneToMany(mappedBy = "vinyl", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TrackList> tracklist = new ArrayList<>();
 
+    @OneToMany(mappedBy = "vinyl", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Format> formats = new ArrayList<>();
+
+    @OneToMany(mappedBy = "vinyl", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ArtistDetail> artists = new ArrayList<>();
+
+    @OneToMany(mappedBy = "vinyl", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Video> videos = new ArrayList<>();
+
     @ManyToOne
     @JoinColumn(name = "userid")
     private User user;
+
+    /**
+     * Like 테이블에서 Vinyl을 N:1 관계로 참조
+     */
+    @OneToMany(mappedBy = "vinyl", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

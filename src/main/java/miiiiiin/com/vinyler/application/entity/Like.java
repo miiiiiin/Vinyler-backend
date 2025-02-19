@@ -9,6 +9,10 @@ import miiiiiin.com.vinyler.user.entity.User;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
+/**
+ * Like는 User와 Vinyl을 각각 N:1 관계
+ * 사용자가 좋아요를 누를 때 Vinyl이 DB에 없으면 먼저 저장 후 Like 생성하는 방식
+ */
 // unique true로 설정해서 중복 생성 방지
 @Table(name = "\"like\"",
 indexes = {@Index(name = "like_userid_vinylid_idx", columnList = "userid, vinylid", unique = true)})
@@ -28,15 +32,16 @@ public class Like extends BaseEntity {
      * "userid"기반으로 연동되나 실제 코드 작성 시에는 user만 사용해도 내부적으로 userid만으로 user를 가져와서 세팅 가능
      */
     @ManyToOne
-    @JoinColumn(name = "userid")
+    @JoinColumn(name = "userid", nullable = false)
     private User user;
 
     /**
-     * Vinyl 정보와 좋아요 관계 설정
-     * (1:N)
+     * 좋아요와 Vinyl 관계 설정
+     * (N:1)
      */
     @ManyToOne
-    @JoinColumn(name = "vinylid")
+    @JoinColumn(name = "vinylid", nullable = false)
+    // DB에 저장된 Vinyl 참조
     private Vinyl vinyl;
 
     public static Like of(User user, Vinyl vinyl) {
