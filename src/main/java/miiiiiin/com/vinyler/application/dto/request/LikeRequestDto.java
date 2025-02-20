@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 public class LikeRequestDto {
-    private Long vinylId;
+    private Long discogsId;
     private String artistsSort;
     private String notes;
     private String status;
@@ -26,7 +26,7 @@ public class LikeRequestDto {
 
     public Vinyl toEntity() {
         return Vinyl.builder()
-                .vinylId(vinylId)
+                .discogsId(discogsId)
                 .artistsSort(artistsSort)
                 .status(status)
                 .uri(uri)

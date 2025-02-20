@@ -1,5 +1,6 @@
 package miiiiiin.com.vinyler.security;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import miiiiiin.com.vinyler.auth.service.JwtService;
@@ -12,16 +13,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+@Getter
 @Slf4j
 @RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails {
     private final User user;
     private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
 
-
-    public User getUser() {
-        return user;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -35,7 +33,6 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        logger.info("getusername is set: {}" + user.getUsername());  // 디
         return user.getUsername();
     }
 }

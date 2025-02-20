@@ -22,12 +22,16 @@ import java.util.Objects;
 @Entity
 public class Vinyl {
 
-    // Discogs API의 Release ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // DB 내부 관리하는 ID
     private Long vinylId;
 
-    @Column
+    @Column(unique = true, nullable = false)
+    // Discogs에서 받아온 Release ID (클라이언트에서 넘어온 값)
+    private Long discogsId;
+
+    @Column(nullable = true)
     private Long likesCount = 0L;
 
     @Column(name = "artists_sort")
