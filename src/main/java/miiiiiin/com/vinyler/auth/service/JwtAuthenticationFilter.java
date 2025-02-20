@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import miiiiiin.com.vinyler.security.UserDetailsImpl;
+import miiiiiin.com.vinyler.user.entity.User;
 import miiiiiin.com.vinyler.user.service.UserService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String BEARER_PREFIX = "Bearer";
+        String BEARER_PREFIX = "Bearer ";
         var authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
         var securityContext = SecurityContextHolder.getContext();
 
@@ -42,8 +44,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             var authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            securityContext.setAuthentication(authenticationToken);
+
             SecurityContextHolder.setContext(securityContext);
+            securityContext.setAuthentication(authenticationToken);
+            logger.info("Authentication is set: {}" + userDetails.getUsername());  // 디
         }
 
         filterChain.doFilter(request, response);

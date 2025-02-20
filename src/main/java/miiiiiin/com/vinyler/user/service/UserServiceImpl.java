@@ -1,9 +1,12 @@
 package miiiiiin.com.vinyler.user.service;
 
 import lombok.RequiredArgsConstructor;
+import miiiiiin.com.vinyler.application.repository.LikeRepository;
+import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.auth.service.JwtService;
 import miiiiiin.com.vinyler.exception.user.UserAlreadyExistException;
 import miiiiiin.com.vinyler.exception.user.UserNotFoundException;
+import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.dto.request.LoginRequestBody;
 import miiiiiin.com.vinyler.user.dto.response.LoginResponseDto;
@@ -19,14 +22,18 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
+    private final VinylRepository vinylRepository;
+    private final LikeRepository likeRepository;
 
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return getUserEntity(username);
+        User user = getUserEntity(username);
+        return new UserDetailsImpl(user);
     }
 
     @Override
@@ -58,8 +65,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private User getUserEntity(String username) {
-        return userRepository.findByEmail(username)
-                .orElseThrow(() -> new UserNotFoundException(username));
+    private User getUserEntity(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
     }
 }

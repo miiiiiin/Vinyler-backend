@@ -12,8 +12,8 @@ import miiiiiin.com.vinyler.user.entity.User;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserResponseDto implements GlobalResponseDto {
-    String nickname;
-    String email;
+    private String nickname;
+    private String email;
 
     public static UserResponseDto from(User user) {
         return new UserResponseDto(

@@ -14,14 +14,15 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Objects;
 
-@Entity(name="member")
+@Table(name = "\"user\"", indexes = {@Index(name = "user_username_idx", columnList = "email", unique = true)}) // username에도 인덱스 처리, db 레벨에서도 중복 생성 원천봉쇄
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-//@SQLDelete(sql = "UPDATE member SET deletedDate = CURRENT_TIMESTAMP WHERE userid = ?") // soft delete
+//@SQLDelete(sql = "UPDATE user SET deletedDate = CURRENT_TIMESTAMP WHERE userid = ?") // soft delete
 //@SQLRestriction("deletedDate IS NULL")
 public class User extends BaseEntity implements UserDetails {
     @Id
