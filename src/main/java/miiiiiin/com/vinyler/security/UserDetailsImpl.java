@@ -33,6 +33,10 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return user.getEmail();
+    }
+
+    public static UserDetailsImpl from(User user) {
+        return new UserDetailsImpl(user);
     }
 }

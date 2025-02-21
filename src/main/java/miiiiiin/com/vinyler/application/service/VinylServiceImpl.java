@@ -28,9 +28,8 @@ public class VinylServiceImpl implements VinylService {
     public VinylLikeDto toggleLike(LikeRequestDto requestDto, User currentUser) {
         // Vinyl 엔티티가 DB에 존재하는지 확인, 없으면 저장
         var entity = requestDto.toEntity();
-        var vinylEntity = getVinyl(requestDto.toEntity().getDiscogsId());
-//        var vinylEntity = vinylRepository.findByDiscogsId(entity.getDiscogsId())
-//                .orElseGet(() -> vinylRepository.save(entity));
+        var vinylEntity = vinylRepository.findByDiscogsId(entity.getDiscogsId())
+                .orElseGet(() -> vinylRepository.save(entity));
 
         // 사용자와 Vinyl에 대한 Like 조회
         var likeEntity = likeRepository.findByUserAndVinyl(currentUser, vinylEntity);

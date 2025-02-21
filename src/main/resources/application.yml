@@ -51,5 +51,14 @@ springdoc:
   paths-to-match:
     - /api/v1
 
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.web.authentication: DEBUG  # 인증 관련
+    org.springframework.security.web.access: DEBUG         # 인가(Authorization) 관련
+    org.springframework.security.jwt: DEBUG                # JWT 관련
+
+
 jwt:
   secret-key: dmlueWxlci1zY2FuLWl0LXJpZ2h0YXdheS1hdXRob3JpemF0aW9uCg==
+

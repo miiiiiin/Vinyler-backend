@@ -4,6 +4,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,7 +59,7 @@ public class JwtService {
     /*
         실제 jwt 인증에서 사용될 함수 (
      */
-    public String generateAccessToken(UserDetails userDetails) {
+    public String generateAccessToken(UserDetailsImpl userDetails) {
         return generateToken(userDetails.getUsername());
     }
 
