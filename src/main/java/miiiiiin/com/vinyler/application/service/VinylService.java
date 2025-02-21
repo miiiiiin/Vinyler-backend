@@ -7,6 +7,4 @@ import miiiiiin.com.vinyler.user.entity.User;
 
 public interface VinylService {
     VinylLikeDto toggleLike(LikeRequestDto vinylRequestDto, User currentUser);
-
-    Vinyl createVinyl(LikeRequestDto request, User user);
 }

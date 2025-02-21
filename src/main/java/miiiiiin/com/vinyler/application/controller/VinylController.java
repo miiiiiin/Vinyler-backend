@@ -28,11 +28,13 @@ public class VinylController {
         return vinylService.toggleLike(request, userDetails.getUser());
     }
 
-    @PostMapping
-    public ResponseEntity<Vinyl> createVinyl(@RequestBody LikeRequestDto request,
-                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
-//        return vinylService.toggleLike(request, userDetails.getUser());
-        var vinyl = vinylService.createVinyl(request, userDetails.getUser());
-        return ResponseEntity.ok(vinyl);
-    }
+//    @PostMapping
+//    public ResponseEntity<Vinyl> createVinyl(@RequestBody LikeRequestDto request,
+//                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
+////        return vinylService.toggleLike(request, userDetails.getUser());
+//        var vinyl = vinylService.createVinyl(request, userDetails.getUser());
+//        return ResponseEntity.ok(vinyl);
+//    }
+
+
 }

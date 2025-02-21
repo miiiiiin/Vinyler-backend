@@ -1,6 +1,9 @@
 package miiiiiin.com.vinyler.user.service;
 
 import lombok.RequiredArgsConstructor;
+import miiiiiin.com.vinyler.application.dto.VinylDto;
+import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
+import miiiiiin.com.vinyler.application.entity.Vinyl;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.auth.service.JwtService;
@@ -18,6 +21,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -65,9 +70,20 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public List<VinylDto> getVinylsLikedByUser(Long userId, User currentUser) {
+        var userEntity = getUserEntity(userId, currentUser.getEmail());
+        var vinylEntities = vinylRepository.findByUser(userEntity);
+        return vinylEntities.stream().map(VinylDto::of).toList();
+    }
+
     private User getUserEntity(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
+    }
 
+    private User getUserEntity(Long userId, String email) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
 }
