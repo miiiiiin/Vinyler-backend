@@ -1,10 +1,13 @@
 package miiiiiin.com.vinyler.application.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import miiiiiin.com.vinyler.user.entity.BaseEntity;
 import miiiiiin.com.vinyler.user.entity.User;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -19,6 +22,7 @@ indexes = {@Index(name = "like_userid_vinylid_idx", columnList = "userid, vinyli
 @Entity
 @Getter
 @Setter
+@JsonIgnoreProperties({"vinyl"}) // Like 직렬화 시 vinyl 필드 제외
 public class Like extends BaseEntity {
 
     @Id
@@ -41,6 +45,7 @@ public class Like extends BaseEntity {
      */
     @ManyToOne
     @JoinColumn(name = "vinylid", nullable = false)
+    @JsonIgnore  // Vinyl 객체 직렬화 시 무시
     // DB에 저장된 Vinyl 참조
     private Vinyl vinyl;
 

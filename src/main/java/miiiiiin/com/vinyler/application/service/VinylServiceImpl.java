@@ -42,20 +42,14 @@ public class VinylServiceImpl implements VinylService {
         if (likeEntity.isPresent()) {
             likeRepository.delete(likeEntity.get());
             vinylEntity.setLikesCount(Math.max(0, vinylEntity.getLikesCount() - 1));
-            return VinylLikeDto.from(vinylRepository.save(vinylEntity), false);
+            return VinylLikeDto.from(vinylRepository.save(vinylEntity), currentUser, false);
         } else {
             likeRepository.save(Like.of(currentUser, vinylEntity));
             vinylEntity.setLikesCount(vinylEntity.getLikesCount() + 1);
-            return VinylLikeDto.from(vinylRepository.save(vinylEntity), true);
+            return VinylLikeDto.from(vinylRepository.save(vinylEntity), currentUser, true);
         }
     }
 
-    @Transactional
-    @Override
-    public Vinyl createVinyl(LikeRequestDto request, User user) {
-        var vinyl = Vinyl.of(request, user);
-        return vinylRepository.save(vinyl);
-    }
 
     private Vinyl getVinyl(Long discogsId) {
         /**

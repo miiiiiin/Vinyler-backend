@@ -22,21 +22,4 @@ public class LikeRequestDto {
     private List<Format> formats;
     private List<Video> videos;
     private List<ArtistDetail> artists;
-
-    public Vinyl toEntity() {
-        return Vinyl.builder()
-                .discogsId(discogsId)
-                .artistsSort(artistsSort)
-                .status(status)
-                .uri(uri)
-                .notes(notes)
-                .releasedFormatted(releasedFormatted)
-//                .tracklist(tracklist)
-//                .images(images)
-//                .formats(formats)
-//                .videos(videos)
-//                .artists(artists)
-                .build();
-    }
-
 }

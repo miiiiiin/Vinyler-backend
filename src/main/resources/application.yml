@@ -33,6 +33,7 @@ spring:
     hibernate:
       ddl-auto: update # jpa가 엔티티 스캔해서 엔티티와 db 테이블을 비교하여 갱신해줌
     show-sql: true
+    
 springdoc:
   swagger-ui:
     groups-order: desc

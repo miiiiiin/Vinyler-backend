@@ -5,6 +5,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import miiiiiin.com.vinyler.application.dto.VinylDto;
+import miiiiiin.com.vinyler.application.entity.Vinyl;
+import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.dto.request.ClientRegisterReqeustDto;
 import miiiiiin.com.vinyler.user.dto.request.LoginRequestBody;
@@ -13,10 +16,11 @@ import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.entity.User;
 import miiiiiin.com.vinyler.user.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -37,6 +41,17 @@ public class UserController {
     @Operation(description = "로그인")
     public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestBody requestBody) {
         var response = userService.login(requestBody);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 유저별 찜한 음반 리스트 조회
+     */
+    @GetMapping("/{userId}/liked")
+    @Operation(description = "유저별 찜한 음반 리스트 조회")
+    public ResponseEntity<List<VinylDto>> getVinylsLikedByUser(@PathVariable Long userId,
+                                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        var response = userService.getVinylsLikedByUser(userId, userDetails.getUser());
         return ResponseEntity.ok(response);
     }
 }
