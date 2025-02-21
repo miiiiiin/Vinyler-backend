@@ -1,8 +1,10 @@
 package miiiiiin.com.vinyler.user.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.VinylDto;
 import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
+import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.Vinyl;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
@@ -71,10 +73,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public List<VinylDto> getVinylsLikedByUser(Long userId, User currentUser) {
         var userEntity = getUserEntity(userId, currentUser.getEmail());
-        var vinylEntities = vinylRepository.findByUser(userEntity);
-        return vinylEntities.stream().map(VinylDto::of).toList();
+
+        // LikeRepository를 통해 유저가 찜한 음반 목록 조회
+        List<Like> likedVinyls = likeRepository.findByUser(userEntity);
+        return likedVinyls.stream().map(VinylDto::of).toList();
     }
 
     private User getUserEntity(String email) {

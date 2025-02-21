@@ -1,5 +1,6 @@
 package miiiiiin.com.vinyler.application.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
@@ -71,20 +72,22 @@ public class Vinyl {
     /**
      * Like 테이블에서 Vinyl을 N:1 관계로 참조
      */
-    @OneToMany(mappedBy = "vinyl", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "vinyl", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore  // 직렬화 시 likes를 무시
     private List<Like> likes = new ArrayList<>();
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Vinyl vinyl = (Vinyl) o;
-        return Objects.equals(vinylId, vinyl.vinylId) && Objects.equals(likesCount, vinyl.likesCount) && Objects.equals(artistsSort, vinyl.artistsSort) && Objects.equals(notes, vinyl.notes) && Objects.equals(releasedFormatted, vinyl.releasedFormatted) && Objects.equals(uri, vinyl.uri) && Objects.equals(status, vinyl.status) && Objects.equals(images, vinyl.images) && Objects.equals(tracklist, vinyl.tracklist);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(vinylId, likesCount, artistsSort, notes, releasedFormatted, uri, status, images, tracklist);
-    }
+//    @Override
+//    public boolean equals(Object o) {
+//        if (o == null || getClass() != o.getClass()) return false;
+//        Vinyl vinyl = (Vinyl) o;
+//        return Objects.equals(vinylId, vinyl.vinylId) && Objects.equals(likesCount, vinyl.likesCount) && Objects.equals(artistsSort, vinyl.artistsSort) && Objects.equals(notes, vinyl.notes) && Objects.equals(releasedFormatted, vinyl.releasedFormatted) && Objects.equals(uri, vinyl.uri) && Objects.equals(status, vinyl.status) && Objects.equals(images, vinyl.images) && Objects.equals(tracklist, vinyl.tracklist);
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(vinylId, likesCount, artistsSort, notes, releasedFormatted, uri, status, images, tracklist);
+//    }
 
     public static Vinyl of (LikeRequestDto requestDto, User user) {
         var vinyl = new Vinyl();
