@@ -1,10 +1,7 @@
 package miiiiiin.com.vinyler.application.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Objects;
 
@@ -13,6 +10,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 public class TrackList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

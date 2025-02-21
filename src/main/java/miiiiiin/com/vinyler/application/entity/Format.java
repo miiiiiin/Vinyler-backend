@@ -1,9 +1,13 @@
 package miiiiiin.com.vinyler.application.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
+@Setter
 @Entity
 public class Format {
     @Id
@@ -17,6 +21,6 @@ public class Format {
     private List<String> descriptions;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vinyl_id")
+    @JoinColumn(name = "vinyl_id", nullable = false)
     private Vinyl vinyl;
 }
