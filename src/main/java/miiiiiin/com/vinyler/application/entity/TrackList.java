@@ -21,7 +21,7 @@ public class TrackList {
     private String position;
 
     @ManyToOne
-    @JoinColumn(name = "vinylid", nullable = false)
+    @JoinColumn(name = "vinyl_id", nullable = false)
     private Vinyl vinyl;
 
     @Override

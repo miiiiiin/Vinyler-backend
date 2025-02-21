@@ -66,7 +66,7 @@ public class Vinyl {
     private List<Video> videos = new ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "userid")
+    @JoinColumn(name = "user_id")
     private User user;
 
     /**
