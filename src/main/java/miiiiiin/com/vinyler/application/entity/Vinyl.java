@@ -1,13 +1,16 @@
 package miiiiiin.com.vinyler.application.entity;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.*;
 import lombok.*;
+import miiiiiin.com.vinyler.application.dto.ImageDto;
+import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
 import miiiiiin.com.vinyler.user.entity.User;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 사용자가 좋아요를 누르면 DB에 해당 Vinyl을 저장
@@ -85,5 +88,51 @@ public class Vinyl {
     public int hashCode() {
         return Objects.hash(vinylId, likesCount, artistsSort, notes, releasedFormatted, uri, status, images, tracklist);
     }
+
+    public static Vinyl of (LikeRequestDto requestDto, User user) {
+        var vinyl = new Vinyl();
+        vinyl.setDiscogsId(requestDto.getDiscogsId());
+        vinyl.setLikesCount(vinyl.likesCount);
+        vinyl.setArtistsSort(requestDto.getArtistsSort());
+        vinyl.setNotes(requestDto.getNotes());
+        vinyl.setReleasedFormatted(requestDto.getReleasedFormatted());
+        vinyl.setUri(requestDto.getUri());
+        vinyl.setStatus(requestDto.getStatus());
+
+        // Images 변환 및 연관 관계 설정
+//        List<Image> images = convertDtoToImages(requestDto, vinyl);
+//        vinyl.setImages(images);
+        vinyl.getImages().addAll(convertDtoToImages(requestDto, vinyl));
+
+//        vinyl.setImages(convertDtoToImages(requestDto));
+//        vinyl.setTracklist(requestDto.getTracklist());
+//        vinyl.setArtists(requestDto.getArtists());
+//        vinyl.setFormats(requestDto.getFormats());
+//        vinyl.setVideos(requestDto.getVideos());
+
+        // Vinyl 엔티티의 현재 로그인된 유저정보로 user 세팅
+        vinyl.setUser(user);
+        return vinyl;
+    }
+    // Vinyl을 매개변수로 전달하여 연관 관계 설정
+    private static List<Image> convertDtoToImages(LikeRequestDto requestDto, Vinyl vinyl) {
+        return requestDto.getImages().stream()
+                .map(imageDto -> {
+                    Image image = new Image();
+                    image.setType(imageDto.getType());
+                    image.setUri(imageDto.getUri());
+                    // vinyl과 연관 관계 설정
+                    image.setVinyl(vinyl);
+                    return image;
+                })
+                .toList();
+    }
+
+    // 연관관계 편의 메서드
+    public void addImage(Image image) {
+        images.add(image);
+        image.setVinyl(this);  // 연관 관계 설정
+    }
+
 
 }
