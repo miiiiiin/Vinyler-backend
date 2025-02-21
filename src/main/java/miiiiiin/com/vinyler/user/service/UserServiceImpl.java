@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
         var userEntity = getUserEntity(requestBody.getEmail());
 
         if (passwordEncoder.matches(requestBody.getPassword(), userEntity.getPassword())) {
-            var accessToken = jwtService.generateAccessToken(userEntity);
+            var accessToken = jwtService.generateAccessToken(UserDetailsImpl.from(userEntity));
             return new LoginResponseDto(accessToken);
         } else {
             throw new UserNotFoundException();
