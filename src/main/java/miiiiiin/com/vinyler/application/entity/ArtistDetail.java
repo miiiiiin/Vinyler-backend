@@ -1,7 +1,11 @@
 package miiiiiin.com.vinyler.application.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity
 public class ArtistDetail {
     @Id
@@ -11,6 +15,6 @@ public class ArtistDetail {
     private String resourceUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vinyl_id")
+    @JoinColumn(name = "vinyl_id", nullable = false)
     private Vinyl vinyl;
 }
