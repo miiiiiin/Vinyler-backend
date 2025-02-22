@@ -10,5 +10,4 @@ import java.util.List;
 
 public interface UserVinylStatusService {
     UserVinylStatusDto toggleListenStatus(LikeRequestDto vinylRequestDto, User user);
-    List<UserVinylStatus> getListenedVinyls(User user);
 }

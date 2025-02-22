@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.VinylDto;
 import miiiiiin.com.vinyler.application.entity.Vinyl;
+import miiiiiin.com.vinyler.application.service.UserVinylStatusService;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.dto.request.ClientRegisterReqeustDto;
@@ -29,6 +30,8 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final UserVinylStatusService userVinylStatusService;
+
 
     @PostMapping("/register")
     @Operation(description = "신규 회원가입")
@@ -54,4 +57,15 @@ public class UserController {
         var response = userService.getVinylsLikedByUser(userId, userDetails.getUser());
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * 유저별 감상한 음반 리스트 조회
+     */
+//    @GetMapping("/{userId}/liked")
+//    @Operation(description = "유저별 찜한 음반 리스트 조회")
+//    public ResponseEntity<List<VinylDto>> getVinylsListenedByUser(@PathVariable Long userId,
+//                                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+//        var response = userService.getListenedVinyls()
+//        return ResponseEntity.ok(response);
+//    }
 }

@@ -24,7 +24,6 @@ public class UserVinylServiceStatusImpl implements UserVinylStatusService {
     private final UserVinylStatusRepository userVinylStatusRepository;
 
 
-
     // 사용자가 Vinyl의 감상 상태를 토글 (감상 완료/감상 미완료)
     @Override
     @Transactional
@@ -40,19 +39,13 @@ public class UserVinylServiceStatusImpl implements UserVinylStatusService {
 
         var status = userVinylStatusRepository.findByUserAndVinyl(currentUser, vinylEntity);
 
-        if (status.isListened()) {
-            status.setListened(!status.isListened());
-            userVinylStatusRepository.save(status);
+        if (status.isPresent() && status.get().isListened()) {
+            userVinylStatusRepository.delete(status.get());
+            return UserVinylStatusDto.from(vinylRepository.save(vinylEntity), currentUser, false);
         } else {
-            status.setListened(true);
-            userVinylStatusRepository.save(status);
+            var st = UserVinylStatus.of(currentUser, vinylEntity, true);
+            userVinylStatusRepository.save(st);
+            return UserVinylStatusDto.from(vinylRepository.save(vinylEntity), currentUser, true);
         }
-        return null;
-    }
-
-    // 사용자가 감상한 Vinyl 조회
-    @Override
-    public List<UserVinylStatus> getListenedVinyls(User user) {
-        return userVinylStatusRepository.findByUserAndListened(user, true);
     }
 }

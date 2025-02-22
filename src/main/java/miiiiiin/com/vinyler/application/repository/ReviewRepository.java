@@ -9,9 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface ReviewRepository extends JpaRepository<Review, Long> {
-
-    Optional<Review> findByUserAndVinyl(User user, Vinyl vinyl);
-//    Optional<Review> findByUserIdAndVinylId(Long userId, Long vinylId);
-    List<Review> findByVinylId(Long vinylId);
-}
+//public interface ReviewRepository extends JpaRepository<Review, Long> {
+//
+//    Optional<Review> findByUserAndVinyl(User user, Vinyl vinyl);
+////    Optional<Review> findByUserIdAndVinylId(Long userId, Long vinylId);
+//    List<Review> findByVinylId(Long vinylId);
+//}

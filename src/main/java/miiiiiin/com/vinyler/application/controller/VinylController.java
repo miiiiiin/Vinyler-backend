@@ -32,10 +32,10 @@ public class VinylController {
         return vinylService.toggleLike(request, userDetails.getUser());
     }
 
+    @PostMapping("/listen")
     public UserVinylStatusDto toggleListenStatus(@RequestBody LikeRequestDto request,
                                                  @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        var user = userDetails.getUser();
-//        return uservinylStatusService.toggleListenStatus()
+        return uservinylStatusService.toggleListenStatus(request, userDetails.getUser());
     }
 
 //    @PostMapping
