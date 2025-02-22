@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Vinyl", description = "Vinyl 정보 조회 관련 엔드포인트")
 public class VinylController {
     private final VinylService vinylService;
-    private final UserService userService;
     private final UserVinylStatusService uservinylStatusService;
 
     @PostMapping("/likes")

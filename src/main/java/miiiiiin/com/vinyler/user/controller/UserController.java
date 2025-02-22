@@ -51,7 +51,7 @@ public class UserController {
      * 유저별 찜한 음반 리스트 조회
      */
     @GetMapping("/{userId}/liked")
-    @Operation(description = "유저별 찜한 음반 리스트 조회")
+    @Operation(description = "유저별 찜한 Vinyl 리스트 조회")
     public ResponseEntity<List<VinylDto>> getVinylsLikedByUser(@PathVariable Long userId,
                                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
         var response = userService.getVinylsLikedByUser(userId, userDetails.getUser());
@@ -61,11 +61,11 @@ public class UserController {
     /**
      * 유저별 감상한 음반 리스트 조회
      */
-//    @GetMapping("/{userId}/liked")
-//    @Operation(description = "유저별 찜한 음반 리스트 조회")
-//    public ResponseEntity<List<VinylDto>> getVinylsListenedByUser(@PathVariable Long userId,
-//                                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
-//        var response = userService.getListenedVinyls()
-//        return ResponseEntity.ok(response);
-//    }
+    @GetMapping("/{userId}/listened")
+    @Operation(description = "유저별 감상한 Vinyl 리스트 조회")
+    public ResponseEntity<List<VinylDto>> getVinylsListenedByUser(@PathVariable Long userId,
+                                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        var response = userService.getVinylsListenedByUser(userId, userDetails.getUser());
+        return ResponseEntity.ok(response);
+    }
 }
