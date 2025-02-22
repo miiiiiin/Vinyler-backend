@@ -40,6 +40,7 @@ public class UserVinylStatus {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean liked;
 
+
     public static UserVinylStatus of(User user, Vinyl vinyl, boolean listened) {
         var status = new UserVinylStatus();
         status.setUser(user);

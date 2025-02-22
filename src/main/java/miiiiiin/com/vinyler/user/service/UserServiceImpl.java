@@ -3,20 +3,17 @@ package miiiiiin.com.vinyler.user.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.VinylDto;
-import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
 import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
-import miiiiiin.com.vinyler.application.entity.Vinyl;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
 //import miiiiiin.com.vinyler.application.repository.ReviewRepository;
 import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
-import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.auth.service.JwtService;
 import miiiiiin.com.vinyler.exception.user.UserAlreadyExistException;
 import miiiiiin.com.vinyler.exception.user.UserNotFoundException;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
-import miiiiiin.com.vinyler.user.dto.request.LoginRequestBody;
+import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
 import miiiiiin.com.vinyler.user.dto.response.LoginResponseDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.entity.User;
@@ -39,7 +36,6 @@ public class UserServiceImpl implements UserService {
 
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-//    private final ReviewRepository reviewRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -65,7 +61,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public LoginResponseDto login(LoginRequestBody requestBody) {
+    public LoginResponseDto login(LoginRequestDto requestBody) {
         var userEntity = getUserEntity(requestBody.getEmail());
 
         if (passwordEncoder.matches(requestBody.getPassword(), userEntity.getPassword())) {

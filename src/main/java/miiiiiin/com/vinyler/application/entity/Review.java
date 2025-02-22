@@ -3,9 +3,13 @@ package miiiiiin.com.vinyler.application.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import miiiiiin.com.vinyler.user.entity.BaseEntity;
 import miiiiiin.com.vinyler.user.entity.User;
+
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 
 /**
  * 사전조건 : 음반을 감상했어요가 선행 조건
@@ -13,6 +17,7 @@ import miiiiiin.com.vinyler.user.entity.User;
  */
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Builder
 @Entity
 @Table(name = "reviews", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "vinyl_id"}))
@@ -39,6 +44,28 @@ public class Review extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "vinyl_id", nullable = false)
     private Vinyl vinyl;
+
+    public static Review of(int rating, String content, User user, Vinyl vinyl) {
+        return Review.builder()
+                .rating(rating)
+                .content(content)
+                .user(user)
+                .vinyl(vinyl)
+                .build();
+    }
+
+    @PrePersist
+    private void prePersist() {
+        // 수정 시간을 생성 시간과 동일하게 맞춰줌
+        setCreatedDate(ZonedDateTime.now());
+        setModifiedDate(getCreatedDate());
+    }
+
+    @PreUpdate
+    private void preUpdate() {
+        // 업데이트가 발생된 시점을 현재 시점으로 기록
+        setModifiedDate(ZonedDateTime.now());
+    }
 }
 
 

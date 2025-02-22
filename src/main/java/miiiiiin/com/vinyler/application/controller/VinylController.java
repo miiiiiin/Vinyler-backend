@@ -44,6 +44,4 @@ public class VinylController {
 //        var vinyl = vinylService.createVinyl(request, userDetails.getUser());
 //        return ResponseEntity.ok(vinyl);
 //    }
-
-
 }

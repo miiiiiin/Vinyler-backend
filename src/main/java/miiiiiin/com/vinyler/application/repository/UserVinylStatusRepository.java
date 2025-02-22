@@ -13,6 +13,7 @@ import java.util.Optional;
 
 public interface UserVinylStatusRepository extends JpaRepository<UserVinylStatus, Long> {
     // 특정 사용자가 특정 LP의 상태를 조회
+//    Optional<UserVinylStatus> findByUserIdAndVinylId(Long userId, Long vinylId);
     Optional<UserVinylStatus> findByUserAndVinyl(User user, Vinyl vinyl);
     // 특정 사용자가 감상한 LP들을 조회
     List<UserVinylStatus> findByUserAndListened(User user, boolean listened);
