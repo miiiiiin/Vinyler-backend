@@ -49,13 +49,4 @@ public class VinylServiceImpl implements VinylService {
             return VinylLikeDto.from(vinylRepository.save(vinylEntity), currentUser, true);
         }
     }
-
-
-    private Vinyl getVinyl(Long discogsId) {
-        /**
-         * discogs 릴리스 ID 기준 찾기
-         */
-        return vinylRepository.findByDiscogsId(discogsId)
-                .orElseThrow(() -> new VinylNotFoundException(discogsId));
-    }
 }

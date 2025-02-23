@@ -3,13 +3,13 @@ package miiiiiin.com.vinyler.application.dto.request;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import miiiiiin.com.vinyler.application.entity.*;
 
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
+@Setter
 public class LikeRequestDto {
     private Long discogsId;
     private String artistsSort;

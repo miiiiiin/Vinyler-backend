@@ -36,7 +36,7 @@ public class Like extends BaseEntity {
      * "userid"기반으로 연동되나 실제 코드 작성 시에는 user만 사용해도 내부적으로 userid만으로 user를 가져와서 세팅 가능
      */
     @ManyToOne
-    @JoinColumn(name = "userid", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     /**
@@ -44,7 +44,7 @@ public class Like extends BaseEntity {
      * (N:1)
      */
     @ManyToOne
-    @JoinColumn(name = "vinylid", nullable = false)
+    @JoinColumn(name = "vinyl_id", nullable = false)
     @JsonIgnore  // Vinyl 객체 직렬화 시 무시
     // DB에 저장된 Vinyl 참조
     private Vinyl vinyl;

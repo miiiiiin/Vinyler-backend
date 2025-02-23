@@ -3,17 +3,17 @@ package miiiiiin.com.vinyler.user.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.VinylDto;
-import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
 import miiiiiin.com.vinyler.application.entity.Like;
-import miiiiiin.com.vinyler.application.entity.Vinyl;
+import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
-import miiiiiin.com.vinyler.application.repository.VinylRepository;
+//import miiiiiin.com.vinyler.application.repository.ReviewRepository;
+import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
 import miiiiiin.com.vinyler.auth.service.JwtService;
 import miiiiiin.com.vinyler.exception.user.UserAlreadyExistException;
 import miiiiiin.com.vinyler.exception.user.UserNotFoundException;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
-import miiiiiin.com.vinyler.user.dto.request.LoginRequestBody;
+import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
 import miiiiiin.com.vinyler.user.dto.response.LoginResponseDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.entity.User;
@@ -31,8 +31,8 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final VinylRepository vinylRepository;
     private final LikeRepository likeRepository;
+    private final UserVinylStatusRepository userVinylStatusRepository;
 
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public LoginResponseDto login(LoginRequestBody requestBody) {
+    public LoginResponseDto login(LoginRequestDto requestBody) {
         var userEntity = getUserEntity(requestBody.getEmail());
 
         if (passwordEncoder.matches(requestBody.getPassword(), userEntity.getPassword())) {
@@ -80,6 +80,15 @@ public class UserServiceImpl implements UserService {
         // LikeRepository를 통해 유저가 찜한 음반 목록 조회
         List<Like> likedVinyls = likeRepository.findByUser(userEntity);
         return likedVinyls.stream().map(VinylDto::of).toList();
+    }
+
+    @Override
+    @Transactional
+    public List<VinylDto> getVinylsListenedByUser(Long userId, User currentUser) {
+        var userEntity = getUserEntity(userId, currentUser.getEmail());
+        List<UserVinylStatus> listenedVinyls = userVinylStatusRepository.findByUserAndListened(userEntity, true);
+        // TODO: FIX (USER ID?)
+        return listenedVinyls.stream().map(VinylDto::of).toList();
     }
 
     private User getUserEntity(String email) {
