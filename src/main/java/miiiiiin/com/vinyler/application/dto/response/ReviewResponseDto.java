@@ -13,11 +13,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Data
 public class ReviewResponseDto implements GlobalResponseDto {
+    private Long reviewId;
     private Long discogsId;
     private LocalDateTime reviewedDate;
 
     public static ReviewResponseDto from(Review review) {
-        return new ReviewResponseDto(review.getVinyl().getDiscogsId(), LocalDateTime.now());
+        return new ReviewResponseDto(review.getId(), review.getVinyl().getDiscogsId(), LocalDateTime.now());
     }
 
     @Override

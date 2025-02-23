@@ -1,10 +1,7 @@
 package miiiiiin.com.vinyler.application.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import miiiiiin.com.vinyler.user.entity.BaseEntity;
 import miiiiiin.com.vinyler.user.entity.User;
 
@@ -18,6 +15,7 @@ import java.time.ZonedDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @Builder
 @Entity
 @Table(name = "reviews", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "vinyl_id"}))

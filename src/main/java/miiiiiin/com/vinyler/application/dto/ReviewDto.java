@@ -7,13 +7,13 @@ import miiiiiin.com.vinyler.application.entity.Review;
 @Builder
 @Data
 public class ReviewDto {
-    private int id;
+    private Long id;
     private int rating;
     private String content;
 
     public static ReviewDto of(Review review) {
         return ReviewDto.builder()
-                .id(review.getRating())
+                .id(review.getId())
                 .rating(review.getRating())
                 .content(review.getContent())
                 .build();
