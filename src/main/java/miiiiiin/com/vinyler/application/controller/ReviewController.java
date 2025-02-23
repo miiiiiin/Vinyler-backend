@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import miiiiiin.com.vinyler.application.dto.ReviewDto;
 import miiiiiin.com.vinyler.application.dto.request.ReviewRequestDto;
 import miiiiiin.com.vinyler.application.dto.response.ReviewResponseDto;
 import miiiiiin.com.vinyler.application.entity.Review;
@@ -11,10 +12,9 @@ import miiiiiin.com.vinyler.application.service.ReviewService;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/reviews")
@@ -29,4 +29,12 @@ public class ReviewController {
         var response = reviewService.createReview(request, userDetails.getUser());
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping
+    public ResponseEntity<List<ReviewDto>> getReviews(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        var response = reviewService.getReviews(userDetails.getUser());
+        return ResponseEntity.ok(response);
+    }
+
+
 }

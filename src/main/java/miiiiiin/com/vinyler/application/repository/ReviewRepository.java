@@ -13,4 +13,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 //    Optional<Review> findByUserIdAndDiscogsId(Long userId, Long discogsId);
     Optional<Review> findByUserAndVinyl(User user, Vinyl vinyl);
 //    List<Review> findByDiscogsId(Long discogsId);
+    List<Review> findByUser(User user);
 }

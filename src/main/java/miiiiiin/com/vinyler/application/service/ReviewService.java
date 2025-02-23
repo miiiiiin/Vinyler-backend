@@ -9,6 +9,9 @@ import miiiiiin.com.vinyler.application.entity.Review;
 import miiiiiin.com.vinyler.application.entity.Vinyl;
 import miiiiiin.com.vinyler.user.entity.User;
 
+import java.util.List;
+
 public interface ReviewService {
     ReviewResponseDto createReview(ReviewRequestDto requestDto, User user);
+    List<ReviewDto> getReviews(User user);
 }

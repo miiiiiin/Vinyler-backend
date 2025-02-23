@@ -18,6 +18,8 @@ import miiiiiin.com.vinyler.user.entity.User;
 import miiiiiin.com.vinyler.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
@@ -41,6 +43,11 @@ public class ReviewServiceImpl implements ReviewService {
 
         var review = reviewRepository.save(Review.of(request.getRating(), request.getContent(), currentUser, vinylEntity));
         return ReviewResponseDto.from(review);
+    }
+
+    @Override
+    public List<ReviewDto> getReviews(User user) {
+        return reviewRepository.findByUser(user).stream().map(ReviewDto::of).toList();
     }
 
     private Vinyl getVinylEntity(Long discogsId) {
