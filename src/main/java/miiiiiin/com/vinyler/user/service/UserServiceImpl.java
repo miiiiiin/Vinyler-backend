@@ -8,7 +8,7 @@ import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
 //import miiiiiin.com.vinyler.application.repository.ReviewRepository;
 import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
-import miiiiiin.com.vinyler.auth.service.JwtService;
+import miiiiiin.com.vinyler.auth.service.JwtTokenProvider;
 import miiiiiin.com.vinyler.exception.user.UserAlreadyExistException;
 import miiiiiin.com.vinyler.exception.user.UserNotFoundException;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     private final UserVinylStatusRepository userVinylStatusRepository;
 
     private final BCryptPasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
         var userEntity = getUserEntity(requestBody.getEmail());
 
         if (passwordEncoder.matches(requestBody.getPassword(), userEntity.getPassword())) {
-            var accessToken = jwtService.generateAccessToken(UserDetailsImpl.from(userEntity));
+            var accessToken = jwtTokenProvider.generateAccessToken(UserDetailsImpl.from(userEntity)).getAccessToken();
             return new LoginResponseDto(accessToken);
         } else {
             throw new UserNotFoundException();
