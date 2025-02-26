@@ -3,7 +3,7 @@ package miiiiiin.com.vinyler.security;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import miiiiiin.com.vinyler.auth.service.JwtService;
+import miiiiiin.com.vinyler.auth.service.JwtTokenProvider;
 import miiiiiin.com.vinyler.user.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails {
     private final User user;
-    private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
 
     @Override
