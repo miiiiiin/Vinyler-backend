@@ -22,13 +22,11 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 
-//@Service
 @Component
-@RequiredArgsConstructor
 public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
-    private SecretKey key;
+    private final SecretKey key;
 
     public static final String REFRESH = "Refresh";
     public static final String BEARER_PREFIX = "Bearer ";
@@ -62,15 +60,15 @@ public class JwtTokenProvider {
         Instant refreshExpireAt = now.plusMillis(refreshExpirationTime);
 
         String accessToken = Jwts.builder().subject(subject)
+                .signWith(key)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(accessExpireAt))
-                .signWith(key)
                 .compact();
 
         String refreshToken = Jwts.builder().subject(subject)
+                .signWith(key)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(refreshExpireAt))
-                .signWith(key)
                 .compact();
 
         return TokenInfoDto.builder()
