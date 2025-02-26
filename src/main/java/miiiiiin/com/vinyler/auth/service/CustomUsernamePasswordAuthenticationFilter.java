@@ -1,7 +1,6 @@
 package miiiiiin.com.vinyler.auth.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,13 +8,16 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import miiiiiin.com.vinyler.auth.repository.RefreshTokenRepository;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
-import miiiiiin.com.vinyler.user.entity.User;
+import org.hibernate.annotations.Filter;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
@@ -84,6 +86,10 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         TokenInfoDto tokenDto = jwtTokenProvider.generateAccessToken(userDetails);
         String accessToken = tokenDto.getAccessToken();
         String refreshToken = tokenDto.getRefreshToken();
+
+        // 헤더에 액세스 토큰 추가
+        jwtTokenProvider.setHeaderAccessToken(response, accessToken);
+        jwtTokenProvider.setHeaderRefreshToken(response, refreshToken);
 
         objectMapper = new ObjectMapper();
         String jsonResponse = objectMapper.writeValueAsString(tokenDto);

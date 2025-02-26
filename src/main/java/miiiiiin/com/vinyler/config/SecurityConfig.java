@@ -53,7 +53,6 @@ public class SecurityConfig {
 
     // AuthenticationManager의 Bean을 얻기 위한 authConfiguration 객체
     private final AuthenticationConfiguration authenticationConfiguration;
-
     /**
      * AuthenticationConfiguration로부터 AuthenticationManager 객체 가져오는 메서드
      * @param authenticationConfiguration
