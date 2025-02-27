@@ -1,7 +1,6 @@
 package miiiiiin.com.vinyler.config;
 
 import lombok.RequiredArgsConstructor;
-import miiiiiin.com.vinyler.auth.handler.JwtAccessDeniedHandler;
 import miiiiiin.com.vinyler.auth.filter.CustomUsernamePasswordAuthenticationFilter;
 import miiiiiin.com.vinyler.auth.filter.JwtTokenProvider;
 import miiiiiin.com.vinyler.auth.filter.JwtVerificationFilter;
@@ -78,7 +77,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests((requests) ->
                             requests
-                                    .requestMatchers(HttpMethod.POST, "/api/*/user/register", "/api/*/user/login")
+                                    .requestMatchers(HttpMethod.POST, "/api/*/user/register", "/api/*/auth/login")
                                     .permitAll()
                                     .anyRequest()
                                     .authenticated()

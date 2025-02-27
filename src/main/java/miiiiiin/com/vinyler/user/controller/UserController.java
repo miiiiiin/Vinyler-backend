@@ -27,18 +27,10 @@ public class UserController {
 
     private final UserService userService;
 
-
     @PostMapping("/register")
     @Operation(description = "신규 회원가입")
     public ResponseEntity<UserResponseDto> registerUser(@RequestBody @Valid ClientRegisterReqeustDto request) {
         var response = userService.registerUser(ServiceRegisterDto.of(request.getEmail(), request.getPassword(), request.getNickname(), request.getProfile(), request.getBirthday()));
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/login")
-    @Operation(description = "로그인")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto request) {
-        var response = userService.login(request);
         return ResponseEntity.ok(response);
     }
 
