@@ -1,11 +1,11 @@
 package miiiiiin.com.vinyler.config;
 
 import lombok.RequiredArgsConstructor;
-import miiiiiin.com.vinyler.auth.service.CustomUsernamePasswordAuthenticationFilter;
-import miiiiiin.com.vinyler.auth.service.JwtTokenProvider;
-import miiiiiin.com.vinyler.auth.service.JwtVerificationFilter;
+import miiiiiin.com.vinyler.auth.handler.JwtAccessDeniedHandler;
+import miiiiiin.com.vinyler.auth.filter.CustomUsernamePasswordAuthenticationFilter;
+import miiiiiin.com.vinyler.auth.filter.JwtTokenProvider;
+import miiiiiin.com.vinyler.auth.filter.JwtVerificationFilter;
 import miiiiiin.com.vinyler.user.service.SocialOAuth2UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -33,6 +33,7 @@ public class SecurityConfig {
 
     private final JwtVerificationFilter jwtVerificationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

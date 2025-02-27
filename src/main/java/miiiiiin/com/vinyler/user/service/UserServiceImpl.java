@@ -10,7 +10,7 @@ import miiiiiin.com.vinyler.application.repository.LikeRepository;
 import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
 import miiiiiin.com.vinyler.auth.entity.RefreshToken;
 import miiiiiin.com.vinyler.auth.repository.RefreshTokenRepository;
-import miiiiiin.com.vinyler.auth.service.JwtTokenProvider;
+import miiiiiin.com.vinyler.auth.filter.JwtTokenProvider;
 import miiiiiin.com.vinyler.exception.user.UserAlreadyExistException;
 import miiiiiin.com.vinyler.exception.user.UserNotFoundException;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;

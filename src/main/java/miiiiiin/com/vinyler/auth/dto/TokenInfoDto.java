@@ -1,4 +1,4 @@
-package miiiiiin.com.vinyler.auth.service;
+package miiiiiin.com.vinyler.auth.dto;
 
 import lombok.Builder;
 import lombok.Data;

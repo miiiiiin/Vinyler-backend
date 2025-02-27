@@ -1,21 +1,15 @@
-package miiiiiin.com.vinyler.auth.service;
+package miiiiiin.com.vinyler.auth.filter;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import miiiiiin.com.vinyler.auth.repository.RefreshTokenRepository;
+import miiiiiin.com.vinyler.auth.dto.TokenInfoDto;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
-import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
