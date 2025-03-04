@@ -1,21 +1,16 @@
-package miiiiiin.com.vinyler.auth.service;
+package miiiiiin.com.vinyler.auth.filter;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import miiiiiin.com.vinyler.auth.repository.RefreshTokenRepository;
+import lombok.Getter;
+import miiiiiin.com.vinyler.auth.dto.TokenInfoDto;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
-import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -36,7 +31,7 @@ public class JwtTokenProvider {
     @Value("${jwt.token.access-expiration-time}")
     private long accessExpirationTime;
     // refreshToken 유효시간 7일
-    @Value("${jwt.token.refresh-expiration-time}")
+    @Value("${jwt.token.refresh-expiration-time}") @Getter
     private long refreshExpirationTime;
 
     // @Value 통해서 yml 파일에 secret-key 값 읽어와서 키 값 초기화
@@ -125,14 +120,20 @@ public class JwtTokenProvider {
         }
     }
 
+    /**
+     * 토큰의 유효성과 만료일자 확인
+     * refreshToken 토큰 검증
+     * db에 저장된 토큰 불러오는 대신 redis에서 저장된 토큰을 불러와서 비교하는 것으로 수정
+     * -> db 보다는 redis를 사용하는 것이 더욱 좋다. (in-memory db기 때문에 조회속도가 빠르고 주기적으로 삭제하는 기능이 기본적으로 존재)
+     */
+    public boolean validateRefreshToken(String refreshToken, String redisRefreshToken) {
+        if (!validateToken(refreshToken)) return false;
+        return !refreshToken.isEmpty() && refreshToken.equals(redisRefreshToken);
+    }
+
     // 액세스 토큰 헤더 설정
     public void setHeaderAccessToken(HttpServletResponse response, String accessToken) {
         response.setHeader(AUTHORIZATION, BEARER_PREFIX + accessToken);
-    }
-
-    // 리프레쉬 토큰 헤더 설정
-    public void setHeaderRefreshToken(HttpServletResponse response, String refreshToken) {
-        response.setHeader(REFRESH, refreshToken);
     }
 
     // 헤더 accessToken 리턴
@@ -144,12 +145,11 @@ public class JwtTokenProvider {
         return null;
     }
 
-    // 헤더 refreshToken 리턴
-    public String getHeaderRefreshToken(HttpServletRequest request) {
-        String refreshToken = request.getHeader(REFRESH);
-        if (refreshToken != null) {
-            return refreshToken;
-        }
-        return null;
+    public Long getAccessTokenExpirationTime() {
+        return accessExpirationTime;
+    }
+
+    public Long getRefreshExpirationTime() {
+        return refreshExpirationTime;
     }
 }

@@ -8,7 +8,6 @@ import miiiiiin.com.vinyler.user.entity.User;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 사용자가 좋아요를 누르면 DB에 해당 Vinyl을 저장

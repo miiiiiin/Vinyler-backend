@@ -6,21 +6,14 @@ import miiiiiin.com.vinyler.application.dto.VinylDto;
 import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
-//import miiiiiin.com.vinyler.application.repository.ReviewRepository;
 import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
-import miiiiiin.com.vinyler.auth.entity.RefreshToken;
-import miiiiiin.com.vinyler.auth.repository.RefreshTokenRepository;
-import miiiiiin.com.vinyler.auth.service.JwtTokenProvider;
 import miiiiiin.com.vinyler.exception.user.UserAlreadyExistException;
 import miiiiiin.com.vinyler.exception.user.UserNotFoundException;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
-import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
-import miiiiiin.com.vinyler.user.dto.response.LoginResponseDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.entity.User;
 import miiiiiin.com.vinyler.user.repository.UserRepository;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -35,10 +28,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final UserVinylStatusRepository userVinylStatusRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
-
     private final BCryptPasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -61,31 +51,6 @@ public class UserServiceImpl implements UserService {
         dto.setPasword(passwordEncoder);
         User user = userRepository.save(dto.toEntity());
         return UserResponseDto.from(user);
-    }
-
-    @Override
-    public LoginResponseDto login(LoginRequestDto requestBody) {
-        var userEntity = getUserEntity(requestBody.getEmail());
-
-        if (passwordEncoder.matches(requestBody.getPassword(), userEntity.getPassword())) {
-            var tokenDto = jwtTokenProvider.generateAccessToken(UserDetailsImpl.from(userEntity));
-            var accessToken = tokenDto.getAccessToken();
-            var refreshToken = refreshTokenRepository.findByEmail(userEntity.getEmail());
-
-            if (refreshToken.isPresent()) {
-                // 있으면 토큰 업데이트 및 발급 후 DB 저장
-                var newToken = refreshToken.get().updateToken(tokenDto.getRefreshToken());
-                refreshTokenRepository.save(newToken);
-            } else {
-                // 없으면 토큰 새로 만들고 DB 저장
-                var newToken = new RefreshToken(requestBody.getEmail(), tokenDto.getRefreshToken());
-                refreshTokenRepository.save(newToken);
-            }
-
-            return new LoginResponseDto(accessToken);
-        } else {
-            throw new UserNotFoundException();
-        }
     }
 
     @Override

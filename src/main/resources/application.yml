@@ -1,4 +1,7 @@
 spring:
+
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: Vinyler-server
   security:
@@ -65,4 +68,9 @@ jwt:
   token:
     access-expiration-time: 10800000 # 3시간
     refresh-expiration-time: 604800000 # 7일
+
+data:
+  redis:
+    host: localhost # 로컬 테스트 시
+    port: 6379
 

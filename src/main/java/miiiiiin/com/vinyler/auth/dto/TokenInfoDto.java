@@ -1,10 +1,11 @@
-package miiiiiin.com.vinyler.auth.service;
+package miiiiiin.com.vinyler.auth.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 
 @Builder
-@Data
+@Getter
 public class TokenInfoDto {
     private String grantType;
     private String accessToken;

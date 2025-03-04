@@ -1,11 +1,10 @@
 package miiiiiin.com.vinyler.config;
 
 import lombok.RequiredArgsConstructor;
-import miiiiiin.com.vinyler.auth.service.CustomUsernamePasswordAuthenticationFilter;
-import miiiiiin.com.vinyler.auth.service.JwtTokenProvider;
-import miiiiiin.com.vinyler.auth.service.JwtVerificationFilter;
+import miiiiiin.com.vinyler.auth.filter.CustomUsernamePasswordAuthenticationFilter;
+import miiiiiin.com.vinyler.auth.filter.JwtTokenProvider;
+import miiiiiin.com.vinyler.auth.filter.JwtVerificationFilter;
 import miiiiiin.com.vinyler.user.service.SocialOAuth2UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -33,6 +32,8 @@ public class SecurityConfig {
 
     private final JwtVerificationFilter jwtVerificationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
+    private final RedisService redisService;
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -70,14 +71,15 @@ public class SecurityConfig {
 
         // 커스텀 필터 등록
         // 로그인 경로 설정 후, 로그인 필터 등록
-        CustomUsernamePasswordAuthenticationFilter filter = new CustomUsernamePasswordAuthenticationFilter(authenticationManager(authenticationConfiguration), jwtTokenProvider);
-        filter.setFilterProcessesUrl("/api/v1/login"); //  로그인 필터가 작동될 경로 설정
+        CustomUsernamePasswordAuthenticationFilter filter = new CustomUsernamePasswordAuthenticationFilter(authenticationManager(authenticationConfiguration), jwtTokenProvider, redisService);
+        filter.setFilterProcessesUrl("/api/*/auth/login"); //  로그인 필터가 작동될 경로 설정
+
 
         http
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests((requests) ->
                             requests
-                                    .requestMatchers(HttpMethod.POST, "/api/*/user/register", "/api/*/user/login")
+                                    .requestMatchers(HttpMethod.POST, "/api/*/user/register", "/api/*/auth/login", "/api/v1/auth/reissue")
                                     .permitAll()
                                     .anyRequest()
                                     .authenticated()
@@ -88,11 +90,12 @@ public class SecurityConfig {
 //                        .userInfoEndpoint(userInfo -> userInfo
 //                                .userService(socialOAuth2UserService)));
 
-                .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(jwtVerificationFilter, CustomUsernamePasswordAuthenticationFilter.class) // jwt 검증 필터 등록
                 .addFilterAfter(jwtExceptionFilter, jwtVerificationFilter.getClass())
                 .httpBasic(HttpBasicConfigurer::disable) // 기본 로그인창 disable
                 .formLogin(FormLoginConfigurer::disable); // UsernamePasswordAuthenticationFilter disable
+
 
 
         return http.build();

@@ -13,9 +13,6 @@ import java.util.List;
 
 public interface UserService extends UserDetailsService {
     UserResponseDto registerUser(ServiceRegisterDto dto);
-
-    LoginResponseDto login(@Valid LoginRequestDto requestBody);
-
     List<VinylDto> getVinylsLikedByUser(Long userId, User user);
     List<VinylDto> getVinylsListenedByUser(Long userId, User user);
 }
