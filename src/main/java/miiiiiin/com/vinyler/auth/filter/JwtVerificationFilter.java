@@ -1,8 +1,10 @@
 package miiiiiin.com.vinyler.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.IncorrectClaimException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +15,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 // spring security 체인에 등록할 커스텀 필터
 @Component
@@ -34,7 +38,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
      * 토큰은 앞에 Bearer를 붙여서 전달해야 함
      * 토큰 값 검증 (토큰 유효기간 만료 여부 검증)
      * 토큰 검증 완료되었으면 SecurityContextHolder에 context, authenticationToken 세팅
-     *
+     * <p>
      * 클라이언트가 header에 토큰값을 실어보내면 doFilterInternal 안에서 토큰 검증 실행
      * 인증 객체 생성 후, Security Context에 정보 저장
      *
@@ -48,63 +52,54 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String BEARER_PREFIX = JwtTokenProvider.BEARER_PREFIX;
 
-        String accessTokenFromHeader = jwtTokenProvider.getHeaderAccessToken(request);
-        String refreshTokenFromHeader = jwtTokenProvider.getHeaderRefreshToken(request);
+        String accessToken = jwtTokenProvider.getHeaderAccessToken(request);
 
-//        var authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-//        var refresh = jwtTokenProvider.getHeaderRefreshToken(request);
+        // 쿠키에서 Refresh Token 가져오기
+        String refreshTokenFromCookie = Arrays.stream(request.getCookies())
+                .filter(cookie -> cookie.getName().equals("refreshToken"))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElse(null);
+
         var securityContext = SecurityContextHolder.getContext();
 
-        if (accessTokenFromHeader != null) {
-            // 액세스토큰 값이 유효하면 setAuthentication 통해 securityContext에 인증 정보 저장
-            if (jwtTokenProvider.validateToken(accessTokenFromHeader)) {
-                var username = jwtTokenProvider.getUsername(accessTokenFromHeader);
+        try {
+            // 유효한 토큰인지 검사
+            if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
+                var username = jwtTokenProvider.getUsername(accessToken);
                 var userDetails = userService.loadUserByUsername(username);
+                // 액세스토큰 값이 유효하면 setAuthentication 통해 securityContext에 인증 정보 저장
                 setAuthentication((UserDetailsImpl) userDetails, request, securityContext);
-            } else if (refreshTokenFromHeader != null) {
+            } else if (refreshTokenFromCookie != null) {
                 // 액세스 토큰이 만료되어있으나 리프레쉬 토큰이 존재하는 상황
-                // 리프레쉬 토큰 검증 && 리프레쉬 토큰 DB에서 토큰 존재유무 확인
-                boolean isRefreshToken = validateRefreshToken(refreshTokenFromHeader);
-                // 리프레쉬 토큰이 유효하고 DB에 있는 것과 비교했을 때 같으면
+                // 리프레쉬 토큰 검증 && 리프레쉬 토큰 쿠키에서 토큰 존재유무 확인
+                boolean isRefreshToken = validateRefreshToken(refreshTokenFromCookie);
+                // 리프레쉬 토큰이 유효하고 쿠키에 있는 것과 비교했을 때 같으면
                 if (isRefreshToken) {
-                    String username = jwtTokenProvider.getSubject(refreshTokenFromHeader);
-//                    // 새로운 액세스 토큰 발급
+                    String username = jwtTokenProvider.getSubject(refreshTokenFromCookie);
+                    // 새로운 액세스 토큰 발급
                     var userDetails = userService.loadUserByUsername(username);
                     var newAccessToken = jwtTokenProvider.generateAccessToken((UserDetailsImpl) userDetails);
                     // 헤더에 액세스 토큰 추가
                     jwtTokenProvider.setHeaderAccessToken(response, newAccessToken.getAccessToken());
                     // Security context에 인증 정보 넣기
                     setAuthentication((UserDetailsImpl) userDetails, request, securityContext);
+                } else {
+                    // 리프레쉬 토큰 만료되었거나 쿠키에 있는 것과 같지 않다면
+                    jwtExceptionHandler(response, "RefreshToken Expired", HttpStatus.BAD_REQUEST);
+                    return;
                 }
-
-            } else {
-                // 리프레쉬 토큰 만료되었거나 DB에 있는 것과 같지 않다면
-                jwtExceptionHandler(response, "RefreshToken Expired", HttpStatus.BAD_REQUEST);
-                return;
             }
+        } catch (IncorrectClaimException e) {
+            // 잘못된 토큰일 경우
+            SecurityContextHolder.clearContext();
+            logger.debug("Invalid JWT token.");
+            response.sendError(403);
+        } catch (UsernameNotFoundException e) {
+            SecurityContextHolder.clearContext();
+            logger.debug("Cannot find user.");
+            response.sendError(403);
         }
-
-//
-//        if (!ObjectUtils.isEmpty(authorization) &&
-//            authorization.startsWith(BEARER_PREFIX) &&
-//            securityContext.getAuthentication() == null) {
-//
-//            var accessToken = authorization.substring(BEARER_PREFIX.length());
-//
-//            // 토큰 만료 검증
-//            if (!jwtTokenProvider.validateToken(accessToken)) {
-//                filterChain.doFilter(request, response);
-//                return;
-//            }
-//            var username = jwtTokenProvider.getUsername(accessToken);
-//            var userDetails = userService.loadUserByUsername(username);
-//
-//            var authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-//            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//            // Security Filter에 의한 사용자 권한별 인가 처리에 사용됨
-//            SecurityContextHolder.setContext(securityContext);
-//            securityContext.setAuthentication(authenticationToken);
-//        }
 
         filterChain.doFilter(request, response);
     }
@@ -124,8 +119,6 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
      */
     private boolean validateRefreshToken(String jwtToken) {
         if (!jwtTokenProvider.validateToken(jwtToken)) return false;
-        // FIX: fix later
-        // DB에 저장한 토큰 비교
         var username = jwtTokenProvider.getUsername(jwtToken);
         var refreshToken = refreshTokenRepository.findByEmail(username);
         return refreshToken.isPresent() && jwtToken.equals(refreshToken.get().getRefreshToken());
@@ -134,13 +127,12 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     // JWT 예외처리
     public void jwtExceptionHandler(HttpServletResponse response, String message, HttpStatus status) {
         response.setStatus(status.value());
-//        response.setContentType("application/json");
+        response.setContentType("application/json");
         try {
-            String json = new ObjectMapper().writeValueAsString(HttpStatus.valueOf(status.value()));
+            String json = new ObjectMapper().writeValueAsString(HttpStatus.valueOf(status.value()) + " " + message);
             response.getWriter().write(json);
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
-
     }
 }

@@ -125,10 +125,10 @@ public class JwtTokenProvider {
         response.setHeader(AUTHORIZATION, BEARER_PREFIX + accessToken);
     }
 
-    // 리프레쉬 토큰 헤더 설정
-    public void setHeaderRefreshToken(HttpServletResponse response, String refreshToken) {
-        response.setHeader(REFRESH, refreshToken);
-    }
+//    // 리프레쉬 토큰 헤더 설정
+//    public void setHeaderRefreshToken(HttpServletResponse response, String refreshToken) {
+//        response.setHeader(REFRESH, refreshToken);
+//    }
 
     // 헤더 accessToken 리턴
     public String getHeaderAccessToken(HttpServletRequest request) {
@@ -140,13 +140,13 @@ public class JwtTokenProvider {
     }
 
     // 헤더 refreshToken 리턴
-    public String getHeaderRefreshToken(HttpServletRequest request) {
-        String refreshToken = request.getHeader(REFRESH);
-        if (refreshToken != null) {
-            return refreshToken;
-        }
-        return null;
-    }
+//    public String getHeaderRefreshToken(HttpServletRequest request) {
+//        String refreshToken = request.getHeader(REFRESH);
+//        if (refreshToken != null) {
+//            return refreshToken;
+//        }
+//        return null;
+//    }
 
     public Long getRefreshExpirationTime() {
         return refreshExpirationTime;

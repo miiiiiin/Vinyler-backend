@@ -12,6 +12,9 @@ import miiiiiin.com.vinyler.auth.dto.TokenInfoDto;
 import miiiiiin.com.vinyler.config.RedisService;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -92,7 +95,20 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 
         // 헤더에 액세스 토큰 추가
         jwtTokenProvider.setHeaderAccessToken(response, accessToken);
-        jwtTokenProvider.setHeaderRefreshToken(response, refreshToken);
+
+        /** 리프레쉬 토큰을 HttpOnly 쿠키에 저장
+         * 헤더에 직접 리프레쉬 토큰 저장하지 않고 (보안 낮출 가능성 유)
+         * HttpOnly 쿠키를 사용하면 자동으로 요청 시 전달
+         */
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true) // 자바스크립트에서 접근 불가능
+                .secure(true) // HTTPS에서만 전송 가능
+                .sameSite("Strict") // CSRF 공격 방지
+                .path("/") // 전체 도메인에서 사용 가능
+                .maxAge(jwtTokenProvider.getRefreshExpirationTime()) // 유효 시간 설정
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
         objectMapper = new ObjectMapper();
         String jsonResponse = objectMapper.writeValueAsString(tokenDto);
