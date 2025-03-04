@@ -28,6 +28,12 @@ public class RedisService {
     }
 
     public String getValues(String key) {
-        return String.valueOf(redisTemplate.opsForValue().get(key));
+        ValueOperations<String, Object> stringValueOperations = redisTemplate.opsForValue();
+        return (stringValueOperations.get(key) == null) ? "" : String.valueOf(stringValueOperations.get(key));
+    }
+
+    @Transactional
+    public void deleteValues(String key) {
+        redisTemplate.delete(key);
     }
 }

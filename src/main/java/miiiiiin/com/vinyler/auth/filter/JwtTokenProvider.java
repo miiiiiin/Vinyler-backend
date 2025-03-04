@@ -120,6 +120,17 @@ public class JwtTokenProvider {
         }
     }
 
+    /**
+     * 토큰의 유효성과 만료일자 확인
+     * refreshToken 토큰 검증
+     * db에 저장된 토큰 불러오는 대신 redis에서 저장된 토큰을 불러와서 비교하는 것으로 수정
+     * -> db 보다는 redis를 사용하는 것이 더욱 좋다. (in-memory db기 때문에 조회속도가 빠르고 주기적으로 삭제하는 기능이 기본적으로 존재)
+     */
+    public boolean validateRefreshToken(String refreshToken, String redisRefreshToken) {
+        if (!validateToken(refreshToken)) return false;
+        return !refreshToken.isEmpty() && refreshToken.equals(redisRefreshToken);
+    }
+
     // 액세스 토큰 헤더 설정
     public void setHeaderAccessToken(HttpServletResponse response, String accessToken) {
         response.setHeader(AUTHORIZATION, BEARER_PREFIX + accessToken);

@@ -117,10 +117,9 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
      * -> db 보다는 redis를 사용하는 것이 더욱 좋다. (in-memory db기 때문에 조회속도가 빠르고 주기적으로 삭제하는 기능이 기본적으로 존재)
      */
     private boolean validateRefreshToken(String jwtToken) {
-        if (!jwtTokenProvider.validateToken(jwtToken)) return false;
         var username = jwtTokenProvider.getUsername(jwtToken);
         var refreshToken = redisService.getValues(username);
-        return !refreshToken.isEmpty() && jwtToken.equals(refreshToken);
+        return jwtTokenProvider.validateRefreshToken(jwtToken, refreshToken);
     }
 
     // JWT 예외처리
