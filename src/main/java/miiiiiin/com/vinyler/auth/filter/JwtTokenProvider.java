@@ -147,4 +147,8 @@ public class JwtTokenProvider {
         }
         return null;
     }
+
+    public Long getRefreshExpirationTime() {
+        return refreshExpirationTime;
+    }
 }

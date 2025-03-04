@@ -26,4 +26,12 @@ public class AuthController {
         var response = authService.login(request);
         return ResponseEntity.ok(response);
     }
+
+//    @PostMapping("/login")
+//    @Operation(description = "로그인")
+//    public void login(@RequestBody @Valid LoginRequestDto request) {
+////        var response = authService.login(request);
+//        authService.login(request);
+//        return;
+//    }
 }

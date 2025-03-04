@@ -10,9 +10,10 @@ import miiiiiin.com.vinyler.global.GlobalResponseDto;
 @Data
 public class LoginResponseDto implements GlobalResponseDto {
     private String accessToken;
+    private String refreshToken;
 
-    public static LoginResponseDto from(String accessToken) {
-        return new LoginResponseDto(accessToken);
+    public static LoginResponseDto from(String accessToken, String refreshToken) {
+        return new LoginResponseDto(accessToken, refreshToken);
     }
 
     @Override

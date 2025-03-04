@@ -32,6 +32,7 @@ public class SecurityConfig {
 
     private final JwtVerificationFilter jwtVerificationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
+    private final RedisService redisService;
 
 
     @Bean
@@ -70,8 +71,9 @@ public class SecurityConfig {
 
         // 커스텀 필터 등록
         // 로그인 경로 설정 후, 로그인 필터 등록
-        CustomUsernamePasswordAuthenticationFilter filter = new CustomUsernamePasswordAuthenticationFilter(authenticationManager(authenticationConfiguration), jwtTokenProvider);
+        CustomUsernamePasswordAuthenticationFilter filter = new CustomUsernamePasswordAuthenticationFilter(authenticationManager(authenticationConfiguration), jwtTokenProvider, redisService);
         filter.setFilterProcessesUrl("/api/v1/login"); //  로그인 필터가 작동될 경로 설정
+
 
         http
                 .cors(Customizer.withDefaults())
@@ -93,6 +95,7 @@ public class SecurityConfig {
                 .addFilterAfter(jwtExceptionFilter, jwtVerificationFilter.getClass())
                 .httpBasic(HttpBasicConfigurer::disable) // 기본 로그인창 disable
                 .formLogin(FormLoginConfigurer::disable); // UsernamePasswordAuthenticationFilter disable
+
 
 
         return http.build();
