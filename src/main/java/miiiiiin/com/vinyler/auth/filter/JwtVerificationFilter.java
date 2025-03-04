@@ -50,7 +50,10 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-//        String BEARER_PREFIX = JwtTokenProvider.BEARER_PREFIX;
+        String requestURI = request.getRequestURI();
+
+        var securityContext = SecurityContextHolder.getContext();
+
 
         String accessToken = jwtTokenProvider.getHeaderAccessToken(request);
 
@@ -61,7 +64,11 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
                 .map(Cookie::getValue)
                 .orElse(null);
 
-        var securityContext = SecurityContextHolder.getContext();
+//        // 특정 API 경로에서는 필터를 건너뜀
+//        if (requestURI.contains("/auth/reissue") || requestURI.contains("/auth/logout")) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
 
         try {
             // 유효한 토큰인지 검사

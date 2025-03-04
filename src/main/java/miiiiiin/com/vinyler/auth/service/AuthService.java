@@ -39,16 +39,25 @@ public class AuthService {
         redisService.deleteValues(userDetails.getUsername());
         var tokenDto = jwtTokenProvider.generateAccessToken(userDetails);
         redisService.setStringValue(userDetails.getUsername(), refreshToken, jwtTokenProvider.getRefreshExpirationTime());
-
-        // 리프레쉬 토큰 쿠키 저장
-        HttpCookie refreshTokenCookie = ResponseCookie.from("refreshToken", tokenDto.getRefreshToken())
-                .httpOnly(true) // 자바스크립트에서 접근 불가능
-                .secure(true) // HTTPS에서만 전송 가능
-                .sameSite("Strict") // CSRF 공격 방지
-                .path("/") // 전체 도메인에서 사용 가능
-                .maxAge(jwtTokenProvider.getRefreshExpirationTime()) // 유효 시간 설정
-                .build();
-
         return tokenDto;
+    }
+
+    /**
+     * 사용자가 로그아웃한 후에도, Access Token을 다시 사용해서 요청을 보낼 가능성이 있음
+     * 그리하여 Redis에서 "logout" 값이 있으면, 해당 토큰은 더 이상 사용할 수 없도록 체크
+     * 로그아웃 후 기존 Access Token이 유효해도 사용 불가 (로그아웃된 토큰 차단)
+     * 키 : accessToken, 값: "logout"
+     * @param accessToken
+     */
+    public void logout(String accessToken) {
+        String username = jwtTokenProvider.getUsername(accessToken);
+        // redis에 저장되어있는 refreshToken 삭제
+        if (redisService.getValues(username) != null) {
+            // 로그아웃 후 더 이상 재발급 요청 불가
+            redisService.deleteValues(username);
+        }
+        // 사용자가 로그아웃했음을 기록하기 위해 Access Token을 Redis에 저장
+        long expTime = jwtTokenProvider.getRefreshExpirationTime();
+        redisService.setStringValue(accessToken, "logout", expTime);
     }
 }
