@@ -26,8 +26,9 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
+    public RedisTemplate<?, ?> redisTemplate() {
+        RedisTemplate<byte[], byte[]> template = new RedisTemplate<>();
+        // template 통해 db 서버에 set, get, delete 메서드 사용 가능
         // setKeySerializer, setValueSerializer 설정
         // redis-cli 통해 직접 데이터 조회 시 알아볼 수 없는 형태로 출력되는 것 방지
         template.setKeySerializer(new StringRedisSerializer());

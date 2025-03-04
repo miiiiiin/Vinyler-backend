@@ -13,10 +13,16 @@ public class RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public void setStringValue(String token, String data, Long expTime) {
+    /**
+     * key(email) : value(refreshToken)
+     * @param key
+     * @param value
+     * @param expTime
+     */
+    public void setStringValue(String key, String value, Long expTime) {
         ValueOperations<String, Object> stringValueOperations = redisTemplate.opsForValue();
         //  set(key, value, {ttl(expiration time)})
-        stringValueOperations.set(token, data, expTime, TimeUnit.MILLISECONDS);
+        stringValueOperations.set(key, value, expTime, TimeUnit.MILLISECONDS);
     }
 
 }

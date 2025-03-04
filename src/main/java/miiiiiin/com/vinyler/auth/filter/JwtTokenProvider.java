@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Getter;
 import miiiiiin.com.vinyler.auth.dto.TokenInfoDto;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ public class JwtTokenProvider {
     @Value("${jwt.token.access-expiration-time}")
     private long accessExpirationTime;
     // refreshToken 유효시간 7일
-    @Value("${jwt.token.refresh-expiration-time}")
+    @Value("${jwt.token.refresh-expiration-time}") @Getter
     private long refreshExpirationTime;
 
     // @Value 통해서 yml 파일에 secret-key 값 읽어와서 키 값 초기화

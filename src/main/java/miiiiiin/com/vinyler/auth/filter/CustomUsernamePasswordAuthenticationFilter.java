@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.auth.dto.TokenInfoDto;
+import miiiiiin.com.vinyler.config.RedisService;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,6 +29,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RedisService redisService;
 
     private ObjectMapper objectMapper;
 
@@ -91,8 +93,12 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         objectMapper = new ObjectMapper();
         String jsonResponse = objectMapper.writeValueAsString(tokenDto);
 
+        // redis에 refreshToken 저장
+        redisService.setStringValue(userDetails.getUsername(), refreshToken, jwtTokenProvider.getRefreshExpirationTime());
+
         // JSON 타입 객체 응답
         response.setContentType("application/json");
         response.getWriter().write(jsonResponse);
+        this.getSuccessHandler().onAuthenticationSuccess(request, response, authResult);
     }
 }
