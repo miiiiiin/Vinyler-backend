@@ -15,6 +15,7 @@ import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.StreamUtils;
 
@@ -86,6 +87,9 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         String accessToken = tokenDto.getAccessToken();
         String refreshToken = tokenDto.getRefreshToken();
 
+        // 인증 정보를 SecurityContext에 저장하여 이후 요청에서도 유지
+        SecurityContextHolder.getContext().setAuthentication(authResult);
+
         // 헤더에 액세스 토큰 추가
         jwtTokenProvider.setHeaderAccessToken(response, accessToken);
         jwtTokenProvider.setHeaderRefreshToken(response, refreshToken);
@@ -99,6 +103,5 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         // JSON 타입 객체 응답
         response.setContentType("application/json");
         response.getWriter().write(jsonResponse);
-        this.getSuccessHandler().onAuthenticationSuccess(request, response, authResult);
     }
 }

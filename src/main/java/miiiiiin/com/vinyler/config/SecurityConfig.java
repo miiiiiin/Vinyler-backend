@@ -72,7 +72,7 @@ public class SecurityConfig {
         // 커스텀 필터 등록
         // 로그인 경로 설정 후, 로그인 필터 등록
         CustomUsernamePasswordAuthenticationFilter filter = new CustomUsernamePasswordAuthenticationFilter(authenticationManager(authenticationConfiguration), jwtTokenProvider, redisService);
-        filter.setFilterProcessesUrl("/api/v1/login"); //  로그인 필터가 작동될 경로 설정
+        filter.setFilterProcessesUrl("/api/*/auth/login"); //  로그인 필터가 작동될 경로 설정
 
 
         http
@@ -90,7 +90,7 @@ public class SecurityConfig {
 //                        .userInfoEndpoint(userInfo -> userInfo
 //                                .userService(socialOAuth2UserService)));
 
-                .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(jwtVerificationFilter, CustomUsernamePasswordAuthenticationFilter.class) // jwt 검증 필터 등록
                 .addFilterAfter(jwtExceptionFilter, jwtVerificationFilter.getClass())
                 .httpBasic(HttpBasicConfigurer::disable) // 기본 로그인창 disable
