@@ -27,4 +27,7 @@ public class RedisService {
         stringValueOperations.set(key, value, expTime, TimeUnit.MILLISECONDS);
     }
 
+    public String getValues(String key) {
+        return String.valueOf(redisTemplate.opsForValue().get(key));
+    }
 }

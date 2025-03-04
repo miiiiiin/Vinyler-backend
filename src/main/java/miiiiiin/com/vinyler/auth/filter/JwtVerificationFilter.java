@@ -8,7 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import miiiiiin.com.vinyler.auth.repository.RefreshTokenRepository;
+import miiiiiin.com.vinyler.config.RedisService;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -30,7 +30,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RedisService redisService;
 
     /**
      * 요청이 해당 필터를 거치면 실행되는 메소드
@@ -50,7 +50,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String BEARER_PREFIX = JwtTokenProvider.BEARER_PREFIX;
+//        String BEARER_PREFIX = JwtTokenProvider.BEARER_PREFIX;
 
         String accessToken = jwtTokenProvider.getHeaderAccessToken(request);
 
@@ -113,15 +113,14 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     /**
      * 토큰의 유효성과 만료일자 확인
      * refreshToken 토큰 검증
-     * -> db에 저장되어 있는 token과 비교
-     * -> db에 저장한다는 것이 jwt token을 사용한다는 강점을 상쇄시킨다.
-     * -> db 보다는 redis를 사용하는 것이 더욱 좋다. (in-memory db기 때문에 조회속도가 빠르고 주기적으로 삭제하는 기능이 기본적으로 존재합니다.)
+     * db에 저장된 토큰 불러오는 대신 redis에서 저장된 토큰을 불러와서 비교하는 것으로 수정
+     * -> db 보다는 redis를 사용하는 것이 더욱 좋다. (in-memory db기 때문에 조회속도가 빠르고 주기적으로 삭제하는 기능이 기본적으로 존재)
      */
     private boolean validateRefreshToken(String jwtToken) {
         if (!jwtTokenProvider.validateToken(jwtToken)) return false;
         var username = jwtTokenProvider.getUsername(jwtToken);
-        var refreshToken = refreshTokenRepository.findByEmail(username);
-        return refreshToken.isPresent() && jwtToken.equals(refreshToken.get().getRefreshToken());
+        var refreshToken = redisService.getValues(username);
+        return !refreshToken.isEmpty() && jwtToken.equals(refreshToken);
     }
 
     // JWT 예외처리
