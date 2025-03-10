@@ -3,6 +3,7 @@ package miiiiiin.com.vinyler.user.service;
 import jakarta.validation.Valid;
 import miiiiiin.com.vinyler.application.dto.VinylDto;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
+import miiiiiin.com.vinyler.user.dto.UserDto;
 import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
 import miiiiiin.com.vinyler.user.dto.response.LoginResponseDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
@@ -15,4 +16,8 @@ public interface UserService extends UserDetailsService {
     UserResponseDto registerUser(ServiceRegisterDto dto);
     List<VinylDto> getVinylsLikedByUser(Long userId, User user);
     List<VinylDto> getVinylsListenedByUser(Long userId, User user);
+    UserDto follow(Long userId, User user);
+    UserDto unfollow(Long userId, User user);
+    List<UserDto> getFollowersByUser(Long userId, User user);
+    List<UserDto> getFollowingsByUser(Long userId, User user);
 }

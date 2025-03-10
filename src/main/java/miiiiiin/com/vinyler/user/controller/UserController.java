@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.VinylDto;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
+import miiiiiin.com.vinyler.user.dto.UserDto;
 import miiiiiin.com.vinyler.user.dto.request.ClientRegisterReqeustDto;
 import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
 import miiiiiin.com.vinyler.user.dto.response.LoginResponseDto;
@@ -53,6 +54,51 @@ public class UserController {
     public ResponseEntity<List<VinylDto>> getVinylsListenedByUser(@PathVariable Long userId,
                                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
         var response = userService.getVinylsListenedByUser(userId, userDetails.getUser());
+        return ResponseEntity.ok(response);
+    }
+
+
+    /**
+     * 팔로우
+     */
+    @PostMapping("/{userId}/following")
+    @Operation(description = "Follow 기능")
+    public ResponseEntity<UserDto> follow(@PathVariable Long userId,
+                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        var response = userService.follow(userId, userDetails.getUser());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 언팔로우
+     */
+    @DeleteMapping("/{userId}/following")
+    @Operation(description = "Follow 기능")
+    public ResponseEntity<UserDto> unfollow(@PathVariable Long userId,
+                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        var response = userService.unfollow(userId, userDetails.getUser());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 유저의 팔로워 리스트
+     */
+    @GetMapping("/{userId}/followers")
+    @Operation(description = "Follower 목록 조회")
+    public ResponseEntity<List<UserDto>> getFollowersByUser(@PathVariable Long userId,
+                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        var response = userService.getFollowersByUser(userId, userDetails.getUser());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 유저의 팔로우 리스트
+     */
+    @GetMapping("/{userId}/followings")
+    @Operation(description = "Follower 목록 조회")
+    public ResponseEntity<List<UserDto>> getFollowingsByUser(@PathVariable Long userId,
+                                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        var response = userService.getFollowingsByUser(userId, userDetails.getUser());
         return ResponseEntity.ok(response);
     }
 }

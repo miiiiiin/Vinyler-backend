@@ -2,8 +2,7 @@ package miiiiiin.com.vinyler.application.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import miiiiiin.com.vinyler.application.entity.ArtistDetail;
-import miiiiiin.com.vinyler.application.entity.Format;
+import miiiiiin.com.vinyler.application.entity.vinyl.ArtistDetail;
 
 @Data
 @Builder

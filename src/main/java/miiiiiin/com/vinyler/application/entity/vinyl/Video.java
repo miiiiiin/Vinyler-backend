@@ -1,4 +1,4 @@
-package miiiiiin.com.vinyler.application.entity;
+package miiiiiin.com.vinyler.application.entity.vinyl;
 
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -5,16 +5,10 @@ import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.UserVinylStatusDto;
 import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
 import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
-import miiiiiin.com.vinyler.application.entity.Vinyl;
 import miiiiiin.com.vinyler.application.service.UserVinylStatusService;
 import miiiiiin.com.vinyler.application.service.VinylService;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
-import miiiiiin.com.vinyler.user.service.UserService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

@@ -1,9 +1,10 @@
-package miiiiiin.com.vinyler.application.entity;
+package miiiiiin.com.vinyler.application.entity.vinyl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
+import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.user.entity.User;
 
 import java.util.ArrayList;
