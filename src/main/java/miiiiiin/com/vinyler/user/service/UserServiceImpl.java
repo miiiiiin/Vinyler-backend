@@ -126,6 +126,35 @@ public class UserServiceImpl implements UserService {
         return UserDto.from(following, false);
     }
 
+    /**
+     * userId의 팔로워 리스트
+     */
+    @Override
+    public List<UserDto> getFollowersByUser(Long userId, User currentUser) {
+        // 팔로잉하고 있는 해당 유저 존재하는지 확인
+        var following = getUserEntity(userId);
+        var followEntities = followRepository.findByFollowing(following);
+        return followEntities.stream().map(follow -> getUserWithFollowingStatus(currentUser, follow.getFollower())).toList();
+    }
+
+    /**
+     * userId가 팔로워 (userId가 팔로잉하고 있는 리스트)
+     */
+    @Override
+    public List<UserDto> getFollowingsByUser(Long userId, User currentUser) {
+        var follower = getUserEntity(userId);
+        var followEntities = followRepository.findByFollowing(follower);
+        return followEntities.stream().map(follow -> getUserWithFollowingStatus(currentUser, follow.getFollowing())).toList();
+    }
+
+    /**
+     * API를 호출하고 있는 유저가 팔로잉하고 있는지 상태 체크 (팔로워: currentUser, 팔로잉: user)
+     */
+    private UserDto getUserWithFollowingStatus(User currentUser, User user) {
+        boolean isFollowing = followRepository.findByFollowerAndFollowing(currentUser, user).isPresent();
+        return UserDto.from(user, isFollowing);
+    }
+
     private User getUserEntity(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));

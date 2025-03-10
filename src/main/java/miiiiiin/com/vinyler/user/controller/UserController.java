@@ -79,4 +79,26 @@ public class UserController {
         var response = userService.unfollow(userId, userDetails.getUser());
         return ResponseEntity.ok(response);
     }
+
+    /**
+     * 유저의 팔로워 리스트
+     */
+    @GetMapping("/{userId}/followers")
+    @Operation(description = "Follower 목록 조회")
+    public ResponseEntity<List<UserDto>> getFollowersByUser(@PathVariable Long userId,
+                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        var response = userService.getFollowersByUser(userId, userDetails.getUser());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 유저의 팔로우 리스트
+     */
+    @GetMapping("/{userId}/followings")
+    @Operation(description = "Follower 목록 조회")
+    public ResponseEntity<List<UserDto>> getFollowingsByUser(@PathVariable Long userId,
+                                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        var response = userService.getFollowingsByUser(userId, userDetails.getUser());
+        return ResponseEntity.ok(response);
+    }
 }

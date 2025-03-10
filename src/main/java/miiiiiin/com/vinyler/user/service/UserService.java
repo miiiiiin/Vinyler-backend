@@ -18,4 +18,6 @@ public interface UserService extends UserDetailsService {
     List<VinylDto> getVinylsListenedByUser(Long userId, User user);
     UserDto follow(Long userId, User user);
     UserDto unfollow(Long userId, User user);
+    List<UserDto> getFollowersByUser(Long userId, User user);
+    List<UserDto> getFollowingsByUser(Long userId, User user);
 }
