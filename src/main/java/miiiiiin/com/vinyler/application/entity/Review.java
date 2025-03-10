@@ -2,10 +2,10 @@ package miiiiiin.com.vinyler.application.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.user.entity.BaseEntity;
 import miiiiiin.com.vinyler.user.entity.User;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 /**

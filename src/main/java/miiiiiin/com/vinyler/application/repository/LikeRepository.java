@@ -1,7 +1,7 @@
 package miiiiiin.com.vinyler.application.repository;
 
 import miiiiiin.com.vinyler.application.entity.Like;
-import miiiiiin.com.vinyler.application.entity.Vinyl;
+import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

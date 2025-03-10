@@ -3,18 +3,13 @@ package miiiiiin.com.vinyler.application.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.UserVinylStatusDto;
-import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
 import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
-import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
-import miiiiiin.com.vinyler.application.entity.Vinyl;
+import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.user.entity.User;
-import miiiiiin.com.vinyler.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service

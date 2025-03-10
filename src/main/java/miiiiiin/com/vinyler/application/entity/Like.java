@@ -1,10 +1,10 @@
 package miiiiiin.com.vinyler.application.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.user.entity.BaseEntity;
 import miiiiiin.com.vinyler.user.entity.User;
 import net.minidev.json.annotate.JsonIgnore;

@@ -3,9 +3,9 @@ package miiiiiin.com.vinyler.application.dto;
 import lombok.Builder;
 import lombok.Data;
 import miiiiiin.com.vinyler.application.entity.*;
+import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Builder
 @Data
