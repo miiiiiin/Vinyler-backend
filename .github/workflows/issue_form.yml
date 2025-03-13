@@ -1,0 +1,40 @@
+name: '기능 이슈'
+description: 'Vinyler에 기능 이슈를 생성하며, 생성된 이슈는 Jira와 연동됩니다.'
+labels: [order]
+title: '만들고자 하는 기능을 기입해주세요'
+body:
+  - type: input
+    id: parentKey
+    attributes:
+      label: '상위 작업 Ticket Number'
+      description: '상위 작업의 Ticket Number를 기입해주세요'
+      placeholder: 'BIN-00'
+    validations:
+      required: true
+      
+  - type: textarea
+    id: tasks
+    attributes:
+      label: '작업 상세 내용'
+      description: '해당 이슈에 대해 필요한 작업목록을 작성해주세요'
+      value: |
+        - [ ] Task1
+        - [ ] Task2
+    validations:
+      required: true
+      
+  - type: input
+    id: description
+    attributes:
+      label: '예상기간'
+      description: '작업 예상기간을 기입해주세요'
+      placeholder: '0월00일 - 0월 00일'
+    validations:
+      required: true
+      
+  - type: input
+    id: description
+    attributes:
+      label: '기타 사항'
+    validations:
+      required: true
