@@ -57,11 +57,10 @@ jobs:
           issuetype: Task
           summary: "${{ github.event.issue.title }}"
           description: "${{ steps.md2jira.outputs.output-text }}"
-           fields: |
+          fields: |
             {
-              "labels": [${{ env.JIRA_LABELS }}]
+              "labels": ${{ toJson(env.JIRA_LABELS) }}
             }
-
 
       - name: Log created issue
         run: echo "Jira Issue ${{ steps.issue-parser.outputs.parentKey }}/${{ steps.create.outputs.issue }} was created"
@@ -80,5 +79,5 @@ jobs:
         uses: actions-cool/issues-helper@v3
         with:
           actions: "update-issue"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GIT_TOKEN }}
           title: "${{ steps.create.outputs.issue }} ${{ github.event.issue.title }}"
