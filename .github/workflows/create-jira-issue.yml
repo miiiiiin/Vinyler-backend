@@ -46,9 +46,9 @@ jobs:
       - name: Extract Labels
         id: extract-labels
         run: |
-          LABELS_JSON=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '[.[].name] | join(",")')
+          LABELS_JSON=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '[.[].name] | @json')
           echo "JIRA_LABELS=$LABELS_JSON" >> $GITHUB_ENV
-        
+
       - name: Create Issue
         id: create
         uses: atlassian/gajira-create@v3
