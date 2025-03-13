@@ -9,8 +9,9 @@ jobs:
     name: Create Jira issue
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write  # 저장소 콘텐츠 접근 권한
+      issues: write    # 이슈 생성 및 수정 권한
+      pull-requests: write  # PR 생성 및 수정 권한
     steps:
       - name: Login
         uses: atlassian/gajira-login@v3
@@ -28,7 +29,7 @@ jobs:
         uses: stefanbuck/github-issue-praser@v3
         id: issue-parser
         with:
-          template-path: .github/workflows/issue-form.yml
+          template-path: .github/ISSUE_TEMPLATE/이슈템플릿.yml
           
 
       - name: Log Issue Parser
