@@ -49,6 +49,9 @@ jobs:
           LABELS_JSON=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -c '[.[].name]')
           echo "JIRA_LABELS=$LABELS_JSON" >> $GITHUB_ENV
 
+      - name: Debug Labels
+        run: echo "JIRA_LABELS=${{ env.JIRA_LABELS }}"
+
       - name: Create Issue
         id: create
         uses: atlassian/gajira-create@v3
@@ -59,7 +62,7 @@ jobs:
           description: "${{ steps.md2jira.outputs.output-text }}"
           fields: |
             {
-              "labels": ${{ toJson(env.JIRA_LABELS) }}
+              "labels": ${{ env.JIRA_LABELS }}
             }
 
       - name: Log created issue
