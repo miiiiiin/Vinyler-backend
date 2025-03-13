@@ -46,13 +46,12 @@ jobs:
       - name: Extract Labels
         id: extract-labels
         run: |
-          RAW_LABELS='${{ toJson(github.event.issue.labels) }}'
+          RAW_LABELS="${{ toJson(github.event.issue.labels) }}"
           CLEAN_LABELS=$(echo "$RAW_LABELS" | tr -d '\n\r' | sed 's/[^[:print:]]//g')
           LABELS_JSON=$(echo "$CLEAN_LABELS" | jq -c '[.[].name]')
           echo "JIRA_LABELS=$LABELS_JSON" >> $GITHUB_ENV
           echo "Extracted Labels: $LABELS_JSON"
 
-  
       - name: Debug Labels
         run: echo "JIRA_LABELS=${{ env.JIRA_LABELS }}"
         
