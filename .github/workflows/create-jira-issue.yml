@@ -43,15 +43,16 @@ jobs:
             ${{ github.event.issue.body }}
           mode: md2jira
 
-      - name: Debug Labels
-        run: echo "JIRA_LABELS=${{ env.JIRA_LABELS }}"
-     
       - name: Extract Labels
         id: extract-labels
         run: |
-          LABELS_JSON=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -c '[.[].name] | @json')
+          LABELS_JSON=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -c '[.[].name]')
           echo "JIRA_LABELS=$LABELS_JSON" >> $GITHUB_ENV
-
+          echo "Extracted Labels: $LABELS_JSON"
+  
+      - name: Debug Labels
+        run: echo "JIRA_LABELS=${{ env.JIRA_LABELS }}"
+        
       - name: Create Issue
         id: create
         uses: atlassian/gajira-create@v3
