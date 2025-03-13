@@ -1,0 +1,43 @@
+name: "기능 이슈"
+description: "새로운 기능 개발을 위한 이슈 템플릿"
+title: "[Feature] "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: "# 기능 이슈"
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: "만들고자 하는 기능"
+      description: "어떤 기능을 추가하려는지 설명해주세요."
+      placeholder: "예: 사용자가 프로필 사진을 업로드할 수 있도록 지원"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: task-details
+    attributes:
+      label: "작업 상세 내용"
+      description: "필요한 작업을 TODO 리스트로 작성해주세요."
+      options:
+        - label: "TODO"
+          required: false
+
+  - type: input
+    id: estimated-period
+    attributes:
+      label: "예상기간"
+      description: "작업 예상 기간을 입력해주세요."
+      placeholder: "예: 3월 15일 - 3월 20일"
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: "기타 사항"
+      description: "기타 참고할 사항이 있다면 적어주세요."
+    validations:
+      required: false
