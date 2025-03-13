@@ -42,11 +42,11 @@ jobs:
 
             ${{ github.event.issue.body }}
           mode: md2jira
-
+     
       - name: Extract Labels
         id: extract-labels
         run: |
-          LABELS_JSON=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -c '[.[].name]')
+          LABELS_JSON=$(echo "${{ toJson(github.event.issue.labels) }}" | jq -c '[.[].name] | @json')
           echo "JIRA_LABELS=$LABELS_JSON" >> $GITHUB_ENV
 
       - name: Debug Labels
