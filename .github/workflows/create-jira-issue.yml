@@ -25,7 +25,7 @@ jobs:
         uses: stefanbuck/github-issue-praser@v3
         id: issue-parser
         with:
-          template-path: .github/workflows/issue_form.yml
+          template-path: .github/workflows/issue-form.yml
           
 
       - name: Log Issue Parser
@@ -43,34 +43,25 @@ jobs:
             ${{ github.event.issue.body }}
           mode: md2jira
 
+      - name: Extract Labels
+        id: extract-labels
+        run: |
+          LABELS_JSON=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '[.[].name] | join(",")')
+          echo "JIRA_LABELS=$LABELS_JSON" >> $GITHUB_ENV
+        
       - name: Create Issue
         id: create
         uses: atlassian/gajira-create@v3
         with:
-          project: BIN
-          issuetype: Subtask
+          project: VNR
+          issuetype: Task
           summary: "${{ github.event.issue.title }}"
           description: "${{ steps.md2jira.outputs.output-text }}"
-          sync-issue-labels: true
-          fields: |
+           fields: |
             {
-              "parent": {
-                "key": "${{ steps.issue-parser.outputs.issueparser_parentKey }}"
-              }
+              "labels": [${{ env.JIRA_LABELS }}]
             }
 
-      - name: Sync to Jira
-        uses: atsushii/github-issue-to-jira@v1
-        with:
-          github-owner: github-owner
-          github-repo: repository-name
-          github-token: ${{ secrets.GITHUB_TOKEN }} # read/write authorized token
-          jira-hostname: hostname # Your Sync dest Jira hostname
-          jira-auth-token: ${{ secrets.JIRA_AUTH_TOKEN }} # Your Jira auth token
-          jira-auth-email: ${{ secrets.JIRA_AUTH_EMAIL }} # email same as jira project creator
-          jira-project-key: project-key # Your Sync dest Jira project name
-          synced-label: custom-synced-label
-          accepted-label: custom-accepted-label
 
       - name: Log created issue
         run: echo "Jira Issue ${{ steps.issue-parser.outputs.parentKey }}/${{ steps.create.outputs.issue }} was created"
