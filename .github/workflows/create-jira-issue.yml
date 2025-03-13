@@ -46,7 +46,7 @@ jobs:
       - name: Extract Labels
         id: extract-labels
         run: |
-          LABELS_JSON=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '[.[].name] | @json')
+          LABELS_JSON=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -c '[.[].name]')
           echo "JIRA_LABELS=$LABELS_JSON" >> $GITHUB_ENV
 
       - name: Create Issue
