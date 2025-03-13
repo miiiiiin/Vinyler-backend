@@ -8,6 +8,9 @@ jobs:
   create-issue:
     name: Create Jira issue
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Login
         uses: atlassian/gajira-login@v3
@@ -84,9 +87,15 @@ jobs:
           git checkout -b ${{ steps.create.outputs.issue }}
           git push origin ${{ steps.create.outputs.issue }}
 
+      - name: Configure Git Credentials
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/miiiiiin/Vinyler-backend.git
+
       - name: Update issue title
         uses: actions-cool/issues-helper@v3
         with:
           actions: "update-issue"
-          token: ${{ secrets.GIT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           title: "${{ steps.create.outputs.issue }} ${{ github.event.issue.title }}"
