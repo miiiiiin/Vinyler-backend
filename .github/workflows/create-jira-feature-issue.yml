@@ -98,10 +98,10 @@ jobs:
       - name: Get existing Jira issue
         id: get-jira-issue
         run: |
-          JQL_QUERY="project=VNR AND summary~\"${{ github.event.issue.title }}\""
+          JQL_QUERY="project=VNR AND summary~\"test issue\""
           RESPONSE=$(curl -s -u "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
-            -X GET -H "Content-Type: application/json" \
-            "${{ secrets.JIRA_BASE_URL }}/rest/api/2/search?jql=${JQL_QUERY}")
+          -X GET -H "Content-Type: application/json" \
+          "${{ secrets.JIRA_BASE_URL }}/rest/api/2/search?jql=$(echo $JQL_QUERY | jq -sRr @uri)")
 
           JIRA_ISSUE_KEY=$(echo "$RESPONSE" | jq -r '.issues[0].key // empty')
 
@@ -110,7 +110,7 @@ jobs:
           else
             echo "🆕 기존 Jira Issue 없음, 새로 생성 예정"
           fi
-
+          
           echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
         shell: bash
         
