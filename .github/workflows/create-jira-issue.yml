@@ -14,43 +14,26 @@ jobs:
       - name: Determine issue type
         id: set-label
         run: |
-          # GitHub Actions의 JSON 데이터를 안전하게 가져오기
-          LABELS_JSON=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -c '.' 2>/dev/null || echo "[]")
-
-          echo "Received Labels JSON: $LABELS_JSON"
-
-          # LABELS_JSON이 비어있거나 "null"일 경우 빈 배열([])로 초기화
-          if [ -z "$LABELS_JSON" ] || [ "$LABELS_JSON" = "null" ]; then
-            LABELS_JSON="[]"
-          fi
-
-          # 라벨 목록을 문자열로 변환하여 처리
-          RAW_LABELS=$(echo "$LABELS_JSON" | jq -r '.[].name' 2>/dev/null || echo "")
-
-          # JSON 특수문자가 깨지지 않도록 안전하게 감싸기
-          RAW_LABELS_CLEAN=$(echo "$RAW_LABELS" | tr -d '\n' | tr -d '\r')
-
-          # 레이블 확인 및 분기 처리
-          ISSUE_TYPE="none"
+          RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
+          
           TEMPLATE_PATH=""
-
-          if echo "$RAW_LABELS_CLEAN" | grep -q "새로운 기능"; then
-            ISSUE_TYPE="feature"
-            TEMPLATE_PATH=".github/ISSUE_TEMPLATE/feature_issues_template.yml"
-          elif echo "$RAW_LABELS_CLEAN" | grep -q "버그"; then
-            ISSUE_TYPE="bug"
-            TEMPLATE_PATH=".github/ISSUE_TEMPLATE/bug_issues_template.yml"
-          elif echo "$RAW_LABELS_CLEAN" | grep -q "요청"; then
-            ISSUE_TYPE="request"
-            TEMPLATE_PATH=".github/ISSUE_TEMPLATE/request_issues_template.yml"
+          
+          if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
+            echo "issue_type=feature" >> "$GITHUB_ENV"
+            echo "::set-output name=issue_type::feature"
+            TEMPLATE_PATH=".github/ISSUE_TEMPLATE/이슈템플릿.yml"
+          elif echo "$RAW_LABELS" | grep -q "버그"; then
+            echo "issue_type=bug" >> "$GITHUB_ENV"
+            echo "::set-output name=issue_type::bug"
+            TEMPLATE_PATH=".github/ISSUE_TEMPLATE/버그이슈-템플릿.yml"
+          elif echo "$RAW_LABELS" | grep -q "요청"; then
+            echo "issue_type=request" >> "$GITHUB_ENV"
+            echo "::set-output name=issue_type::request"
+            TEMPLATE_PATH=".github/ISSUE_TEMPLATE/이슈템플릿.yml"
+          else
+            echo "issue_type=none" >> "$GITHUB_ENV"
+            echo "::set-output name=issue_type::none"
           fi
-
-          echo "최종 ISSUE_TYPE: $ISSUE_TYPE"
-          echo "최종 TEMPLATE_PATH: $TEMPLATE_PATH"
-
-          # 최신 GitHub Actions 방식으로 환경 변수 설정
-          echo "issue_type=$ISSUE_TYPE" >> "$GITHUB_ENV"
-          echo "template_path=$TEMPLATE_PATH" >> "$GITHUB_ENV"
         shell: bash
         
   create-issue:
