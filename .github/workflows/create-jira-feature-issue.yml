@@ -100,30 +100,19 @@ jobs:
         uses: atlassian/gajira-get@v3
         with:
           jql: 'project = VNR AND summary ~ "${{ github.event.issue.title }}"'
-
-      - name: Extract Jira Issue Key
-        run: |
-          JIRA_ISSUE_KEY=$(echo '${{ steps.get-jira-issue.outputs.issue }}' | jq -r '.issues[0].key' 2>/dev/null || echo "")
-          if [ -n "$JIRA_ISSUE_KEY" ]; then
-            echo "📌 기존 Jira Issue 발견: $JIRA_ISSUE_KEY"
-          else
-            echo "🆕 기존 Jira Issue 없음, 새로 생성 예정"
-          fi
-          echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
-        shell: bash
-        
-      - name: Create or Update Jira Issue
-        run: |
-          if [ -n "$JIRA_ISSUE_KEY" ]; then
-            echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
-            jira-edit issue=$JIRA_ISSUE_KEY fields='{ "description": "${{ steps.md2jira.outputs.output-text }}"}'
-          else
-            echo "🆕 새 Jira Issue 생성 중..."
-            JIRA_ISSUE_KEY=$(jira-create project=VNR issuetype=Task summary="${{ github.event.issue.title }}" description="${{ steps.md2jira.outputs.output-text }}" fields='{ "labels": ${{ env.JIRA_LABELS }} }')
-            echo "📌 새 Jira Issue 생성 완료: $JIRA_ISSUE_KEY"
-          fi
-          echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
-        shell: bash
+  
+      - name: Create Issue
+        id: create
+        uses: atlassian/gajira-create@v3
+        with:
+          project: BIN
+          issuetype: Task
+          summary: "${{ github.event.issue.title }}"
+          description: "${{ steps.md2jira.outputs.output-text }}"
+          fields: |
+            {
+              "labels": ${{ env.JIRA_LABELS }}
+            }
 
       - name: Log created issue
         run: echo "Jira Issue ${{ steps.issue-parser.outputs.parentKey }}/${{ steps.create.outputs.issue }} was created"
@@ -139,9 +128,9 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/miiiiiin/Vinyler-backend.git
 
-      - name: Update GitHub issue title
-        run: |
-          gh issue edit ${{ github.event.issue.number }} --title "${{ github.event.issue.title }}"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
+      - name: Update issue title
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: "update-issue"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "${{ github.event.issue.title }}"
