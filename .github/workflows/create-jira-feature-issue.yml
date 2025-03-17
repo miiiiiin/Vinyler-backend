@@ -144,24 +144,24 @@ jobs:
           
           DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
           echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
-
-          # 🔍 원본 JIRA_LABELS 출력
           echo "🔍 Raw JIRA_LABELS: '${{ env.JIRA_LABELS }}'"
-      
-          # JIRA_LABELS 값이 유효한 JSON 배열인지 확인 후 변환 (한글, 특수문자 포함 처리)
-          if [[ "${{ env.JIRA_LABELS }}" =~ ^\[.*\]$ ]]; then
-            JIRA_LABELS_JSON="${{ env.JIRA_LABELS }}"
+
+          # JIRA_LABELS 값이 이미 JSON 배열이면 그대로 사용
+          if echo '${{ env.JIRA_LABELS }}' | jq -e . >/dev/null 2>&1; then
+            JIRA_LABELS_JSON='${{ env.JIRA_LABELS }}'
           else
-            JIRA_LABELS_JSON=$(echo '${{ env.JIRA_LABELS }}' | jq -R 'split(",") | map(gsub("^ *"; "") | gsub(" *$"; "") | tostring)' || echo "[]")
+            # JSON이 아니면 강제로 JSON 배열로 변환
+            JIRA_LABELS_JSON=$(echo '${{ env.JIRA_LABELS }}' | sed 's/^\[\(.*\)\]$/\1/' | jq -R 'split(",") | map(gsub("^ *"; "") | gsub(" *$"; "") | tostring)')
           fi
-      
+          
           # JSON 유효성 검사
-          if ! echo "$JIRA_LABELS_JSON" | jq empty; then
+          if ! echo "$JIRA_LABELS_JSON" | jq empty >/dev/null 2>&1; then
             echo "❌ Invalid JSON detected in JIRA_LABELS_JSON! Using default empty array."
-            JIRA_LABELS_JSON="[]"
+            JIRA_LABELS_JSON='[]'
           fi
-      
+          
           echo "📌 Converted JIRA_LABELS_JSON: $JIRA_LABELS_JSON"
+
       
           if [ -n "$JIRA_ISSUE_KEY" ]; then
             echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
