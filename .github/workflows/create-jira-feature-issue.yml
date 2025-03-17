@@ -100,7 +100,8 @@ jobs:
       - name: Get existing Jira issue
         id: get-jira-issue
         run: |
-          JQL_QUERY="project=VNR AND summary~\"test issue\""
+          JQL_QUERY="project=VNR AND summary=\"test issue\""
+          echo "🔍 JQL Query: $JQL_QUERY"
           RESPONSE=$(curl -s -u "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
           -X GET -H "Content-Type: application/json" \
           "${{ secrets.JIRA_BASE_URL }}/rest/api/2/search?jql=$(echo $JQL_QUERY | jq -sRr @uri)")
