@@ -97,7 +97,7 @@ jobs:
 
       - name: Get existing Jira issue
         id: get-jira-issue
-        uses: atlassian/gajira-get@v3
+        uses: atlassian/gajira-issue-get@v2
         with:
           jql: 'project = VNR AND summary ~ "${{ github.event.issue.title }}"'
   
