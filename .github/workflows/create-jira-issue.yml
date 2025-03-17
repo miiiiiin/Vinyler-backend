@@ -3,7 +3,7 @@ name: Sync issues to jira
 on:
   issues:
     types:
-      - labled
+      - labeled
 jobs:
   create-issue:
     name: Create Jira issue
