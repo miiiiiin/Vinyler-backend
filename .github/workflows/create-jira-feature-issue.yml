@@ -139,13 +139,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/miiiiiin/Vinyler-backend.git
 
-      # - name: Update issue title
-      #   uses: actions-cool/issues-helper@v3
-      #   with:
-      #     actions: "update-issue"
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     title: "${{ steps.create.outputs.issue }} ${{ github.event.issue.title }}"
-
       - name: Update GitHub issue title
         run: |
           gh issue edit ${{ github.event.issue.number }} --title "${{ github.event.issue.title }}"
