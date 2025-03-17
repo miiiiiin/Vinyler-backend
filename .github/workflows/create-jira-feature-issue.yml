@@ -145,11 +145,11 @@ jobs:
           DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
           echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
 
-          # JIRA_LABELS 값이 유효한 JSON 배열이 아니면 변환
+          # JIRA_LABELS 값이 유효한 JSON 배열이 아닐 경우 변환 (한글 포함 처리)
           if [[ "${{ env.JIRA_LABELS }}" =~ ^\[.*\]$ ]]; then
             JIRA_LABELS_JSON="${{ env.JIRA_LABELS }}"
           else
-            JIRA_LABELS_JSON=$(echo '"${{ env.JIRA_LABELS }}"' | jq -R 'split(",")')
+            JIRA_LABELS_JSON=$(echo '${{ env.JIRA_LABELS }}' | jq -R 'split(",") | map(gsub("^ *"; "") | gsub(" *$"; "") | tostring)')
           fi
       
           echo "📌 Converted JIRA_LABELS_JSON: $JIRA_LABELS_JSON"
