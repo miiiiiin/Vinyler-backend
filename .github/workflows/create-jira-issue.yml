@@ -15,9 +15,20 @@ jobs:
       - name: Determine issue type
         id: set-label
         run: |
-          LABELS_JSON='${{ toJson(github.event.issue.labels) }}'
-          RAW_LABELS=$(echo "$LABELS_JSON" | jq -r 'if . == null then "" else .[].name end' 2>/dev/null || echo "")
+          # GitHub Actions의 JSON 데이터를 안전하게 가져오기
+          LABELS_JSON=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -c '.' 2>/dev/null || echo "[]")
 
+          echo "Received Labels JSON: $LABELS_JSON"
+
+          # 만약 LABELS_JSON이 비어있거나 null이면 빈 값으로 설정
+          if [ -z "$LABELS_JSON" ] || [ "$LABELS_JSON" = "null" ]; then
+            LABELS_JSON="[]"
+          fi
+
+          # 라벨 목록을 문자열로 변환하여 처리
+          RAW_LABELS=$(echo "$LABELS_JSON" | jq -r '.[].name' 2>/dev/null || echo "")
+
+          # 레이블 확인 및 분기 처리
           if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
             echo "issue_type=feature" >> "$GITHUB_ENV"
             echo "::set-output name=issue_type::feature"
