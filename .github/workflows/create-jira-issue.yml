@@ -15,24 +15,25 @@ jobs:
         id: set-label
         run: |
           RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
-          
+
+          ISSUE_TYPE="none"
           TEMPLATE_PATH=""
           
           if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
             echo "issue_type=feature" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::feature"
+            ISSUE_TYPE="feature"
             TEMPLATE_PATH=".github/ISSUE_TEMPLATE/이슈템플릿.yml"
           elif echo "$RAW_LABELS" | grep -q "버그"; then
             echo "issue_type=bug" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::bug"
+            ISSUE_TYPE="bug"
             TEMPLATE_PATH=".github/ISSUE_TEMPLATE/버그이슈-템플릿.yml"
           elif echo "$RAW_LABELS" | grep -q "요청"; then
             echo "issue_type=request" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::request"
+            ISSUE_TYPE="request"
             TEMPLATE_PATH=".github/ISSUE_TEMPLATE/이슈템플릿.yml"
           else
-            echo "issue_type=none" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::none"
+            echo "issue_type=$ISSUE_TYPE" >> "$GITHUB_ENV"
+            echo "template_path=$TEMPLATE_PATH" >> "$GITHUB_ENV
           fi
         shell: bash
         
