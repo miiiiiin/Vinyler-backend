@@ -143,8 +143,8 @@ jobs:
             #       "description": "${{ steps.md2jira.outputs.output-text }}"
             #     }
             #   }'
-              DESCRIPTION=$(jq -Rs '.' <<< "${{ steps.md2jira.outputs.output-text }}")
-
+            DESCRIPTION=$(jq -Rs '.' <<< "${{ steps.md2jira.outputs.output-text }}")
+  
             echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
             curl --request PUT \
               --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
@@ -153,7 +153,21 @@ jobs:
               --header "Content-Type: application/json" \
               --data '{
                 "fields": {
-                  "description": '"$DESCRIPTION"'
+                  "description": {
+                    "type": "doc",
+                    "version": 1,
+                    "content": [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": '"$DESCRIPTION"'
+                          }
+                        ]
+                      }
+                    ]
+                  }
                 }
               }'
           else
