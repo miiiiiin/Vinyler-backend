@@ -131,7 +131,8 @@ jobs:
       
       - name: Create or Update Jira Issue
         run: |
-          DESCRIPTION=$(echo '${{ steps.md2jira.outputs.output-text }}' | jq -Rs .)
+          # Jira에 맞게 Markdown을 Jira Wiki 문법으로 변환한 후 JSON 형태로 변환
+          DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
           if [ -n "$JIRA_ISSUE_KEY" ]; then
             echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
             curl --request PUT \
@@ -139,28 +140,76 @@ jobs:
               --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
               --header "Accept: application/json" \
               --header "Content-Type: application/json" \
-              --data '{
-                "fields": {
-                  "description": $DESCRIPTION
+              --data "{
+                \"fields\": {
+                  \"description\": {
+                    \"type\": \"doc\",
+                    \"version\": 1,
+                    \"content\": [
+                      {
+                        \"type\": \"paragraph\",
+                        \"content\": [
+                          { \"type\": \"text\", \"text\": $DESCRIPTION }
+                        ]
+                      }
+                    ]
+                  }
                 }
-              }'
+              }"
+          #   echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
+          #   curl --request PUT \
+          #     --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
+          #     --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+          #     --header "Accept: application/json" \
+          #     --header "Content-Type: application/json" \
+          #     --data '{
+          #       "fields": {
+          #         "description": $DESCRIPTION
+          #       }
+          #     }'
   
           else
+            # echo "🆕 새 Jira Issue 생성 중..."
+            # RESPONSE=$(curl --request POST \
+            #   --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue" \
+            #   --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+            #   --header "Accept: application/json" \
+            #   --header "Content-Type: application/json" \
+            #   --data '{
+            #     "fields": {
+            #       "project": { "key": "VNR" },
+            #       "summary": "${{ github.event.issue.title }}",
+            #       "description": $DESCRIPTION,
+            #       "issuetype": { "name": "Task" },
+            #       "labels": ${{ env.JIRA_LABELS }}
+            #     }
+            #   }'| jq -r '.key')
+
             echo "🆕 새 Jira Issue 생성 중..."
-            RESPONSE=$(curl --request POST \
+            JIRA_ISSUE_KEY=$(curl --request POST \
               --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue" \
               --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
               --header "Accept: application/json" \
               --header "Content-Type: application/json" \
-              --data '{
-                "fields": {
-                  "project": { "key": "VNR" },
-                  "summary": "${{ github.event.issue.title }}",
-                  "description": $DESCRIPTION,
-                  "issuetype": { "name": "Task" },
-                  "labels": ${{ env.JIRA_LABELS }}
+              --data "{
+                \"fields\": {
+                  \"project\": { \"key\": \"VNR\" },
+                  \"issuetype\": { \"name\": \"Task\" },
+                  \"summary\": \"${{ github.event.issue.title }}\",
+                  \"description\": {
+                    \"type\": \"doc\",
+                    \"version\": 1,
+                    \"content\": [
+                      {
+                        \"type\": \"paragraph\",
+                        \"content\": [
+                          { \"type\": \"text\", \"text\": $DESCRIPTION }
+                        ]
+                      }
+                    ]
+                  }
                 }
-              }'| jq -r '.key')
+              }" | jq -r '.key')
 
             JIRA_ISSUE_KEY=$(echo "$RESPONSE" | jq -r '.key' 2>/dev/null || echo "")
 
