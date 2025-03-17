@@ -16,7 +16,7 @@ jobs:
       - name: Determine Label and Set Template
         id: determine-label
         run: |
-          RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
+          RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -c '.[].name')
           echo "Labels: $RAW_LABELS"
 
           if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
