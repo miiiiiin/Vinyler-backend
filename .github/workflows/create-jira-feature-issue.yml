@@ -4,7 +4,6 @@ on:
   issues:
     types:
       - labeled
-      - opened
       - edited
 jobs:
   determine-label:
@@ -154,7 +153,7 @@ jobs:
               --data "{
                 \"fields\": {
                   \"summary\": \"${{ github.event.issue.title }}\",
-                  \"labels"\: ${{ env.JIRA_LABELS }}
+                  "labels"\: ${{ env.JIRA_LABELS }},
                   \"description\": {
                     \"type\": \"doc\",
                     \"version\": 1,
