@@ -146,44 +146,44 @@ jobs:
           echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
           if [ -n "$JIRA_ISSUE_KEY" ]; then
             echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
-            # RESPONSE=$(curl -v --request PUT \
-            #   --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
-            #   --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
-            #   --header "Accept: application/json" \
-            #   --header "Content-Type: application/json" \
-            #   --data "{
-            #     \"fields\": {
-            #       \"summary\": \"${{ github.event.issue.title }}\",
-            #       \"labels"\: ${{ env.JIRA_LABELS }}
-            #       \"description\": {
-            #         \"type\": \"doc\",
-            #         \"version\": 1,
-            #         \"content\": [
-            #           {
-            #             \"type\": \"paragraph\",
-            #             \"content\": [
-            #               { \"type\": \"text\", \"text\": $DESCRIPTION }
-            #             ]
-            #           }
-            #         ]
-            #       }
-            #     }
-            #   }")
-
-              # echo "📌 Jira API Response: $RESPONSE"
-            echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
-            curl --request PUT \
+            RESPONSE=$(curl -v --request PUT \
               --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
               --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
               --header "Accept: application/json" \
               --header "Content-Type: application/json" \
-              --data '{
-                "fields": {
-                  "labels": ${{ env.JIRA_LABELS }},
-                  "summary": "${{ github.event.issue.title }}",
-                  "description": $DESCRIPTION
+              --data "{
+                \"fields\": {
+                  \"summary\": \"${{ github.event.issue.title }}\",
+                  \"labels"\: ${{ env.JIRA_LABELS }}
+                  \"description\": {
+                    \"type\": \"doc\",
+                    \"version\": 1,
+                    \"content\": [
+                      {
+                        \"type\": \"paragraph\",
+                        \"content\": [
+                          { \"type\": \"text\", \"text\": $DESCRIPTION }
+                        ]
+                      }
+                    ]
+                  }
                 }
-              }'
+              }")
+
+              echo "📌 Jira API Response: $RESPONSE"
+            # echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
+            # curl --request PUT \
+            #   --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
+            #   --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+            #   --header "Accept: application/json" \
+            #   --header "Content-Type: application/json" \
+            #   --data '{
+            #     "fields": {
+            #       "labels": ${{ env.JIRA_LABELS }},
+            #       "summary": "${{ github.event.issue.title }}",
+            #       "description": $DESCRIPTION
+            #     }
+            #   }'
           else
             echo "🆕 새 Jira Issue 생성 중..."
             RESPONSE=$(curl --request POST \
