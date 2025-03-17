@@ -34,7 +34,7 @@ jobs:
           else
             echo "issue_type=$ISSUE_TYPE" >> "$GITHUB_ENV"
             echo "template_path=$TEMPLATE_PATH" >> "$GITHUB_ENV
-          
+          fi
         shell: bash
         
   create-issue:
