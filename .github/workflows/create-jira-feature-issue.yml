@@ -133,15 +133,17 @@ jobs:
         run: |
           # Jira에 맞게 Markdown을 Jira Wiki 문법으로 변환한 후 JSON 형태로 변환
           DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
+          echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
           if [ -n "$JIRA_ISSUE_KEY" ]; then
             echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
-            curl --request PUT \
+            RESPONSE=$(curl -v --request PUT \
               --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
               --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
               --header "Accept: application/json" \
               --header "Content-Type: application/json" \
               --data "{
                 \"fields\": {
+                  \"summary\": \"자동 업데이트됨 - $(date)\",
                   \"description\": {
                     \"type\": \"doc\",
                     \"version\": 1,
@@ -155,7 +157,9 @@ jobs:
                     ]
                   }
                 }
-              }"
+              }")
+
+              echo "📌 Jira API Response: $RESPONSE"
           #   echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
           #   curl --request PUT \
           #     --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
