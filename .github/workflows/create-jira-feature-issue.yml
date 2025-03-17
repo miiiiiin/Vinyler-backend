@@ -100,22 +100,31 @@ jobs:
       - name: Get existing Jira issue
         id: get-jira-issue
         run: |
-          JQL_QUERY="project=VNR AND summary=\"test issue\""
+          # GitHub Issue 제목 가져오기
+          ISSUE_TITLE=$(jq -r '.issue.title' "$GITHUB_EVENT_PATH")
+          
+          # JQL 쿼리를 동적으로 설정
+          JQL_QUERY="project=VNR AND summary~\"$ISSUE_TITLE\""
           echo "🔍 JQL Query: $JQL_QUERY"
+      
+          # Jira API 호출하여 기존 이슈 검색
           RESPONSE=$(curl -s -u "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
-          -X GET -H "Content-Type: application/json" \
-          "${{ secrets.JIRA_BASE_URL }}/rest/api/2/search?jql=$(echo $JQL_QUERY | jq -sRr @uri)")
-
+            -X GET -H "Content-Type: application/json" \
+            "${{ secrets.JIRA_BASE_URL }}/rest/api/2/search?jql=$(echo $JQL_QUERY | jq -sRr @uri)")
+      
+          # Jira 이슈 키 추출
           JIRA_ISSUE_KEY=$(echo "$RESPONSE" | jq -r '.issues[0].key // empty')
-
+      
           if [[ -n "$JIRA_ISSUE_KEY" ]]; then
             echo "📌 기존 Jira Issue 발견: $JIRA_ISSUE_KEY"
           else
             echo "🆕 기존 Jira Issue 없음, 새로 생성 예정"
           fi
           
+          # 환경 변수 설정
           echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
         shell: bash
+
         
       # - name: Create Issue
       #   id: create
