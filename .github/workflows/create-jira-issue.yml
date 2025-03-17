@@ -15,7 +15,8 @@ jobs:
       - name: Determine issue type
         id: set-label
         run: |
-          RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
+          LABELS_JSON='${{ toJson(github.event.issue.labels) }}'
+          RAW_LABELS=$(echo "$LABELS_JSON" | jq -r 'if . == null then "" else .[].name end' 2>/dev/null || echo "")
 
           if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
             echo "issue_type=feature" >> "$GITHUB_ENV"
@@ -37,6 +38,7 @@ jobs:
             echo "::set-output name=issue_type::none"
           fi
         shell: bash
+        
   create-issue:
     name: Create Jira issue
     runs-on: ubuntu-latest
