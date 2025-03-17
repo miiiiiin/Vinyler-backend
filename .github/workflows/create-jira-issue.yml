@@ -3,7 +3,7 @@ name: Sync issues to jira
 on:
   issues:
     types:
-      - labeled
+      - opened
 jobs:
   create-issue:
     name: Create Jira issue
@@ -13,6 +13,23 @@ jobs:
       issues: write    # 이슈 생성 및 수정 권한
       pull-requests: write  # PR 생성 및 수정 권한
     steps:
+      - name: Determine Label and Set Template
+        id: determine-label
+        run: |
+          RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
+          echo "Labels: $RAW_LABELS"
+
+          if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
+            echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/이슈템플릿.yml" >> $GITHUB_ENV
+          elif echo "$RAW_LABELS" | grep -q "버그"; then
+            echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/버그이슈-템플릿.yml" >> $GITHUB_ENV
+          # elif echo "$RAW_LABELS" | grep -q "요청"; then
+          #   echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/request_issues_template.yml" >> $GITHUB_ENV
+          else
+            echo "SKIP=true" >> $GITHUB_ENV
+          fi
+        shell: bash
+        
       - name: Login
         uses: atlassian/gajira-login@v3
         env:
@@ -26,10 +43,11 @@ jobs:
           ref: main
 
       - name: Issue Parser
+        if: env.SKIP != 'true'
         uses: stefanbuck/github-issue-praser@v3
         id: issue-parser
         with:
-          template-path: .github/ISSUE_TEMPLATE/이슈템플릿.yml
+          template-path: ${{ env.TEMPLATE_PATH }}
           
 
       - name: Log Issue Parser
