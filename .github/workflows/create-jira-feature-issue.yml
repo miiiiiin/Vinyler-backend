@@ -149,7 +149,7 @@ jobs:
 
       - name: Update existing Jira Issue
         if: env.JIRA_ISSUE_KEY != ''
-        uses: atlassian/gajira-edit@v3
+        uses: atlassian/gajira-update@v3.1.0
         with:
           issue: ${{ env.JIRA_ISSUE_KEY }}
           fields: '{ "description": "${{ steps.md2jira.outputs.output-text }}" }'
