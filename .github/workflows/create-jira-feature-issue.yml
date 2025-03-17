@@ -95,7 +95,7 @@ jobs:
       - name: Debug Labels
         run: echo "JIRA_LABELS=${{ env.JIRA_LABELS }}"
 
-       - name: Get existing Jira issue
+      - name: Get existing Jira issue
         id: get-jira-issue
         uses: atlassian/gajira-get@v3
         with:
