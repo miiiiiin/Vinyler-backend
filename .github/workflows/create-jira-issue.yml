@@ -72,7 +72,7 @@ jobs:
           ${{ toJson(github.event.issue.labels) }}
           EOF
           )
-          CLEAN_LABELS=$(echo "$RAW_LABELS" | jq -c '[.[].name]')
+          CLEAN_LABELS=$(echo "$RAW_LABELS" | jq -c '[.[].name | gsub(" "; "-")]')
           echo "JIRA_LABELS=$CLEAN_LABELS" >> $GITHUB_ENV
           echo "Extracted Labels: $CLEAN_LABELS"
         shell: bash
