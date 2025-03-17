@@ -143,31 +143,72 @@ jobs:
           # Jira에 맞게 Markdown을 Jira Wiki 문법으로 변환한 후 JSON 형태로 변환
           DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
           echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
+      
           if [ -n "$JIRA_ISSUE_KEY" ]; then
             echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
-            RESPONSE=$(curl -v --request PUT \
-              --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
-              --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
-              --header "Accept: application/json" \
-              --header "Content-Type: application/json" \
-              --data "{
-                \"fields\": {
-                  \"summary\": \"${{ github.event.issue.title }}\",
-                  "labels"\: ${{ env.JIRA_LABELS }},
-                  \"description\": {
-                    \"type\": \"doc\",
-                    \"version\": 1,
-                    \"content\": [
+      
+            # JSON 요청 바디 생성 (jq로 안전하게 처리)
+            JSON_PAYLOAD=$(jq -n \
+              --arg summary "${{ github.event.issue.title }}" \
+              --arg description "$DESCRIPTION" \
+              --argjson labels "${{ env.JIRA_LABELS }}" \
+              '{
+                fields: {
+                  summary: $summary,
+                  labels: $labels,
+                  description: {
+                    type: "doc",
+                    version: 1,
+                    content: [
                       {
-                        \"type\": \"paragraph\",
-                        \"content\": [
-                          { \"type\": \"text\", \"text\": $DESCRIPTION }
+                        type: "paragraph",
+                        content: [
+                          { type: "text", text: $description }
                         ]
                       }
                     ]
                   }
                 }
-              }")
+              }')
+      
+            echo "📌 Final JSON Payload: $JSON_PAYLOAD"
+      
+            RESPONSE=$(curl -s --request PUT \
+              --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
+              --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+              --header "Accept: application/json" \
+              --header "Content-Type: application/json" \
+              --data "$JSON_PAYLOAD")
+      
+            echo "📌 Jira API Response: $RESPONSE"
+          # DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
+          # echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
+          # if [ -n "$JIRA_ISSUE_KEY" ]; then
+          #   echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
+          #   RESPONSE=$(curl -v --request PUT \
+          #     --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
+          #     --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+          #     --header "Accept: application/json" \
+          #     --header "Content-Type: application/json" \
+          #     --data "{
+          #       \"fields\": {
+          #         \"summary\": \"${{ github.event.issue.title }}\",
+          #         "labels"\: ${{ env.JIRA_LABELS }},
+          #         \"description\": {
+          #           \"type\": \"doc\",
+          #           \"version\": 1,
+          #           \"content\": [
+          #             {
+          #               \"type\": \"paragraph\",
+          #               \"content\": [
+          #                 { \"type\": \"text\", \"text\": $DESCRIPTION }
+          #               ]
+          #             }
+          #           ]
+          #         }
+          #       }
+          #     }")
+              
 
               echo "📌 Jira API Response: $RESPONSE"
             # echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
