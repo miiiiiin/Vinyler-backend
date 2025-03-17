@@ -5,31 +5,48 @@ on:
     types:
       - labeled
 jobs:
+  
+  determine-label:
+    runs-on: ubuntu-latest
+    outputs:
+      issue_type: ${{ steps.set-label.outputs.issue_type }}
+      template_path: ${{ steps.set-label.outputs.template_path }}
+    steps:
+      - name: Determine issue type
+        id: set-label
+        run: |
+          RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r '.[].name')
+
+          if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
+            echo "issue_type=feature" >> "$GITHUB_ENV"
+            echo "::set-output name=issue_type::feature"
+            echo "template_path=.github/ISSUE_TEMPLATE/feature_issues_template.yml" >> "$GITHUB_ENV"
+            echo "::set-output name=template_path::.github/ISSUE_TEMPLATE/feature_issues_template.yml"
+          elif echo "$RAW_LABELS" | grep -q "버그"; then
+            echo "issue_type=bug" >> "$GITHUB_ENV"
+            echo "::set-output name=issue_type::bug"
+            echo "template_path=.github/ISSUE_TEMPLATE/bug_issues_template.yml" >> "$GITHUB_ENV"
+            echo "::set-output name=template_path::.github/ISSUE_TEMPLATE/bug_issues_template.yml"
+          elif echo "$RAW_LABELS" | grep -q "요청"; then
+            echo "issue_type=request" >> "$GITHUB_ENV"
+            echo "::set-output name=issue_type::request"
+            echo "template_path=.github/ISSUE_TEMPLATE/request_issues_template.yml" >> "$GITHUB_ENV"
+            echo "::set-output name=template_path::.github/ISSUE_TEMPLATE/request_issues_template.yml"
+          else
+            echo "issue_type=none" >> "$GITHUB_ENV"
+            echo "::set-output name=issue_type::none"
+          fi
+        shell: bash
   create-issue:
     name: Create Jira issue
     runs-on: ubuntu-latest
+    needs: determine-label
+    if: needs.determine-label.outputs.issue_type != 'none'
     permissions:
       contents: write  # 저장소 콘텐츠 접근 권한
       issues: write    # 이슈 생성 및 수정 권한
       pull-requests: write  # PR 생성 및 수정 권한
-    steps:
-      - name: Determine Label and Set Template
-        id: determine-label
-        run: |
-          RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r 'map(.name) | join(",")')
-          echo "Labels: $RAW_LABELS"
-
-          if [[ "$RAW_LABELS" == *"새로운 기능"* ]]; then
-            echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/이슈템플릿.yml" >> $GITHUB_ENV
-          elif [[ "$RAW_LABELS" == *"버그"* ]]; then
-            echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/버그이슈-템플릿.yml" >> $GITHUB_EN
-          # elif echo "$RAW_LABELS" | grep -q "요청"; then
-          #   echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/request_issues_template.yml" >> $GITHUB_ENV
-          else
-            echo "SKIP=true" >> $GITHUB_ENV
-          fi
-        shell: bash
-        
+    steps:        
       - name: Login
         uses: atlassian/gajira-login@v3
         env:
@@ -47,8 +64,7 @@ jobs:
         uses: stefanbuck/github-issue-praser@v3
         id: issue-parser
         with:
-          template-path: ${{ env.TEMPLATE_PATH }}
-          
+          template-path: ${{ needs.determine-label.outputs.template_path }}
 
       - name: Log Issue Parser
         run: |
