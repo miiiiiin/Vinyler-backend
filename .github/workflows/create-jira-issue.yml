@@ -16,13 +16,13 @@ jobs:
       - name: Determine Label and Set Template
         id: determine-label
         run: |
-          RAW_LABELS=$(jq -r '.[].name' <<< '${{ toJson(github.event.issue.labels) }}')
+          RAW_LABELS=$(echo '${{ toJson(github.event.issue.labels) }}' | jq -r 'map(.name) | join(",")')
           echo "Labels: $RAW_LABELS"
 
-          if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
+          if [[ "$RAW_LABELS" == *"새로운 기능"* ]]; then
             echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/이슈템플릿.yml" >> $GITHUB_ENV
-          elif echo "$RAW_LABELS" | grep -q "버그"; then
-            echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/버그이슈-템플릿.yml" >> $GITHUB_ENV
+          elif [[ "$RAW_LABELS" == *"버그"* ]]; then
+            echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/버그이슈-템플릿.yml" >> $GITHUB_EN
           # elif echo "$RAW_LABELS" | grep -q "요청"; then
           #   echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/request_issues_template.yml" >> $GITHUB_ENV
           else
