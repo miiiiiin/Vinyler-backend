@@ -129,17 +129,18 @@ jobs:
         id: convert-adf
         run: |
           convert_md_to_adf() {
-            echo -e "$1" | sed -E \
-              -e 's/^### (.*)$/{"type": "heading", "attrs": {"level": 3}, "content": [{"t$
-              -e 's/^## (.*)$/{"type": "heading", "attrs": {"level": 2}, "content": [{"ty$
-              -e 's/^# (.*)$/{"type": "heading", "attrs": {"level": 1}, "content": [{"typ$
-              -e 's/\*\*(.*)\*\*/{"type": "text", "marks": [{"type": "strong"}], "text": $
-              -e 's/\*(.*)\*/{"type": "text", "marks": [{"type": "em"}], "text": "\1"}/g'$
-              -e 's/^> (.*)$/{"type": "blockquote", "content": [{"type": "paragraph", "co$
-              -e 's/^[-*] (.*)$/{"type": "listItem", "content": [{"type": "paragraph", "c$
+            echo "$1" | sed -E \
+              -e 's/^### (.*)$/{"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "\1"}]}/' \
+              -e 's/^## (.*)$/{"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "\1"}]}/' \
+              -e 's/^# (.*)$/{"type": "heading", "attrs": {"level": 1}, "content": [{"type": "text", "text": "\1"}]}/' \
+              -e 's/\*\*(.*)\*\*/{"type": "text", "marks": [{"type": "strong"}], "text": "\1"}/g' \
+              -e 's/\*(.*)\*/{"type": "text", "marks": [{"type": "em"}], "text": "\1"}/g' \
+              -e 's/^> (.*)$/{"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]}/' \
+              -e 's/^[-*] (.*)$/{"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]}/' \
               | jq -R -s .  # JSON 배열로 변환
           }
       
+          # Markdown 원본 데이터 저장
           DESCRIPTION_RAW=$(cat <<EOF
           ### Github Issue Link
           - ${{ github.event.issue.html_url }}
@@ -147,11 +148,10 @@ jobs:
           ${{ github.event.issue.body }}
           EOF
           )
-
           echo "📌 Raw Markdown Input:"
           echo "$DESCRIPTION_RAW"
           echo ""
-          
+                
           # Markdown -> ADF 변환
           DESCRIPTION_ADF=$(convert_md_to_adf "$DESCRIPTION_RAW")
           
