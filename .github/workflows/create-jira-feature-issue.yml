@@ -70,16 +70,16 @@ jobs:
         run: |
           echo '${{ steps.issue-parser.outputs.jsonString }}'
 
-      - name: Convert markdown to Jira Syntax
-        uses: peter-evans/jira2md@v1
-        id: md2jira
-        with:
-          input-text: |
-            ### Github Issue Link
-            - ${{ github.event.issue.html_url }}
+      # - name: Convert markdown to Jira Syntax
+      #   uses: peter-evans/jira2md@v1
+      #   id: md2jira
+      #   with:
+      #     input-text: |
+      #       ### Github Issue Link
+      #       - ${{ github.event.issue.html_url }}
 
-            ${{ github.event.issue.body }}
-          mode: md2jira
+      #       ${{ github.event.issue.body }}
+      #     mode: md2jira
 
       - name: Extract Labels
         id: extract-labels
@@ -124,6 +124,33 @@ jobs:
           echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
         shell: bash
 
+      - name: Convert Markdown to Jira Wiki
+        id: convert-md
+        run: |
+          convert_md_to_jira_wiki() {
+            echo "$1" | sed \
+              -e 's/^### /h3. /g' \
+              -e 's/^## /h2. /g' \
+              -e 's/^# /h1. /g' \
+              -e 's/\*\*\(.*\)\*\*/\*\1\*/g' \
+              -e 's/\*\(.*\)\*/_\1_/g' \
+              -e 's/^> /bq. /g' \
+              -e 's/^[-*] /- /g'
+          }
+
+          DESCRIPTION_RAW=$(cat <<EOF
+          ### Github Issue Link
+          - ${{ github.event.issue.html_url }}
+
+          ${{ github.event.issue.body }}
+          EOF
+          )
+
+          DESCRIPTION_JIRA=$(convert_md_to_jira_wiki "$DESCRIPTION_RAW")
+          echo "JIRA_DESCRIPTION=$DESCRIPTION_JIRA" >> $GITHUB_ENV
+          echo "📌 Converted Description:"
+          echo "$DESCRIPTION_JIRA"
+        shell: bash
       
       - name: Create or Update Jira Issue
         run: |
@@ -156,7 +183,7 @@ jobs:
             JSON_PAYLOAD=$(jq -n \
               --arg summary "${{ github.event.issue.title }}" \
               --argjson labels "$JIRA_LABELS_JSON" \
-              --argjson description "$(echo "$DESCRIPTION" | jq -Rs .)" \
+              --argjson description "$(echo "$JIRA_DESCRIPTION" | jq -Rs .)" \
               '{
                 fields: {
                   summary: $summary,
@@ -190,46 +217,6 @@ jobs:
       
             echo "📌 Jira API Response: $RESPONSE"
           fi
-            # echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
-            # curl --request PUT \
-            #   --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
-            #   --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
-            #   --header "Accept: application/json" \
-            #   --header "Content-Type: application/json" \
-            #   --data '{
-            #     "fields": {
-            #       "labels": ${{ env.JIRA_LABELS }},
-            #       "summary": "${{ github.event.issue.title }}",
-            #       "description": $DESCRIPTION
-            #     }
-            #   }'
-          # else
-            # echo "🆕 새 Jira Issue 생성 중..."
-            # RESPONSE=$(curl --request POST \
-            #   --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue" \
-            #   --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
-            #   --header "Accept: application/json" \
-            #   --header "Content-Type: application/json" \
-            #   --data '{
-            #     "fields": {
-            #       "project": { "key": "VNR" },
-            #       "summary": "${{ github.event.issue.title }}",
-            #       "description": $DESCRIPTION,
-            #       "issuetype": { "name": "Task" },
-            #       "labels": ${{ env.JIRA_LABELS }}
-            #     }
-            #   }'| jq -r '.key')
-
-            # JIRA_ISSUE_KEY=$(echo "$RESPONSE" | jq -r '.key' 2>/dev/null || echo "")
-
-          #   if [ -n "$JIRA_ISSUE_KEY" ]; then
-          #     echo "📌 새 Jira Issue 생성 완료: $JIRA_ISSUE_KEY"
-          #     echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
-          #   else
-          #     echo "❌ Jira Issue 생성 실패!"
-          #     exit 1
-          #   fi
-          # fi
         shell: bash
         
       - name: Create Issue
