@@ -199,7 +199,15 @@ jobs:
         run: |
           # Jira에 맞게 Markdown을 Jira Wiki 문법으로 변환한 후 JSON 형태로 변환
           
-          DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
+          # DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
+          DESCRIPTION_RAW="${{ steps.md2jira.outputs.output-text }}"
+    
+          if [[ -z "$DESCRIPTION_RAW" ]]; then
+            DESCRIPTION="\"No description provided.\""
+          else
+            DESCRIPTION=$(jq -Rs . <<< "$DESCRIPTION_RAW")
+          fi
+          
           echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
           echo "🔍 Raw JIRA_LABELS: '${{ env.JIRA_LABELS }}'"
 
