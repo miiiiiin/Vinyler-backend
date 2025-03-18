@@ -21,19 +21,19 @@ jobs:
           
           if echo "$RAW_LABELS" | grep -q "새로운 기능"; then
             echo "issue_type=feature" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::feature"
+            echo "issue_type=feature" >> "$GITHUB_OUTPUT"
             TEMPLATE_PATH=".github/ISSUE_TEMPLATE/이슈템플릿.yml"
           elif echo "$RAW_LABELS" | grep -q "버그"; then
             echo "issue_type=bug" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::bug"
+            echo "issue_type=bug" >> "$GITHUB_OUTPUT"
             TEMPLATE_PATH=".github/ISSUE_TEMPLATE/버그이슈-템플릿.yml"
           elif echo "$RAW_LABELS" | grep -q "요청"; then
             echo "issue_type=request" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::request"
+            eecho "issue_type=request" >> "$GITHUB_OUTPUT"
             TEMPLATE_PATH=".github/ISSUE_TEMPLATE/이슈템플릿.yml"
           else
             echo "issue_type=none" >> "$GITHUB_ENV"
-            echo "::set-output name=issue_type::none"
+            echo "issue_type=none" >> "$GITHUB_OUTPUT"
           fi
         shell: bash
         
