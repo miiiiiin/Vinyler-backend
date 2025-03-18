@@ -210,6 +210,13 @@ jobs:
           
           echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
           echo "🔍 Raw JIRA_LABELS: '${{ env.JIRA_LABELS }}'"
+          
+          # JIRA_LABELS 값이 JSON 배열인지 확인
+          if jq -e . <<< "${{ env.JIRA_LABELS }}" >/dev/null 2>&1; then
+            JIRA_LABELS_JSON="${{ env.JIRA_LABELS }}"
+          else
+            JIRA_LABELS_JSON=$(echo "${{ env.JIRA_LABELS }}" | jq -R 'split(",") | map(gsub("^ *"; "") | gsub(" *$"; "") | tostring)')
+          fi
 
           # JIRA_LABELS 값이 이미 JSON 배열이면 그대로 사용
           if echo '${{ env.JIRA_LABELS }}' | jq -e . >/dev/null 2>&1; then
@@ -233,7 +240,7 @@ jobs:
             # Jira ADF 형식으로 변환
             JSON_PAYLOAD=$(jq -n \
               --arg summary "${{ github.event.issue.title }}" \
-              --argjson labels "$JIRA_LABELS_JSON" \
+              --argjson labels "${JIRA_LABELS_JSON}" \
               --argjson description "${{ env.JIRA_DESCRIPTION }}" \
               '{
                 fields: {
