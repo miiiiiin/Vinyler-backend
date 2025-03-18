@@ -129,8 +129,9 @@ jobs:
         run: |
           # Jira에 맞게 Markdown을 Jira Wiki 문법으로 변환한 후 JSON 형태로 변환
           
-          DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
-          echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
+          # DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
+          # echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
+          
           echo "🔍 Raw JIRA_LABELS: '${{ env.JIRA_LABELS }}'"
 
           # JIRA_LABELS 값이 이미 JSON 배열이면 그대로 사용
