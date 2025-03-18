@@ -124,6 +124,7 @@ jobs:
           echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
         shell: bash
 
+
       - name: Convert Markdown to ADF (Jira Format)
         id: convert-adf
         run: |
@@ -136,7 +137,7 @@ jobs:
               -e 's/\*(.*)\*/{"type": "text", "marks": [{"type": "em"}], "text": "\1"}/g' \
               -e 's/^> (.*)$/{"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]}/' \
               -e 's/^[-*] (.*)$/{"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]}/' \
-              | jq -s .
+              | jq -s .  # JSON 배열로 변환
           }
       
           DESCRIPTION_RAW=$(cat <<EOF
@@ -160,8 +161,8 @@ jobs:
             exit 1
           fi
       
-          # JSON 배열로 변환
-          DESCRIPTION_JSON=$(jq -n --argjson adf_content "$DESCRIPTION_ADF" '{"type": "doc", "version": 1, "content": $adf_content}')
+          # JSON 배열을 사용하도록 보장
+          DESCRIPTION_JSON=$(echo "$DESCRIPTION_ADF" | jq -s '{ "type": "doc", "version": 1, "content": . }')
       
           # 최종 JSON 확인
           echo "📌 Final ADF JSON:"
@@ -175,7 +176,8 @@ jobs:
       
           echo "JIRA_DESCRIPTION=$DESCRIPTION_JSON" >> $GITHUB_ENV
         shell: bash
-      
+
+
       - name: Create or Update Jira Issue
         run: |
           # Jira에 맞게 Markdown을 Jira Wiki 문법으로 변환한 후 JSON 형태로 변환
