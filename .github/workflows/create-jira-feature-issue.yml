@@ -3,7 +3,7 @@ name: Sync issues to jira
 on:
   issues:
     types:
-      - labeled
+      - opened
       - edited
 jobs:
   determine-label:
