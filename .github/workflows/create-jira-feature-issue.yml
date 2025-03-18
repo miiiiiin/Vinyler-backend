@@ -129,8 +129,8 @@ jobs:
         run: |
           # Jira에 맞게 Markdown을 Jira Wiki 문법으로 변환한 후 JSON 형태로 변환
           
-          # DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
-          # echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
+          DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
+          echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
           
           echo "🔍 Raw JIRA_LABELS: '${{ env.JIRA_LABELS }}'"
 
@@ -152,31 +152,17 @@ jobs:
 
           if [ -n "$JIRA_ISSUE_KEY" ]; then
             echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
-      
-            # Jira ADF 형식으로 변환
+
+            # JSON 요청 바디 생성 (jq로 안전하게 처리)
             JSON_PAYLOAD=$(jq -n \
               --arg summary "${{ github.event.issue.title }}" \
+              # --arg description "$DESCRIPTION" \
               --argjson labels "$JIRA_LABELS_JSON" \
-              # --argjson description "$(echo "$DESCRIPTION" | jq -Rs .)" \
               '{
                 fields: {
                   summary: $summary,
                   labels: $labels,
-                  # description: {
-                  #   "type": "doc",
-                  #   "version": 1,
-                  #   "content": [
-                  #     {
-                  #       "type": "paragraph",
-                  #       "content": [
-                  #         {
-                  #           "type": "text",
-                  #           "text": $description
-                  #         }
-                  #       ]
-                  #     }
-                  #   ]
-                  # }
+                  # description: $description
                 }
               }')
       
