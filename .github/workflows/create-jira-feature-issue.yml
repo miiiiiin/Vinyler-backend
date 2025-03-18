@@ -175,7 +175,7 @@ jobs:
               --data "$JSON_PAYLOAD")
       
             echo "📌 Jira API Response: $RESPONSE"
-
+          fi
             # echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
             # curl --request PUT \
             #   --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
@@ -189,7 +189,7 @@ jobs:
             #       "description": $DESCRIPTION
             #     }
             #   }'
-          else
+          # else
             # echo "🆕 새 Jira Issue 생성 중..."
             # RESPONSE=$(curl --request POST \
             #   --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue" \
@@ -215,7 +215,7 @@ jobs:
           #     echo "❌ Jira Issue 생성 실패!"
           #     exit 1
           #   fi
-          fi
+          # fi
         shell: bash
         
       - name: Create Issue
