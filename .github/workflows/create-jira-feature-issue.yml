@@ -150,8 +150,22 @@ jobs:
           # Markdown → ADF 변환 후 JSON 배열로 변환
           DESCRIPTION_ADF=$(convert_md_to_adf "$DESCRIPTION_RAW")
       
+          # JSON 유효성 검사 (출력해서 확인)
+          echo "📌 Raw ADF JSON Output:"
+          echo "$DESCRIPTION_ADF"
+      
+          # JSON 배열이 유효한지 확인
+          if ! echo "$DESCRIPTION_ADF" | jq empty >/dev/null 2>&1; then
+            echo "❌ Invalid JSON detected in DESCRIPTION_ADF!"
+            exit 1
+          fi
+      
           # JSON 배열로 변환
           DESCRIPTION_JSON=$(jq -n --argjson adf_content "$DESCRIPTION_ADF" '{"type": "doc", "version": 1, "content": $adf_content}')
+      
+          # 최종 JSON 확인
+          echo "📌 Final ADF JSON:"
+          echo "$DESCRIPTION_JSON"
       
           # JSON 유효성 검사
           if ! echo "$DESCRIPTION_JSON" | jq empty >/dev/null 2>&1; then
@@ -160,10 +174,7 @@ jobs:
           fi
       
           echo "JIRA_DESCRIPTION=$DESCRIPTION_JSON" >> $GITHUB_ENV
-          echo "📌 Converted ADF Description:"
-          echo "$DESCRIPTION_JSON"
         shell: bash
-
       
       - name: Create or Update Jira Issue
         run: |
