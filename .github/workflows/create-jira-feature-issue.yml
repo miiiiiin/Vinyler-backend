@@ -156,13 +156,11 @@ jobs:
             # JSON 요청 바디 생성 (jq로 안전하게 처리)
             JSON_PAYLOAD=$(jq -n \
               --arg summary "${{ github.event.issue.title }}" \
-              # --arg description "$DESCRIPTION" \
               --argjson labels "$JIRA_LABELS_JSON" \
               '{
                 fields: {
                   summary: $summary,
                   labels: $labels,
-                  # description: $description
                 }
               }')
       
