@@ -41,7 +41,7 @@ jobs:
     name: Create Jira issue
     runs-on: ubuntu-latest
     needs: determine-label
-    # if: needs.determine-label.outputs.issue_type != 'none'
+    if: needs.determine-label.outputs.issue_type != 'none'
     permissions:
       contents: write  # 저장소 콘텐츠 접근 권한
       issues: write    # 이슈 생성 및 수정 권한
@@ -70,16 +70,16 @@ jobs:
         run: |
           echo '${{ steps.issue-parser.outputs.jsonString }}'
 
-      # - name: Convert markdown to Jira Syntax
-      #   uses: peter-evans/jira2md@v1
-      #   id: md2jira
-      #   with:
-      #     input-text: |
-      #       ### Github Issue Link
-      #       - ${{ github.event.issue.html_url }}
+      - name: Convert markdown to Jira Syntax
+        uses: peter-evans/jira2md@v1
+        id: md2jira
+        with:
+          input-text: |
+            ### Github Issue Link
+            - ${{ github.event.issue.html_url }}
 
-      #       ${{ github.event.issue.body }}
-      #     mode: md2jira
+            ${{ github.event.issue.body }}
+          mode: md2jira
 
       - name: Extract Labels
         id: extract-labels
@@ -124,99 +124,14 @@ jobs:
           echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
         shell: bash
 
-      - name: Convert Markdown to ADF (Jira Format)
-        id: convert-adf
-        if: always()  # 스킵되지 않도록 설정
-        run: |
-          convert_md_to_adf() {
-            echo "$1" | sed -E \
-              -e 's/^### (.*)$/{"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "\1"}]}/' \
-              -e 's/^## (.*)$/{"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "\1"}]}/' \
-              -e 's/^# (.*)$/{"type": "heading", "attrs": {"level": 1}, "content": [{"type": "text", "text": "\1"}]}/' \
-              -e 's/\*\*(.*)\*\*/{"type": "text", "marks": [{"type": "strong"}], "text": "\1"}/g' \
-              -e 's/\*(.*)\*/{"type": "text", "marks": [{"type": "em"}], "text": "\1"}/g' \
-              -e 's/^> (.*)$/{"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]}/' \
-              -e 's/^[-*] (.*)$/{"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]}/' \
-              | jq --slurp --raw-input 'split("\n")'
-          }
       
-          # Markdown 원본 데이터 저장
-          DESCRIPTION_RAW=$(cat <<EOF
-          ### Github Issue Link
-          - ${{ github.event.issue.html_url }}
-      
-          ${{ github.event.issue.body }}
-          EOF
-          )
-      
-          # description이 비어 있는지 확인
-          if [[ -z "$DESCRIPTION_RAW" ]]; then
-            echo "❌ DESCRIPTION_RAW is empty! Check if the issue body exists."
-            exit 1
-          fi
-      
-          echo "📌 Raw Markdown Input:"
-          echo "$DESCRIPTION_RAW"
-          echo ""
-      
-          # Markdown -> ADF 변환
-          DESCRIPTION_ADF=$(convert_md_to_adf "$DESCRIPTION_RAW" | jq -c .)
-      
-          echo "📌 Converted ADF JSON Output:"
-          echo "$DESCRIPTION_ADF"
-          echo ""
-      
-          # JSON 유효성 검사
-          if ! echo "$DESCRIPTION_ADF" | jq empty >/dev/null 2>&1; then
-            echo "❌ Invalid JSON detected in DESCRIPTION_ADF!"
-            exit 1
-          fi
-      
-          # JSON 배열을 포함하는 ADF 최종 변환
-          DESCRIPTION_JSON=$(echo "$DESCRIPTION_ADF" | jq -c -s '{ "type": "doc", "version": 1, "content": . }')
-      
-          echo "📌 Final ADF JSON Output:"
-          echo "$DESCRIPTION_JSON"
-      
-          # JSON 최종 유효성 검사
-          if ! echo "$DESCRIPTION_JSON" | jq empty >/dev/null 2>&1; then
-            echo "❌ Invalid JSON detected in DESCRIPTION_JSON!"
-            exit 1
-          fi
-      
-          # JSON 환경변수로 저장
-          if [ -n "$DESCRIPTION_JSON" ]; then
-            echo "JIRA_DESCRIPTION=$DESCRIPTION_JSON" >> $GITHUB_ENV
-          else
-            echo "❌ JIRA_DESCRIPTION is empty! Exiting..."
-            exit 1
-          fi
-        shell: bash
-
-
-
       - name: Create or Update Jira Issue
         run: |
           # Jira에 맞게 Markdown을 Jira Wiki 문법으로 변환한 후 JSON 형태로 변환
           
-          # DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
-          DESCRIPTION_RAW="${{ steps.md2jira.outputs.output-text }}"
-    
-          if [[ -z "$DESCRIPTION_RAW" ]]; then
-            DESCRIPTION="\"No description provided.\""
-          else
-            DESCRIPTION=$(jq -Rs . <<< "$DESCRIPTION_RAW")
-          fi
-          
+          DESCRIPTION=$(jq -Rs . <<< "${{ steps.md2jira.outputs.output-text }}")
           echo "📌 Final DESCRIPTION payload: $DESCRIPTION"
           echo "🔍 Raw JIRA_LABELS: '${{ env.JIRA_LABELS }}'"
-          
-          # JIRA_LABELS 값이 JSON 배열인지 확인
-          if jq -e . <<< "${{ env.JIRA_LABELS }}" >/dev/null 2>&1; then
-            JIRA_LABELS_JSON="${{ env.JIRA_LABELS }}"
-          else
-            JIRA_LABELS_JSON=$(echo "${{ env.JIRA_LABELS }}" | jq -R 'split(",") | map(gsub("^ *"; "") | gsub(" *$"; "") | tostring)')
-          fi
 
           # JIRA_LABELS 값이 이미 JSON 배열이면 그대로 사용
           if echo '${{ env.JIRA_LABELS }}' | jq -e . >/dev/null 2>&1; then
@@ -240,13 +155,12 @@ jobs:
             # Jira ADF 형식으로 변환
             JSON_PAYLOAD=$(jq -n \
               --arg summary "${{ github.event.issue.title }}" \
-              --argjson labels "${JIRA_LABELS_JSON}" \
-              --argjson description "${{ env.JIRA_DESCRIPTION }}" \
+              --argjson labels "$JIRA_LABELS_JSON" \
+              # --argjson description "$(echo "$DESCRIPTION" | jq -Rs .)" \
               '{
                 fields: {
                   summary: $summary,
                   labels: $labels,
-                  description: $description
                   # description: {
                   #   "type": "doc",
                   #   "version": 1,
@@ -261,11 +175,6 @@ jobs:
                   #       ]
                   #     }
                   #   ]
-                  # }
-                  # description: {
-                  #   "type": "doc",
-                  #   "version": 1,
-                  #   "content": $description
                   # }
                 }
               }')
