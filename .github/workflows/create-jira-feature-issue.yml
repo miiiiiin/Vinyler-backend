@@ -103,7 +103,7 @@ jobs:
           ISSUE_TITLE=$(jq -r '.issue.title' "$GITHUB_EVENT_PATH")
           
           # JQL 쿼리를 동적으로 설정
-          JQL_QUERY="project=VNR AND summary~\"$ISSUE_TITLE\""
+          JQL_QUERY="project=VNR AND summary~\"$(echo $ISSUE_TITLE | sed 's/[][():]/ /g')\""
           echo "🔍 JQL Query: $JQL_QUERY"
       
           # Jira API 호출하여 기존 이슈 검색
