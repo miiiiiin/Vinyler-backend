@@ -127,26 +127,47 @@ jobs:
       - name: Convert Markdown to Jira Wiki
         id: convert-md
         run: |
-          convert_md_to_jira_wiki() {
-            echo "$1" | sed \
-              -e 's/^### /h3. /g' \
-              -e 's/^## /h2. /g' \
-              -e 's/^# /h1. /g' \
-              -e 's/\*\*\(.*\)\*\*/\*\1\*/g' \
-              -e 's/\*\(.*\)\*/_\1_/g' \
-              -e 's/^> /bq. /g' \
-              -e 's/^[-*] /- /g'
+          # convert_md_to_jira_wiki() {
+          #   echo "$1" | sed \
+          #     -e 's/^### /h3. /g' \
+          #     -e 's/^## /h2. /g' \
+          #     -e 's/^# /h1. /g' \
+          #     -e 's/\*\*\(.*\)\*\*/\*\1\*/g' \
+          #     -e 's/\*\(.*\)\*/_\1_/g' \
+          #     -e 's/^> /bq. /g' \
+          #     -e 's/^[-*] /- /g'
+          # }
+
+          # DESCRIPTION_RAW=$(cat <<EOF
+          # ### Github Issue Link
+          # - ${{ github.event.issue.html_url }}
+
+          # ${{ github.event.issue.body }}
+          # EOF
+          # )
+
+          ISSUE_BODY="${{ github.event.issue.body }}"
+
+          # Markdown -> Jira ADF 변환 함수
+          convert_md_to_adf() {
+            local markdown="$1"
+          
+            # 제목 변환 (h3. -> ADF heading level 3)
+            markdown=$(echo "$markdown" | sed -E 's/^h3\.\s*(.*)/{"type": "heading", "attrs": { "level": 3 }, "content": [{"type": "text", "text": "\1"}]}/')
+          
+            # 리스트 변환 (- item -> ADF bulletList)
+            markdown=$(echo "$markdown" | sed -E 's/^- (.*)/{"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]}/')
+          
+            # 일반 텍스트를 paragraph로 변환
+            markdown=$(echo "$markdown" | sed -E 's/^([^{}].*)$/{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}/')
+          
+            # JSON 배열 형태로 변환
+            markdown=$(echo "$markdown" | awk 'BEGIN { print "[" } { print $0 "," } END { print "]" }' | sed '$ s/,$//')
+            echo "$markdown"
           }
 
-          DESCRIPTION_RAW=$(cat <<EOF
-          ### Github Issue Link
-          - ${{ github.event.issue.html_url }}
-
-          ${{ github.event.issue.body }}
-          EOF
-          )
-
-          DESCRIPTION_JIRA=$(convert_md_to_jira_wiki "$DESCRIPTION_RAW")
+          
+          DESCRIPTION_JIRA=$(convert_md_to_adf "$ISSUE_BODY")
           echo "JIRA_DESCRIPTION=$DESCRIPTION_JIRA" >> $GITHUB_ENV
           echo "📌 Converted Description:"
           echo "$DESCRIPTION_JIRA"
@@ -188,20 +209,25 @@ jobs:
                 fields: {
                   summary: $summary,
                   labels: $labels,
+                  # description: {
+                  #   "type": "doc",
+                  #   "version": 1,
+                  #   "content": [
+                  #     {
+                  #       "type": "paragraph",
+                  #       "content": [
+                  #         {
+                  #           "type": "text",
+                  #           "text": $description
+                  #         }
+                  #       ]
+                  #     }
+                  #   ]
+                  # }
                   description: {
                     "type": "doc",
                     "version": 1,
-                    "content": [
-                      {
-                        "type": "paragraph",
-                        "content": [
-                          {
-                            "type": "text",
-                            "text": $description
-                          }
-                        ]
-                      }
-                    ]
+                    "content": $description
                   }
                 }
               }')
