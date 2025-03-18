@@ -124,54 +124,39 @@ jobs:
           echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
         shell: bash
 
-      - name: Convert Markdown to Jira Wiki
-        id: convert-md
+      - name: Convert Markdown to ADF (Jira Format)
+        id: convert-adf
         run: |
-          # convert_md_to_jira_wiki() {
-          #   echo "$1" | sed \
-          #     -e 's/^### /h3. /g' \
-          #     -e 's/^## /h2. /g' \
-          #     -e 's/^# /h1. /g' \
-          #     -e 's/\*\*\(.*\)\*\*/\*\1\*/g' \
-          #     -e 's/\*\(.*\)\*/_\1_/g' \
-          #     -e 's/^> /bq. /g' \
-          #     -e 's/^[-*] /- /g'
-          # }
-
-          # DESCRIPTION_RAW=$(cat <<EOF
-          # ### Github Issue Link
-          # - ${{ github.event.issue.html_url }}
-
-          # ${{ github.event.issue.body }}
-          # EOF
-          # )
-
-          ISSUE_BODY="${{ github.event.issue.body }}"
-
-          # Markdown -> Jira ADF 변환 함수
           convert_md_to_adf() {
-            local markdown="$1"
-          
-            # 제목 변환 (h3. -> ADF heading level 3)
-            markdown=$(echo "$markdown" | sed -E 's/^h3\.\s*(.*)/{"type": "heading", "attrs": { "level": 3 }, "content": [{"type": "text", "text": "\1"}]}/')
-          
-            # 리스트 변환 (- item -> ADF bulletList)
-            markdown=$(echo "$markdown" | sed -E 's/^- (.*)/{"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]}/')
-          
-            # 일반 텍스트를 paragraph로 변환
-            markdown=$(echo "$markdown" | sed -E 's/^([^{}].*)$/{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}/')
-          
-            # JSON 배열 형태로 변환
-            markdown=$(echo "$markdown" | awk 'BEGIN { print "[" } { print $0 "," } END { print "]" }' | sed '$ s/,$//')
-            echo "$markdown"
+            echo -e "$1" | sed \
+              -e 's/^### \(.*\)$/{"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "\1"}]},/g' \
+              -e 's/^## \(.*\)$/{"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "\1"}]},/g' \
+              -e 's/^# \(.*\)$/{"type": "heading", "attrs": {"level": 1}, "content": [{"type": "text", "text": "\1"}]},/g' \
+              -e 's/\*\*\(.*\)\*\*/{"type": "text", "marks": [{"type": "strong"}], "text": "\1"},/g' \
+              -e 's/\*\(.*\)\*/{"type": "text", "marks": [{"type": "em"}], "text": "\1"},/g' \
+              -e 's/^> \(.*\)$/{"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]},/g' \
+              -e 's/^[-*] \(.*\)$/{"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]},/g' \
+              -e 's/$/\\n/g'
           }
-
+      
+          DESCRIPTION_RAW=$(cat <<EOF
+          ### Github Issue Link
+          - ${{ github.event.issue.html_url }}
+      
+          ${{ github.event.issue.body }}
+          EOF
+          )
+      
+          DESCRIPTION_ADF=$(convert_md_to_adf "$DESCRIPTION_RAW")
           
-          DESCRIPTION_JIRA=$(convert_md_to_adf "$ISSUE_BODY")
-          echo "JIRA_DESCRIPTION=$DESCRIPTION_JIRA" >> $GITHUB_ENV
-          echo "📌 Converted Description:"
-          echo "$DESCRIPTION_JIRA"
+          # JSON 배열 형식으로 변환
+          DESCRIPTION_JSON=$(jq -n --argjson adf_content "[$DESCRIPTION_ADF]" '{"type": "doc", "version": 1, "content": $adf_content}')
+      
+          echo "JIRA_DESCRIPTION=$DESCRIPTION_JSON" >> $GITHUB_ENV
+          echo "📌 Converted ADF Description:"
+          echo "$DESCRIPTION_JSON"
         shell: bash
+
       
       - name: Create or Update Jira Issue
         run: |
@@ -204,7 +189,7 @@ jobs:
             JSON_PAYLOAD=$(jq -n \
               --arg summary "${{ github.event.issue.title }}" \
               --argjson labels "$JIRA_LABELS_JSON" \
-              --argjson description "$(echo "$JIRA_DESCRIPTION" | jq -Rs .)" \
+              --argjson description "$JIRA_DESCRIPTION" \ 
               '{
                 fields: {
                   summary: $summary,
