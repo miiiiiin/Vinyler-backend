@@ -124,19 +124,6 @@ jobs:
           echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
         shell: bash
 
-        
-      # - name: Create Issue
-      #   id: create
-      #   uses: atlassian/gajira-create@v3
-      #   with:
-      #     project: BIN
-      #     issuetype: Task
-      #     summary: "${{ github.event.issue.title }}"
-      #     description: "${{ steps.md2jira.outputs.output-text }}"
-      #     fields: |
-      #       {
-      #         "labels": ${{ env.JIRA_LABELS }}
-      #       }
       
       - name: Create or Update Jira Issue
         run: |
@@ -162,7 +149,6 @@ jobs:
           
           echo "📌 Converted JIRA_LABELS_JSON: $JIRA_LABELS_JSON"
 
-      
           if [ -n "$JIRA_ISSUE_KEY" ]; then
             echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
       
@@ -189,7 +175,6 @@ jobs:
       
             echo "📌 Jira API Response: $RESPONSE"
 
-              
             # echo "🔄 기존 Jira Issue($JIRA_ISSUE_KEY) 업데이트 중..."
             # curl --request PUT \
             #   --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/$JIRA_ISSUE_KEY" \
@@ -204,34 +189,49 @@ jobs:
             #     }
             #   }'
           else
-            echo "🆕 새 Jira Issue 생성 중..."
-            RESPONSE=$(curl --request POST \
-              --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue" \
-              --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
-              --header "Accept: application/json" \
-              --header "Content-Type: application/json" \
-              --data '{
-                "fields": {
-                  "project": { "key": "VNR" },
-                  "summary": "${{ github.event.issue.title }}",
-                  "description": $DESCRIPTION,
-                  "issuetype": { "name": "Task" },
-                  "labels": ${{ env.JIRA_LABELS }}
-                }
-              }'| jq -r '.key')
+            # echo "🆕 새 Jira Issue 생성 중..."
+            # RESPONSE=$(curl --request POST \
+            #   --url "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue" \
+            #   --user "${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+            #   --header "Accept: application/json" \
+            #   --header "Content-Type: application/json" \
+            #   --data '{
+            #     "fields": {
+            #       "project": { "key": "VNR" },
+            #       "summary": "${{ github.event.issue.title }}",
+            #       "description": $DESCRIPTION,
+            #       "issuetype": { "name": "Task" },
+            #       "labels": ${{ env.JIRA_LABELS }}
+            #     }
+            #   }'| jq -r '.key')
 
-            JIRA_ISSUE_KEY=$(echo "$RESPONSE" | jq -r '.key' 2>/dev/null || echo "")
+            # JIRA_ISSUE_KEY=$(echo "$RESPONSE" | jq -r '.key' 2>/dev/null || echo "")
 
-            if [ -n "$JIRA_ISSUE_KEY" ]; then
-              echo "📌 새 Jira Issue 생성 완료: $JIRA_ISSUE_KEY"
-              echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
-            else
-              echo "❌ Jira Issue 생성 실패!"
-              exit 1
-            fi
-          fi
+          #   if [ -n "$JIRA_ISSUE_KEY" ]; then
+          #     echo "📌 새 Jira Issue 생성 완료: $JIRA_ISSUE_KEY"
+          #     echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
+          #   else
+          #     echo "❌ Jira Issue 생성 실패!"
+          #     exit 1
+          #   fi
+          # fi
         shell: bash
 
+      
+        
+      - name: Create Issue
+        if: env.JIRA_ISSUE_KEY == ''
+        id: create
+        uses: atlassian/gajira-create@v3
+        with:
+          project: BIN
+          issuetype: Task
+          summary: "${{ github.event.issue.title }}"
+          description: "${{ steps.md2jira.outputs.output-text }}"
+          fields: |
+            {
+              "labels": ${{ env.JIRA_LABELS }}
+            }
 
       - name: Log created issue
         run: echo "Jira Issue ${{ steps.issue-parser.outputs.parentKey }}/${{ steps.create.outputs.issue }} was created"
