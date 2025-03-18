@@ -128,15 +128,15 @@ jobs:
         id: convert-adf
         run: |
           convert_md_to_adf() {
-            echo -e "$1" | sed \
-              -e 's/^### \(.*\)$/{"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "\1"}]},/g' \
-              -e 's/^## \(.*\)$/{"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "\1"}]},/g' \
-              -e 's/^# \(.*\)$/{"type": "heading", "attrs": {"level": 1}, "content": [{"type": "text", "text": "\1"}]},/g' \
-              -e 's/\*\*\(.*\)\*\*/{"type": "text", "marks": [{"type": "strong"}], "text": "\1"},/g' \
-              -e 's/\*\(.*\)\*/{"type": "text", "marks": [{"type": "em"}], "text": "\1"},/g' \
-              -e 's/^> \(.*\)$/{"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]},/g' \
-              -e 's/^[-*] \(.*\)$/{"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]},/g' \
-              -e 's/$/\\n/g'
+            echo -e "$1" | sed -E \
+              -e 's/^### (.*)$/{"type": "heading", "attrs": {"level": 3}, "content": [{"type": "text", "text": "\1"}]}/' \
+              -e 's/^## (.*)$/{"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "\1"}]}/' \
+              -e 's/^# (.*)$/{"type": "heading", "attrs": {"level": 1}, "content": [{"type": "text", "text": "\1"}]}/' \
+              -e 's/\*\*(.*)\*\*/{"type": "text", "marks": [{"type": "strong"}], "text": "\1"}/g' \
+              -e 's/\*(.*)\*/{"type": "text", "marks": [{"type": "em"}], "text": "\1"}/g' \
+              -e 's/^> (.*)$/{"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]}/' \
+              -e 's/^[-*] (.*)$/{"type": "listItem", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "\1"}]}]}/' \
+              | jq -s .
           }
       
           DESCRIPTION_RAW=$(cat <<EOF
@@ -147,10 +147,17 @@ jobs:
           EOF
           )
       
+          # Markdown → ADF 변환 후 JSON 배열로 변환
           DESCRIPTION_ADF=$(convert_md_to_adf "$DESCRIPTION_RAW")
-          
-          # JSON 배열 형식으로 변환
-          DESCRIPTION_JSON=$(jq -n --argjson adf_content "[$DESCRIPTION_ADF]" '{"type": "doc", "version": 1, "content": $adf_content}')
+      
+          # JSON 배열로 변환
+          DESCRIPTION_JSON=$(jq -n --argjson adf_content "$DESCRIPTION_ADF" '{"type": "doc", "version": 1, "content": $adf_content}')
+      
+          # JSON 유효성 검사
+          if ! echo "$DESCRIPTION_JSON" | jq empty >/dev/null 2>&1; then
+            echo "❌ Invalid JSON detected in DESCRIPTION_JSON!"
+            exit 1
+          fi
       
           echo "JIRA_DESCRIPTION=$DESCRIPTION_JSON" >> $GITHUB_ENV
           echo "📌 Converted ADF Description:"
@@ -189,11 +196,12 @@ jobs:
             JSON_PAYLOAD=$(jq -n \
               --arg summary "${{ github.event.issue.title }}" \
               --argjson labels "$JIRA_LABELS_JSON" \
-              --argjson description "$JIRA_DESCRIPTION" \ 
+              --argjson description "${{ env.JIRA_DESCRIPTION }}" \
               '{
                 fields: {
                   summary: $summary,
                   labels: $labels,
+                  description: $description
                   # description: {
                   #   "type": "doc",
                   #   "version": 1,
@@ -209,11 +217,11 @@ jobs:
                   #     }
                   #   ]
                   # }
-                  description: {
-                    "type": "doc",
-                    "version": 1,
-                    "content": $description
-                  }
+                  # description: {
+                  #   "type": "doc",
+                  #   "version": 1,
+                  #   "content": $description
+                  # }
                 }
               }')
       
