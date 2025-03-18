@@ -127,7 +127,6 @@ jobs:
       
       - name: Create or Update Jira Issue
         run: |
-          # Jira에 맞게 Markdown을 Jira Wiki 문법으로 변환한 후 JSON 형태로 변환
           echo "🔍 Raw JIRA_LABELS: '${{ env.JIRA_LABELS }}'"
 
           # JIRA_LABELS 값이 이미 JSON 배열이면 그대로 사용
