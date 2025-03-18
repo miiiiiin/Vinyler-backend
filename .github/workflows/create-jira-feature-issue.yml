@@ -161,6 +161,7 @@ jobs:
                 fields: {
                   summary: $summary,
                   labels: $labels,
+                  description: $description
                 }
               }')
       
@@ -214,10 +215,8 @@ jobs:
           #     echo "❌ Jira Issue 생성 실패!"
           #     exit 1
           #   fi
-          # fi
+          fi
         shell: bash
-
-      
         
       - name: Create Issue
         if: env.JIRA_ISSUE_KEY == ''
