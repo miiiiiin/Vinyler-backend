@@ -51,11 +51,13 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
-
         var securityContext = SecurityContextHolder.getContext();
-
-
         String accessToken = jwtTokenProvider.getHeaderAccessToken(request);
+
+        if (request.getCookies() == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 쿠키에서 Refresh Token 가져오기
         String refreshTokenFromCookie = Arrays.stream(request.getCookies())
