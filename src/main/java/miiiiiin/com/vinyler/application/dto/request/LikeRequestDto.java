@@ -9,15 +9,19 @@ import java.util.List;
 @Getter
 @Setter
 public class LikeRequestDto {
-    private Long discogsId;
-    private String artistsSort;
-    private String notes;
-    private String status;
-    private String uri;
-    private String releasedFormatted;
-    private List<TrackList> tracklist;
-    private List<Image> images;
-    private List<Format> formats;
-    private List<Video> videos;
-    private List<ArtistDetail> artists;
+    private AlbumInfo albumInfo;
+
+    public record AlbumInfo(
+        Long discogsId,
+        String artistsSort,
+        String notes,
+        String status,
+        String uri,
+        String releasedFormatted,
+        List<TrackList> tracklist,
+        List<Image> images,
+        List<Format> formats,
+        List<Video> videos,
+        List<ArtistDetail> artists
+    ) { }
 }
