@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public List<VinylDto> getVinylsLikedByUser(Long userId, User currentUser) {
-        var userEntity = getUserEntity(currentUser.getEmail());
+        var userEntity = getUserEntity(userId);
 
         // LikeRepository 를 통해 유저가 찜한 음반 목록 조회
         List<Like> likedVinyls = likeRepository.findByUser(userEntity);

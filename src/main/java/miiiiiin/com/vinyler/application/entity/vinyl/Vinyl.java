@@ -76,28 +76,15 @@ public class Vinyl {
     @JsonIgnore  // 직렬화 시 likes를 무시
     private List<Like> likes = new ArrayList<>();
 
-
-//    @Override
-//    public boolean equals(Object o) {
-//        if (o == null || getClass() != o.getClass()) return false;
-//        Vinyl vinyl = (Vinyl) o;
-//        return Objects.equals(vinylId, vinyl.vinylId) && Objects.equals(likesCount, vinyl.likesCount) && Objects.equals(artistsSort, vinyl.artistsSort) && Objects.equals(notes, vinyl.notes) && Objects.equals(releasedFormatted, vinyl.releasedFormatted) && Objects.equals(uri, vinyl.uri) && Objects.equals(status, vinyl.status) && Objects.equals(images, vinyl.images) && Objects.equals(tracklist, vinyl.tracklist);
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(vinylId, likesCount, artistsSort, notes, releasedFormatted, uri, status, images, tracklist);
-//    }
-
     public static Vinyl of (LikeRequestDto requestDto, User user) {
         var vinyl = new Vinyl();
-        vinyl.setDiscogsId(requestDto.getDiscogsId());
+        vinyl.setDiscogsId(requestDto.getAlbumInfo().discogsId());
         vinyl.setLikesCount(vinyl.likesCount);
-        vinyl.setArtistsSort(requestDto.getArtistsSort());
-        vinyl.setNotes(requestDto.getNotes());
-        vinyl.setReleasedFormatted(requestDto.getReleasedFormatted());
-        vinyl.setUri(requestDto.getUri());
-        vinyl.setStatus(requestDto.getStatus());
+        vinyl.setArtistsSort(requestDto.getAlbumInfo().artistsSort());
+        vinyl.setNotes(requestDto.getAlbumInfo().notes());
+        vinyl.setReleasedFormatted(requestDto.getAlbumInfo().releasedFormatted());
+        vinyl.setUri(requestDto.getAlbumInfo().uri());
+        vinyl.setStatus(requestDto.getAlbumInfo().status());
 
         // 리스트 데이터 변환 및 연관 관계 설정
         vinyl.getImages().addAll(convertDtoToImages(requestDto, vinyl));
@@ -111,7 +98,7 @@ public class Vinyl {
     }
     // Vinyl을 매개변수로 전달하여 연관 관계 설정
     private static List<Image> convertDtoToImages(LikeRequestDto requestDto, Vinyl vinyl) {
-        return requestDto.getImages().stream()
+        return requestDto.getAlbumInfo().images().stream()
                 .map(img -> {
                     Image image = new Image();
                     image.setType(img.getType());
@@ -124,7 +111,7 @@ public class Vinyl {
     }
 
     private static List<TrackList> convertDtoToTracklist(LikeRequestDto requestDto, Vinyl vinyl) {
-        return requestDto.getTracklist().stream()
+        return requestDto.getAlbumInfo().tracklist().stream()
                 .map(trackList -> {
                     TrackList list = new TrackList();
                     list.setTitle(trackList.getTitle());
@@ -138,7 +125,7 @@ public class Vinyl {
     }
 
     private static List<Format> convertDtoFormats(LikeRequestDto requestDto, Vinyl vinyl) {
-        return requestDto.getFormats().stream()
+        return requestDto.getAlbumInfo().formats().stream()
                 .map(formats -> {
                     Format format = new Format();
                     format.setName(formats.getName());
@@ -151,7 +138,7 @@ public class Vinyl {
     }
 
     private static List<Video> convertDtoVideos(LikeRequestDto requestDto, Vinyl vinyl) {
-        return requestDto.getVideos().stream()
+        return requestDto.getAlbumInfo().videos().stream()
                 .map(vid -> {
                     Video video = new Video();
                     video.setUri(vid.getUri());
@@ -163,7 +150,7 @@ public class Vinyl {
     }
 
     private static List<ArtistDetail> convertDtoArtists(LikeRequestDto requestDto, Vinyl vinyl) {
-        return requestDto.getArtists().stream()
+        return requestDto.getAlbumInfo().artists().stream()
                 .map(artists -> {
                     ArtistDetail artist = new ArtistDetail();
                     artist.setName(artists.getName());

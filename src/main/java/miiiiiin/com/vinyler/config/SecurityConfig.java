@@ -45,7 +45,7 @@ public class SecurityConfig {
          * UrlBasedCorsConfigurationSource : configuration을 특정 url 패턴에서만 적용할 수 있게 함
          */
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/v1/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 
