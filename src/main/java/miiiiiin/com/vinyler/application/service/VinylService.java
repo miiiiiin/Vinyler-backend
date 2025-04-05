@@ -6,4 +6,5 @@ import miiiiiin.com.vinyler.user.entity.User;
 
 public interface VinylService {
     VinylLikeDto toggleLike(LikeRequestDto requestDto, User user);
+    VinylLikeDto getLikeStatus(Long discogsId, User currentUser);
 }
