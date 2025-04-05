@@ -8,6 +8,7 @@ import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
+import miiiiiin.com.vinyler.global.Constants;
 import miiiiiin.com.vinyler.user.entity.User;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,21 @@ public class VinylServiceImpl implements VinylService {
             likeRepository.save(Like.of(currentUser, vinylEntity));
             vinylEntity.setLikesCount(vinylEntity.getLikesCount() + 1);
             return VinylLikeDto.from(vinylRepository.save(vinylEntity), currentUser, true);
+        }
+    }
+
+    @Override
+    public VinylLikeDto getLikeStatus(Long discogsId, User currentUser) {
+        var vinylEntity = vinylRepository.findByDiscogsId(discogsId)
+            .orElseThrow(() -> new RuntimeException(Constants.ALBUM_NOT_FOUND));
+
+        // 사용자와 Vinyl에 대한 Like 조회
+        var likeEntity = likeRepository.findByUserAndVinyl(currentUser, vinylEntity);
+
+        if (likeEntity.isPresent()) {
+            return VinylLikeDto.from(vinylEntity, currentUser, true);
+        } else {
+            return VinylLikeDto.from(vinylEntity, currentUser, false);
         }
     }
 }
