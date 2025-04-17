@@ -38,7 +38,7 @@ public class AuthService {
         // 액세스 토큰 재발급 및 redis 갱신
         redisService.deleteValues(userDetails.getUsername());
         var tokenDto = jwtTokenProvider.generateAccessToken(userDetails);
-        redisService.setStringValue(userDetails.getUsername(), refreshToken, jwtTokenProvider.getRefreshExpirationTime());
+        redisService.setStringValue(userDetails.getUsername(), tokenDto.getRefreshToken(), jwtTokenProvider.getRefreshExpirationTime());
         return tokenDto;
     }
 
