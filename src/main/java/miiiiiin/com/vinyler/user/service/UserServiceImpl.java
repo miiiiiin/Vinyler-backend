@@ -45,6 +45,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDto getUserInfo(User currentUser) {
+        return UserDto.from(currentUser, false);
+    }
+
+    @Override
     public UserResponseDto registerUser(ServiceRegisterDto dto) {
         // email 중복체크
         userRepository.findByEmail(dto.getEmail()).ifPresent(user -> {
