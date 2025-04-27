@@ -9,11 +9,13 @@ import miiiiiin.com.vinyler.application.entity.vinyl.ArtistDetail;
 public class ArtistDetailDto {
     private String name;
     private String resourceUrl;
+    private Boolean active;
 
     public static ArtistDetailDto of(ArtistDetail artist) {
         return ArtistDetailDto.builder()
                 .name(artist.getName())
                 .resourceUrl(artist.getResourceUrl())
+                .active(artist.getActive())
                 .build();
     }
 }

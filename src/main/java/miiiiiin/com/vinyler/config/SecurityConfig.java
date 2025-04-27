@@ -91,7 +91,7 @@ public class SecurityConfig {
 //                                .userService(socialOAuth2UserService)));
 
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(jwtVerificationFilter, CustomUsernamePasswordAuthenticationFilter.class) // jwt 검증 필터 등록
+                .addFilterBefore(jwtVerificationFilter, UsernamePasswordAuthenticationFilter.class) // jwt 검증 필터 등록
                 .addFilterAfter(jwtExceptionFilter, jwtVerificationFilter.getClass())
                 .httpBasic(HttpBasicConfigurer::disable) // 기본 로그인창 disable
                 .formLogin(FormLoginConfigurer::disable); // UsernamePasswordAuthenticationFilter disable
