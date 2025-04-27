@@ -35,6 +35,9 @@ public class Vinyl {
     @Column(nullable = true)
     private Long likesCount = 0L;
 
+    @Column(nullable = true)
+    private String title;
+
     @Column(name = "artists_sort")
     private String artistsSort;
 
@@ -79,6 +82,7 @@ public class Vinyl {
     public static Vinyl of (LikeRequestDto requestDto, User user) {
         var vinyl = new Vinyl();
         vinyl.setDiscogsId(requestDto.getAlbumInfo().discogsId());
+        vinyl.setTitle(requestDto.getAlbumInfo().title());
         vinyl.setLikesCount(vinyl.likesCount);
         vinyl.setArtistsSort(requestDto.getAlbumInfo().artistsSort());
         vinyl.setNotes(requestDto.getAlbumInfo().notes());

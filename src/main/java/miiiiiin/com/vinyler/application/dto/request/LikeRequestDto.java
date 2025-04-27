@@ -13,6 +13,7 @@ public class LikeRequestDto {
 
     public record AlbumInfo(
         Long discogsId,
+        String title,
         String artistsSort,
         String notes,
         String status,
