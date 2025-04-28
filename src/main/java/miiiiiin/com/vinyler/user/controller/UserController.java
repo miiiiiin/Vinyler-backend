@@ -14,6 +14,7 @@ import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
 import miiiiiin.com.vinyler.user.dto.response.LoginResponseDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -100,5 +101,12 @@ public class UserController {
                                                             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         var response = userService.getFollowingsByUser(userId, userDetails.getUser());
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    @Operation(description = "현재 사용자 정보 조회")
+    public ResponseEntity<UserDto> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        var response = userService.getUserInfo(userDetails.getUser());
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

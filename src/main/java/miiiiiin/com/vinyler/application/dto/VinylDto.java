@@ -10,8 +10,11 @@ import java.util.List;
 @Builder
 @Data
 public class VinylDto {
+    private Long vinylId;
     private Long discogsId;
+    private String title;
     private String artistsSort;
+    private Long likesCount;
     private String notes;
     private String status;
     private String uri;
@@ -25,8 +28,11 @@ public class VinylDto {
     public static VinylDto of(Like like) {
         Vinyl vinyl = like.getVinyl();
         return VinylDto.builder()
+                .vinylId(vinyl.getVinylId())
                 .discogsId(vinyl.getDiscogsId())
+                .title(vinyl.getTitle())
                 .artistsSort(vinyl.getArtistsSort())
+                .likesCount(vinyl.getLikesCount())
                 .status(vinyl.getStatus())
                 .uri(vinyl.getUri())
                 .notes(vinyl.getNotes())

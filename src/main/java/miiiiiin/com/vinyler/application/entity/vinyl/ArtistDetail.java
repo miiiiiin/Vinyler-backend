@@ -13,6 +13,7 @@ public class ArtistDetail {
     private Long id;
     private String name;
     private String resourceUrl;
+    private Boolean active;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vinyl_id", nullable = false)
