@@ -27,6 +27,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final VinylRepository vinylRepository;
     private final UserVinylStatusRepository userVinylStatusRepository;
+    private final VinylService vinylService;
 
     @Override
     public ReviewResponseDto createReview(ReviewRequestDto request, User currentUser) {
@@ -76,6 +77,15 @@ public class ReviewServiceImpl implements ReviewService {
         return ReviewResponseDto.from(review);
     }
 
+    @Override
+    public List<ReviewDto> getReviewsByDiscogsId(Long discogsId) {
+        var vinylEntity = vinylRepository.findByDiscogsId(discogsId)
+            .orElseThrow(() -> new VinylNotFoundException(discogsId));
+
+        var reviewEntity = reviewRepository.findByVinyl(vinylEntity);
+
+        return reviewEntity.stream().map(ReviewDto::of).toList();
+    }
 
     private Vinyl getVinylEntity(Long discogsId) {
         /**
