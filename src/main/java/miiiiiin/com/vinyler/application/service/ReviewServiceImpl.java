@@ -26,15 +26,15 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final VinylRepository vinylRepository;
-    private final UserVinylStatusRepository userVinylStatusRepository;
+//    private final UserVinylStatusRepository userVinylStatusRepository;
 
     @Override
     public ReviewResponseDto createReview(ReviewRequestDto request, User currentUser) {
         var vinylEntity = getVinylEntity(request.getDiscogsId());
 
-        // UserVinylStatus 검사 (리뷰 선행 조건 -> 음반 "감상했어요" 상태)
-        userVinylStatusRepository.findByUserAndVinyl(currentUser, vinylEntity)
-                .orElseThrow(ReviewNotAvailableException::new);
+//        // UserVinylStatus 검사 (리뷰 선행 조건 -> 음반 "감상했어요" 상태)
+//        userVinylStatusRepository.findByUserAndVinyl(currentUser, vinylEntity)
+//                .orElseThrow(ReviewNotAvailableException::new);
 
         // 한 유저가 한 음반에 한 개의 리뷰만 남길 수 있도록 검사
         if (reviewRepository.findByUserAndVinyl(currentUser, vinylEntity).isPresent()) {
@@ -76,6 +76,15 @@ public class ReviewServiceImpl implements ReviewService {
         return ReviewResponseDto.from(review);
     }
 
+    @Override
+    public List<ReviewDto> getReviewsByDiscogsId(Long discogsId) {
+        var vinylEntity = vinylRepository.findByDiscogsId(discogsId)
+            .orElseThrow(() -> new VinylNotFoundException(discogsId));
+
+        var reviewEntity = reviewRepository.findByVinyl(vinylEntity);
+
+        return reviewEntity.stream().map(ReviewDto::of).toList();
+    }
 
     private Vinyl getVinylEntity(Long discogsId) {
         /**

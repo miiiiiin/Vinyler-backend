@@ -51,4 +51,10 @@ public class ReviewController {
         var response = reviewService.updateReview(reviewId, request, userDetails.getUser());
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/discogs/{discogsId}")
+    public ResponseEntity<List<ReviewDto>> getReviewsByDiscogsId(@PathVariable Long discogsId) {
+        var response = reviewService.getReviewsByDiscogsId(discogsId);
+        return ResponseEntity.ok(response);
+    }
 }
