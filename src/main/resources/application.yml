@@ -9,7 +9,7 @@ spring:
     url: jdbc:mysql://localhost:3306/vinyler
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: vinyler-master
-    password:
+    password: itsfrom90s
 
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
@@ -44,7 +44,7 @@ logging:
 
 
 jwt:
-  secret-key:
+  secret-key: dmlueWxlci1zY2FuLWl0LXJpZ2h0YXdheQo=
   token:
     access-expiration-time: 10800000 # 3시간
     refresh-expiration-time: 604800000 # 7일
