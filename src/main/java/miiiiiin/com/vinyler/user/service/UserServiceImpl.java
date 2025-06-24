@@ -3,17 +3,21 @@ package miiiiiin.com.vinyler.user.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.VinylDto;
+import miiiiiin.com.vinyler.application.dto.projection.LikeVinylProjection;
+import miiiiiin.com.vinyler.application.dto.response.SliceResponse;
 import miiiiiin.com.vinyler.application.entity.Follow;
-import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
+import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.application.repository.FollowRepository;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
 import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
+import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.exception.follow.FollowAlreadyExistException;
 import miiiiiin.com.vinyler.exception.follow.FollowNotFoundException;
 import miiiiiin.com.vinyler.exception.follow.InvalidFollowException;
 import miiiiiin.com.vinyler.exception.user.UserAlreadyExistException;
 import miiiiiin.com.vinyler.exception.user.UserNotFoundException;
+import miiiiiin.com.vinyler.exception.vinyl.VinylNotFoundException;
 import miiiiiin.com.vinyler.global.Constants;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
@@ -21,6 +25,9 @@ import miiiiiin.com.vinyler.user.dto.UserDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.entity.User;
 import miiiiiin.com.vinyler.user.repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,6 +44,7 @@ public class UserServiceImpl implements UserService {
     private final UserVinylStatusRepository userVinylStatusRepository;
     private final FollowRepository followRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final VinylRepository vinylRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -68,12 +76,32 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public List<VinylDto> getVinylsLikedByUser(Long userId, User currentUser) {
-        var userEntity = getUserEntity(userId);
+    public SliceResponse getVinylsLikedByUser(Long userId, User currentUser, Long cursorId, int size) {
+        // 커서 페이징 size + 1 (+1로 다음 페이지(hasNext) 존재 여부 판단)
+        Pageable pageable = PageRequest.of(0, size + 1);
 
-        // LikeRepository 를 통해 유저가 찜한 음반 목록 조회
-        List<Like> likedVinyls = likeRepository.findByUser(userEntity);
-        return likedVinyls.stream().map(VinylDto::of).toList();
+        var userEntity = getUserEntity(userId);
+        // DTO Projection 활용하여 가져온 사용자 별 찜한 음반 리스트
+        List<LikeVinylProjection> results = likeRepository.findVinylsLikedByUserWithCursor(userEntity, cursorId, pageable);
+
+        // 결과가 size보다 많다는 의미
+        boolean hasNext = results.size() > size;
+        // 마지막 1개를 제외한 size개만 클라이언트에 응답 => subList(0, size)를 이용해 앞쪽 size개만 자름
+        List<LikeVinylProjection> contents = hasNext ? results.subList(0, size) : results;
+
+        // 필요한 연관 관계 직접 조회 및 VinylDto로 구성 (유저가 찜한 음반 목록 조회)
+        List<VinylDto> vinylDtos = contents.stream()
+            .map(projection -> {
+                Vinyl vinyl = vinylRepository.findById(projection.getVinylId())
+                    .orElseThrow(() -> new VinylNotFoundException(projection.getVinylId()));
+                return VinylDto.of(vinyl);
+            }).toList();
+
+        // 다음 요청에서 커서로 사용할 ID = 클라이언트에 반환해준 마지막 요소의 ID
+        Long nextCursorId = hasNext ? contents.get(contents.size() - 1).getLikeId() : null;
+
+        SliceImpl<VinylDto> sliceContents = new SliceImpl<>(vinylDtos, PageRequest.of(0, size), hasNext);
+        return new SliceResponse<>(sliceContents, nextCursorId);
     }
 
     @Override
