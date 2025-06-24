@@ -2,6 +2,7 @@ package miiiiiin.com.vinyler.user.service;
 
 import jakarta.validation.Valid;
 import miiiiiin.com.vinyler.application.dto.VinylDto;
+import miiiiiin.com.vinyler.application.dto.response.SliceResponse;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.dto.UserDto;
 import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public interface UserService extends UserDetailsService {
     UserResponseDto registerUser(ServiceRegisterDto dto);
-    Slice<VinylDto> getVinylsLikedByUser(Long userId, User user, Long cursorId, int size);
+    SliceResponse getVinylsLikedByUser(Long userId, User user, Long cursorId, int size);
     List<VinylDto> getVinylsListenedByUser(Long userId, User user);
     UserDto follow(Long userId, User user);
     UserDto unfollow(Long userId, User user);

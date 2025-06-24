@@ -24,17 +24,10 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
      */
 //    @Query("SELECT l FROM Like l JOIN FETCH l.vinyl v WHERE l.user = :user")
 //    Slice<Like> findByUser(User user, Pageable pageable);
-//    @EntityGraph(attributePaths = {"vinyl"})
-//    @Query("""
-//    SELECT l FROM Like l
-//    WHERE l.user = :user
-//      AND (:cursorId IS NULL OR l.id < :cursorId)
-//    ORDER BY l.id DESC
-//    """)
-
 
     @Query("""
       SELECT
+          l.likeId as likeId,
           v.vinylId as vinylId,
           v.discogsId as discogsId,
           v.title as title,

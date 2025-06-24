@@ -44,7 +44,7 @@ logging:
 
 
 jwt:
-  secret-key: dmlueWxlci1zY2FuLWl0LXJpZ2h0YXdheS1hdXRob3JpemF0aW9uCg==
+  secret-key:
   token:
     access-expiration-time: 10800000 # 3시간
     refresh-expiration-time: 604800000 # 7일

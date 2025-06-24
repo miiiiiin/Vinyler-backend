@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.VinylDto;
+import miiiiiin.com.vinyler.application.dto.response.SliceResponse;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.dto.UserDto;
@@ -45,7 +46,7 @@ public class UserController {
      */
     @GetMapping("/{userId}/liked")
     @Operation(description = "유저별 찜한 Vinyl 리스트 조회")
-    public ResponseEntity<Slice<VinylDto>> getVinylsLikedByUser(@PathVariable Long userId,
+    public ResponseEntity<SliceResponse<VinylDto>> getVinylsLikedByUser(@PathVariable Long userId,
                                                                 @AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                 @RequestParam(required=false) Long cursorId,
                                                                 @RequestParam(defaultValue = "10") int size) {
