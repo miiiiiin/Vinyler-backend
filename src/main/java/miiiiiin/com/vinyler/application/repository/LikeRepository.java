@@ -34,7 +34,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
 
     @Query("""
-      SELECT 
+      SELECT
           v.vinylId as vinylId,
           v.discogsId as discogsId,
           v.title as title,

@@ -2,18 +2,27 @@ package miiiiiin.com.vinyler.user.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import miiiiiin.com.vinyler.application.dto.ArtistDetailDto;
+import miiiiiin.com.vinyler.application.dto.FormatDto;
+import miiiiiin.com.vinyler.application.dto.ImageDto;
+import miiiiiin.com.vinyler.application.dto.TrackListDto;
+import miiiiiin.com.vinyler.application.dto.VideoDto;
 import miiiiiin.com.vinyler.application.dto.VinylDto;
+import miiiiiin.com.vinyler.application.dto.projection.LikeVinylProjection;
 import miiiiiin.com.vinyler.application.entity.Follow;
 import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
+import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.application.repository.FollowRepository;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
 import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
+import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.exception.follow.FollowAlreadyExistException;
 import miiiiiin.com.vinyler.exception.follow.FollowNotFoundException;
 import miiiiiin.com.vinyler.exception.follow.InvalidFollowException;
 import miiiiiin.com.vinyler.exception.user.UserAlreadyExistException;
 import miiiiiin.com.vinyler.exception.user.UserNotFoundException;
+import miiiiiin.com.vinyler.exception.vinyl.VinylNotFoundException;
 import miiiiiin.com.vinyler.global.Constants;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
@@ -21,6 +30,10 @@ import miiiiiin.com.vinyler.user.dto.UserDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.entity.User;
 import miiiiiin.com.vinyler.user.repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,6 +50,7 @@ public class UserServiceImpl implements UserService {
     private final UserVinylStatusRepository userVinylStatusRepository;
     private final FollowRepository followRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final VinylRepository vinylRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -68,12 +82,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public List<VinylDto> getVinylsLikedByUser(Long userId, User currentUser) {
-        var userEntity = getUserEntity(userId);
+    public Slice<VinylDto> getVinylsLikedByUser(Long userId, User currentUser, Long cursorId, int size) {
+        // 커서 페이징 size + 1
+        Pageable pageable = PageRequest.of(0, size + 1);
 
-        // LikeRepository 를 통해 유저가 찜한 음반 목록 조회
-        List<Like> likedVinyls = likeRepository.findByUser(userEntity);
-        return likedVinyls.stream().map(VinylDto::of).toList();
+        var userEntity = getUserEntity(userId);
+        List<LikeVinylProjection> projections = likeRepository.findVinylsLikedByUserWithCursor(userEntity, cursorId, pageable);
+
+        boolean hasNext = projections.size() > size;
+        List<LikeVinylProjection> contents = hasNext ? projections.subList(0, size) : projections;
+
+        // 필요한 연관 관계 직접 조회 및 VinylDto로 구성 (유저가 찜한 음반 목록 조회)
+        List<VinylDto> vinylDtos = contents.stream()
+            .map(projection -> {
+                Vinyl vinyl = vinylRepository.findById(projection.getVinylId())
+                    .orElseThrow(() -> new VinylNotFoundException(projection.getVinylId()));
+                return VinylDto.of(vinyl);
+            }).toList();
+
+            return new SliceImpl<>(vinylDtos, PageRequest.of(0, size), hasNext);
+
+
+        // LikeRepository 를 통해
+//        Slice<Like> likedVinyls = likeRepository.findByUser(userEntity, pageable);
+//        return likedVinyls.map(VinylDto::of);
     }
 
     @Override

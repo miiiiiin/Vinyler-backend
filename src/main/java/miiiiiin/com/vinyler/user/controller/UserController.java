@@ -14,6 +14,10 @@ import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
 import miiiiiin.com.vinyler.user.dto.response.LoginResponseDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.service.UserService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,9 +45,12 @@ public class UserController {
      */
     @GetMapping("/{userId}/liked")
     @Operation(description = "유저별 찜한 Vinyl 리스트 조회")
-    public ResponseEntity<List<VinylDto>> getVinylsLikedByUser(@PathVariable Long userId,
-                                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        var response = userService.getVinylsLikedByUser(userId, userDetails.getUser());
+    public ResponseEntity<Slice<VinylDto>> getVinylsLikedByUser(@PathVariable Long userId,
+                                                                @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                @RequestParam(required=false) Long cursorId,
+                                                                @RequestParam(defaultValue = "10") int size) {
+        // 특정 유저의 찜한 Vinyl 리스트를 관리자 또는 팔로우한 사용자가 조회할 수 있는 API
+        var response = userService.getVinylsLikedByUser(userId, userDetails.getUser(), cursorId, size);
         return ResponseEntity.ok(response);
     }
 
