@@ -27,38 +27,31 @@ public class VinylDto {
 
     public static VinylDto of(Like like) {
         Vinyl vinyl = like.getVinyl();
-        return VinylDto.builder()
-                .vinylId(vinyl.getVinylId())
-                .discogsId(vinyl.getDiscogsId())
-                .title(vinyl.getTitle())
-                .artistsSort(vinyl.getArtistsSort())
-                .likesCount(vinyl.getLikesCount())
-                .status(vinyl.getStatus())
-                .uri(vinyl.getUri())
-                .notes(vinyl.getNotes())
-                .releasedFormatted(vinyl.getReleasedFormatted())
-                .tracklist(vinyl.getTracklist().stream().map(TrackListDto::of).toList())
-                .images(vinyl.getImages().stream().map(ImageDto::of).toList())
-                .formats(vinyl.getFormats().stream().map(FormatDto::of).toList())
-                .videos(vinyl.getVideos().stream().map(VideoDto::of).toList())
-                .artists(vinyl.getArtists().stream().map(ArtistDetailDto::of).toList())
-                .build();
+        return getVinylDto(vinyl);
     }
 
     public static VinylDto of(UserVinylStatus status) {
         Vinyl vinyl = status.getVinyl();
+        return getVinylDto(vinyl);
+    }
+
+    public static VinylDto of(Vinyl vinyl) {
+        return getVinylDto(vinyl);
+    }
+
+    private static VinylDto getVinylDto(Vinyl vinyl) {
         return VinylDto.builder()
-                .discogsId(vinyl.getDiscogsId())
-                .artistsSort(vinyl.getArtistsSort())
-                .status(vinyl.getStatus())
-                .uri(vinyl.getUri())
-                .notes(vinyl.getNotes())
-                .releasedFormatted(vinyl.getReleasedFormatted())
-                .tracklist(vinyl.getTracklist().stream().map(TrackListDto::of).toList())
-                .images(vinyl.getImages().stream().map(ImageDto::of).toList())
-                .formats(vinyl.getFormats().stream().map(FormatDto::of).toList())
-                .videos(vinyl.getVideos().stream().map(VideoDto::of).toList())
-                .artists(vinyl.getArtists().stream().map(ArtistDetailDto::of).toList())
-                .build();
+            .discogsId(vinyl.getDiscogsId())
+            .artistsSort(vinyl.getArtistsSort())
+            .status(vinyl.getStatus())
+            .uri(vinyl.getUri())
+            .notes(vinyl.getNotes())
+            .releasedFormatted(vinyl.getReleasedFormatted())
+            .tracklist(vinyl.getTracklist().stream().map(TrackListDto::of).toList())
+            .images(vinyl.getImages().stream().map(ImageDto::of).toList())
+            .formats(vinyl.getFormats().stream().map(FormatDto::of).toList())
+            .videos(vinyl.getVideos().stream().map(VideoDto::of).toList())
+            .artists(vinyl.getArtists().stream().map(ArtistDetailDto::of).toList())
+            .build();
     }
 }
