@@ -15,6 +15,10 @@ import miiiiiin.com.vinyler.exception.review.ReviewNotFoundException;
 import miiiiiin.com.vinyler.exception.user.UserNotAllowedException;
 import miiiiiin.com.vinyler.exception.vinyl.VinylNotFoundException;
 import miiiiiin.com.vinyler.user.entity.User;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
@@ -77,13 +81,30 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<ReviewDto> getReviewsByDiscogsId(Long discogsId) {
+    public Slice<ReviewDto> getReviewsByDiscogsId(Long discogsId, Long cursorId, int size) {
         var vinylEntity = vinylRepository.findByDiscogsId(discogsId)
             .orElseThrow(() -> new VinylNotFoundException(discogsId));
 
-        var reviewEntity = reviewRepository.findByVinyl(vinylEntity);
+//        var reviewEntity = reviewRepository.findByVinyl(vinylEntity);
 
-        return reviewEntity.stream().map(ReviewDto::of).toList();
+        // 커서 페이징 size + 1 (+1로 다음 페이지(hasNext) 존재 여부 판단)
+        Pageable pageable = PageRequest.of(0, size+1);
+
+        var results = reviewRepository.findByVinylWithCursor(vinylEntity, cursorId, pageable);
+
+        // 결과가 size보다 많다는 의미
+        boolean hasNext = results.size() > size;
+        // 마지막 1개를 제외한 size개만 클라이언트에 응답 => subList(0, size)를 이용해 앞쪽 size개만 자름
+        var contents = hasNext ? results.subList(0, size) : results;
+
+        // 다음 요청에서 커서로 사용할 ID = 클라이언트에 반환해준 마지막 요소의 ID
+        Long nextCursorId = hasNext ? contents.get(contents.size() - 1).getId() : null;
+
+        List<ReviewDto> reviews = contents.stream()
+            .map(ReviewDto::of)
+            .toList();
+
+        return new SliceImpl<>(reviews, pageable, hasNext);
     }
 
     private Vinyl getVinylEntity(Long discogsId) {

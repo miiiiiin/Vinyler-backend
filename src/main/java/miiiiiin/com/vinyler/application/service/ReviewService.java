@@ -6,11 +6,12 @@ import miiiiiin.com.vinyler.application.dto.response.ReviewResponseDto;
 import miiiiiin.com.vinyler.user.entity.User;
 
 import java.util.List;
+import org.springframework.data.domain.Slice;
 
 public interface ReviewService {
     ReviewResponseDto createReview(ReviewRequestDto requestDto, User user);
     List<ReviewDto> getReviews(User user);
     ReviewDto getReviewById(Long reviewId, User user);
     ReviewResponseDto updateReview(Long reviewId, ReviewRequestDto requestDto, User user);
-    List<ReviewDto> getReviewsByDiscogsId(Long discogsId);
+    Slice<ReviewDto> getReviewsByDiscogsId(Long discogsId, Long cursorId, int size);
 }
