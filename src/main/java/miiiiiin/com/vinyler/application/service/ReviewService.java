@@ -12,5 +12,5 @@ public interface ReviewService {
     List<ReviewDto> getReviews(User user);
     ReviewDto getReviewById(Long reviewId, User user);
     ReviewResponseDto updateReview(Long reviewId, ReviewRequestDto requestDto, User user);
-    List<ReviewDto> getReviewsByDiscogsId(Long discogsId);
+    SliceResponse getReviewsByDiscogsId(Long discogsId, Long cursorId, int size);
 }

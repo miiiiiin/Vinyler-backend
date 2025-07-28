@@ -7,14 +7,15 @@ import miiiiiin.com.vinyler.application.dto.response.ReviewResponseDto;
 import miiiiiin.com.vinyler.application.entity.Review;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.application.repository.ReviewRepository;
-import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.exception.review.ReviewAlreadyExistException;
-import miiiiiin.com.vinyler.exception.review.ReviewNotAvailableException;
 import miiiiiin.com.vinyler.exception.review.ReviewNotFoundException;
 import miiiiiin.com.vinyler.exception.user.UserNotAllowedException;
 import miiiiiin.com.vinyler.exception.vinyl.VinylNotFoundException;
 import miiiiiin.com.vinyler.user.entity.User;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
@@ -77,13 +78,29 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<ReviewDto> getReviewsByDiscogsId(Long discogsId) {
+    public SliceResponse getReviewsByDiscogsId(Long discogsId, Long cursorId, int size) {
         var vinylEntity = vinylRepository.findByDiscogsId(discogsId)
             .orElseThrow(() -> new VinylNotFoundException(discogsId));
 
-        var reviewEntity = reviewRepository.findByVinyl(vinylEntity);
+        // 커서 페이징 size + 1 (+1로 다음 페이지(hasNext) 존재 여부 판단)
+        Pageable pageable = PageRequest.of(0, size+1);
 
-        return reviewEntity.stream().map(ReviewDto::of).toList();
+        var results = reviewRepository.findByVinylWithCursor(vinylEntity, cursorId, pageable);
+
+        // 결과가 size보다 많다는 의미
+        boolean hasNext = results.size() > size;
+        // 마지막 1개를 제외한 size개만 클라이언트에 응답 => subList(0, size)를 이용해 앞쪽 size개만 자름
+        var contents = hasNext ? results.subList(0, size) : results;
+
+        // 다음 요청에서 커서로 사용할 ID = 클라이언트에 반환해준 마지막 요소의 ID
+        Long nextCursorId = hasNext ? contents.get(contents.size() - 1).getId() : null;
+
+        List<ReviewDto> reviews = contents.stream()
+            .map(ReviewDto::of)
+            .toList();
+
+        SliceImpl<ReviewDto> sliceContents = new SliceImpl<>(reviews, pageable, hasNext);
+        return new SliceResponse<>(sliceContents, nextCursorId);
     }
 
     private Vinyl getVinylEntity(Long discogsId) {
