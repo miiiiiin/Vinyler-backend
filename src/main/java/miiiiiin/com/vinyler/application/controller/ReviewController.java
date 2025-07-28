@@ -1,17 +1,13 @@
 package miiiiiin.com.vinyler.application.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.ReviewDto;
 import miiiiiin.com.vinyler.application.dto.request.ReviewRequestDto;
-import miiiiiin.com.vinyler.application.dto.request.ReviewUpdateRequestDto;
 import miiiiiin.com.vinyler.application.dto.response.ReviewResponseDto;
-import miiiiiin.com.vinyler.application.entity.Review;
 import miiiiiin.com.vinyler.application.service.ReviewService;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -53,8 +49,10 @@ public class ReviewController {
     }
 
     @GetMapping("/discogs/{discogsId}")
-    public ResponseEntity<List<ReviewDto>> getReviewsByDiscogsId(@PathVariable Long discogsId) {
-        var response = reviewService.getReviewsByDiscogsId(discogsId);
+    public ResponseEntity<SliceResponse<ReviewDto>> getReviewsByDiscogsId(@PathVariable Long discogsId,
+                                                            @RequestParam(required=false) Long cursorId,
+                                                            @RequestParam(defaultValue = "10") int size) {
+        var response = reviewService.getReviewsByDiscogsId(discogsId, cursorId, size);
         return ResponseEntity.ok(response);
     }
 }

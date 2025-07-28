@@ -7,17 +7,14 @@ import miiiiiin.com.vinyler.application.dto.response.ReviewResponseDto;
 import miiiiiin.com.vinyler.application.entity.Review;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.application.repository.ReviewRepository;
-import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.exception.review.ReviewAlreadyExistException;
-import miiiiiin.com.vinyler.exception.review.ReviewNotAvailableException;
 import miiiiiin.com.vinyler.exception.review.ReviewNotFoundException;
 import miiiiiin.com.vinyler.exception.user.UserNotAllowedException;
 import miiiiiin.com.vinyler.exception.vinyl.VinylNotFoundException;
 import miiiiiin.com.vinyler.user.entity.User;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 
@@ -81,11 +78,9 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Slice<ReviewDto> getReviewsByDiscogsId(Long discogsId, Long cursorId, int size) {
+    public SliceResponse getReviewsByDiscogsId(Long discogsId, Long cursorId, int size) {
         var vinylEntity = vinylRepository.findByDiscogsId(discogsId)
             .orElseThrow(() -> new VinylNotFoundException(discogsId));
-
-//        var reviewEntity = reviewRepository.findByVinyl(vinylEntity);
 
         // 커서 페이징 size + 1 (+1로 다음 페이지(hasNext) 존재 여부 판단)
         Pageable pageable = PageRequest.of(0, size+1);
@@ -104,7 +99,8 @@ public class ReviewServiceImpl implements ReviewService {
             .map(ReviewDto::of)
             .toList();
 
-        return new SliceImpl<>(reviews, pageable, hasNext);
+        SliceImpl<ReviewDto> sliceContents = new SliceImpl<>(reviews, pageable, hasNext);
+        return new SliceResponse<>(sliceContents, nextCursorId);
     }
 
     private Vinyl getVinylEntity(Long discogsId) {
