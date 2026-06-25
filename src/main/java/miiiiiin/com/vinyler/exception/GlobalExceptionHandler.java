@@ -1,5 +1,6 @@
 package miiiiiin.com.vinyler.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import miiiiiin.com.vinyler.error.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -24,12 +26,13 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleClientErrorException(RuntimeException e) {
+        log.error("[RuntimeException]", e);
         return ResponseEntity.internalServerError().build();
-
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleClientErrorException(Exception e) {
+        log.error("[Exception]", e);
         return ResponseEntity.internalServerError().build();
     }
 

@@ -3,6 +3,7 @@ package miiiiiin.com.vinyler.application.service;
 import miiiiiin.com.vinyler.application.dto.ReviewDto;
 import miiiiiin.com.vinyler.application.dto.request.ReviewRequestDto;
 import miiiiiin.com.vinyler.application.dto.response.ReviewResponseDto;
+import miiiiiin.com.vinyler.application.dto.response.SliceResponse;
 import miiiiiin.com.vinyler.user.entity.User;
 
 import java.util.List;

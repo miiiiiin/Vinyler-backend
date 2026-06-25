@@ -1,5 +1,6 @@
 package miiiiiin.com.vinyler.application.entity.vinyl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +21,7 @@ public class TrackList {
     private String duration;
     private String position;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "vinyl_id", nullable = false)
     private Vinyl vinyl;
