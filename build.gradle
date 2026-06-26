@@ -35,14 +35,14 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     // Swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // MYSQL
-    runtimeOnly 'com.mysql:mysql-connector-j'
+    // PostgreSQL
+    runtimeOnly 'org.postgresql:postgresql'
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'

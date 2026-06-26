@@ -1,5 +1,6 @@
 package miiiiiin.com.vinyler.application.entity.vinyl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,6 +14,7 @@ public class Video {
     private Long id;
     private String uri;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vinyl_id", nullable = false)
     private Vinyl vinyl;

@@ -1,5 +1,6 @@
 package miiiiiin.com.vinyler.application.entity.vinyl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +20,7 @@ public class Image {
     private String type;
     private String uri;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "vinyl_id", nullable = false)
     private Vinyl vinyl;

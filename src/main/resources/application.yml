@@ -6,13 +6,13 @@ spring:
     name: Vinyler-server
 
   datasource:
-    url: jdbc:mysql://localhost:3306/vinyler
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:postgresql://localhost:5432/vinyler
+    driver-class-name: org.postgresql.Driver
     username: vinyler-master
     password: itsfrom90s
 
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update # jpa가 엔티티 스캔해서 엔티티와 db 테이블을 비교하여 갱신해줌
     show-sql: true
@@ -33,7 +33,7 @@ springdoc:
   writer-with-default-pretty-printer: true
   model-and-view-allowed: true
   paths-to-match:
-    - /api/v1
+    - /api/v1/**
 
 logging:
   level:

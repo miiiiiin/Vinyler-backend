@@ -14,7 +14,7 @@ import java.util.List;
  * 사용자가 좋아요를 누르면 DB에 해당 Vinyl을 저장
  */
 
-@Table(name = "vinyls", indexes = @Index(name = "vinyl_userid_idx", columnList = "userid"))
+@Table(name = "vinyls", indexes = @Index(name = "vinyl_userid_idx", columnList = "user_id"))
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

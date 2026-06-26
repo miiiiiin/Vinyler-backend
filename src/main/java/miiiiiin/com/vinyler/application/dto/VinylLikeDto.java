@@ -2,6 +2,7 @@ package miiiiiin.com.vinyler.application.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.user.entity.User;
@@ -11,11 +12,16 @@ import miiiiiin.com.vinyler.user.entity.User;
 @NoArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "Vinyl 찜 상태 응답")
 public class VinylLikeDto {
+    @Schema(description = "내부 Vinyl ID", example = "1")
     private Long vinylId;
+
+    @Schema(description = "유저 ID", example = "1")
     private Long userId;
-    // 특정 사용자가 해당 Vinyl을 "좋아요" 했는지 여부
+
     @JsonProperty("is_liking")
+    @Schema(description = "현재 사용자가 찜한 상태인지 여부", example = "true")
     private boolean isLiking;
 
     public static VinylLikeDto from(Vinyl vinyl, User user, boolean isLiking) {

@@ -18,7 +18,7 @@ import java.util.Objects;
  */
 // unique true로 설정해서 중복 생성 방지
 @Table(name = "\"like\"",
-indexes = {@Index(name = "like_userid_vinylid_idx", columnList = "userid, vinylid", unique = true)})
+indexes = {@Index(name = "like_userid_vinylid_idx", columnList = "user_id, vinyl_id", unique = true)})
 @Entity
 @Getter
 @Setter
