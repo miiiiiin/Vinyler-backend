@@ -70,6 +70,7 @@ public class VinylDto {
 
     private static VinylDto getVinylDto(Vinyl vinyl) {
         return VinylDto.builder()
+            .vinylId(vinyl.getVinylId())
             .discogsId(vinyl.getDiscogsId())
             .artistsSort(vinyl.getArtistsSort())
             .status(vinyl.getStatus())

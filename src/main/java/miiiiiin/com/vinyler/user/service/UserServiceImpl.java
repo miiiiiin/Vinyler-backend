@@ -109,7 +109,6 @@ public class UserServiceImpl implements UserService {
     public List<VinylDto> getVinylsListenedByUser(Long userId, User currentUser) {
         var userEntity = getUserEntity(userId);
         List<UserVinylStatus> listenedVinyls = userVinylStatusRepository.findByUserAndListened(userEntity, true);
-        // TODO: FIX (USER ID?)
         return listenedVinyls.stream().map(VinylDto::of).toList();
     }
 
