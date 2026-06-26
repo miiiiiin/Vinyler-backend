@@ -176,7 +176,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> getFollowingsByUser(Long userId, User currentUser) {
         var follower = getUserEntity(userId);
-        var followEntities = followRepository.findByFollowing(follower);
+        var followEntities = followRepository.findByFollower(follower);
         return followEntities.stream().map(follow -> getUserWithFollowingStatus(currentUser, follow.getFollowing())).toList();
     }
 
