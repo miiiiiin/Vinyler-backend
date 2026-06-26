@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
         // 팔로우 당하는 사람의 팔로워 숫자 증가
         following.setFollowersCount(following.getFollowersCount() + 1);
         // 팔로우 하는 주체의 팔로우 숫자 증가
-        currentUser.setFollowingsCount(following.getFollowingsCount() + 1);
+        currentUser.setFollowingsCount(currentUser.getFollowingsCount() + 1);
 
         userRepository.saveAll(List.of(currentUser, following));
 
