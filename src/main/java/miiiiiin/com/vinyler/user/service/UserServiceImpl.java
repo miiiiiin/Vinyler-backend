@@ -161,6 +161,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * userId의 팔로워 리스트
+     * 나를 팔로우한 사람들 (팔로워 목록)
      */
     @Override
     public List<UserDto> getFollowersByUser(Long userId, User currentUser) {
@@ -172,11 +173,12 @@ public class UserServiceImpl implements UserService {
 
     /**
      * userId가 팔로워 (userId가 팔로잉하고 있는 리스트)
+     * 내가 팔로우한 사람들 (팔로잉 목록)
      */
     @Override
     public List<UserDto> getFollowingsByUser(Long userId, User currentUser) {
         var follower = getUserEntity(userId);
-        var followEntities = followRepository.findByFollowing(follower);
+        var followEntities = followRepository.findByFollower(follower);
         return followEntities.stream().map(follow -> getUserWithFollowingStatus(currentUser, follow.getFollowing())).toList();
     }
 
