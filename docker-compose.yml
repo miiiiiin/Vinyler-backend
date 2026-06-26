@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: vinyler-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: vinyler
+      POSTGRES_USER: vinyler-master
+      POSTGRES_PASSWORD: itsfrom90s
+    ports:
+      - 5432:5432
+
+  redis-stack:
+    image: redis/redis-stack
+    container_name: redis-stack-compose
+    restart: always
+#    command: ["redis-service", "--requirepass", "systempass"]
+    environment:
+      REDIS_ARGS: "--requirepass systempass"
+    ports:
+      - 6379:6379
+      - 8001:8001
