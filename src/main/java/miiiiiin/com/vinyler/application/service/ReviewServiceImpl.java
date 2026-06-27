@@ -20,7 +20,6 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -73,7 +72,6 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         // 수정할 데이터 전달
-        reviewEntity.setModifiedDate(ZonedDateTime.now());
         reviewEntity.setRating(request.getRating());
         reviewEntity.setContent(request.getContent());
 
