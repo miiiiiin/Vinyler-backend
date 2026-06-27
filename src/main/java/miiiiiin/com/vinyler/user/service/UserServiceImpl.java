@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public SliceResponse getVinylsLikedByUser(Long userId, User currentUser, Long cursorId, int size) {
+    public SliceResponse<VinylDto> getVinylsLikedByUser(Long userId, User currentUser, Long cursorId, int size) {
         // 커서 페이징 size + 1 (+1로 다음 페이지(hasNext) 존재 여부 판단)
         Pageable pageable = PageRequest.of(0, size + 1);
 
