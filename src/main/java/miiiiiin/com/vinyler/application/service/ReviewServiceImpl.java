@@ -62,6 +62,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    @Transactional
     public ReviewResponseDto updateReview(Long reviewId, ReviewRequestDto request, User currentUser) {
         // 수정하고자 하는 대상 게시물 찾은 다음, 해당 게시물의 작성자와 현재 유저가 같은지를 검증
         var reviewEntity = reviewRepository.findById(reviewId)
