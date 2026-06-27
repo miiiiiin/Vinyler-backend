@@ -55,12 +55,12 @@ public class User extends BaseEntity {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(userId, user.userId) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(nickname, user.nickname) && Objects.equals(deletedDate, user.deletedDate) && Objects.equals(profile, user.profile) && Objects.equals(birthday, user.birthday) && Objects.equals(followersCount, user.followersCount) && Objects.equals(followingsCount, user.followingsCount);
+        return Objects.equals(userId, user.userId) && Objects.equals(email, user.email) && Objects.equals(nickname, user.nickname) && Objects.equals(deletedDate, user.deletedDate) && Objects.equals(profile, user.profile) && Objects.equals(birthday, user.birthday) && Objects.equals(followersCount, user.followersCount) && Objects.equals(followingsCount, user.followingsCount);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, email, password, nickname, deletedDate, profile, birthday, followersCount, followingsCount);
+        return Objects.hash(userId, email, nickname, deletedDate, profile, birthday, followersCount, followingsCount);
     }
 
     public static User of(String email, String password, String nickname, String profile, LocalDate birthday) {
