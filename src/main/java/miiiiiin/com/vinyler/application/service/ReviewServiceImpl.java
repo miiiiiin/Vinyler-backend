@@ -76,8 +76,7 @@ public class ReviewServiceImpl implements ReviewService {
         reviewEntity.setRating(request.getRating());
         reviewEntity.setContent(request.getContent());
 
-        var review = reviewRepository.save(reviewEntity);
-        return ReviewResponseDto.from(review);
+        return ReviewResponseDto.from(reviewEntity);
     }
 
     @Override
