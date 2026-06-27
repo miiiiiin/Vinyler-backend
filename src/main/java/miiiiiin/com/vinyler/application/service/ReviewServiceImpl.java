@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -31,6 +32,7 @@ public class ReviewServiceImpl implements ReviewService {
 //    private final UserVinylStatusRepository userVinylStatusRepository;
 
     @Override
+    @Transactional
     public ReviewResponseDto createReview(ReviewRequestDto request, User currentUser) {
         var vinylEntity = getVinylEntity(request.getDiscogsId());
 
@@ -60,6 +62,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    @Transactional
     public ReviewResponseDto updateReview(Long reviewId, ReviewRequestDto request, User currentUser) {
         // 수정하고자 하는 대상 게시물 찾은 다음, 해당 게시물의 작성자와 현재 유저가 같은지를 검증
         var reviewEntity = reviewRepository.findById(reviewId)
@@ -74,8 +77,7 @@ public class ReviewServiceImpl implements ReviewService {
         reviewEntity.setRating(request.getRating());
         reviewEntity.setContent(request.getContent());
 
-        var review = reviewRepository.save(reviewEntity);
-        return ReviewResponseDto.from(review);
+        return ReviewResponseDto.from(reviewEntity);
     }
 
     @Override
