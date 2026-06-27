@@ -79,7 +79,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public SliceResponse getReviewsByDiscogsId(Long discogsId, Long cursorId, int size) {
+    public SliceResponse<ReviewDto> getReviewsByDiscogsId(Long discogsId, Long cursorId, int size) {
         var vinylEntity = vinylRepository.findByDiscogsId(discogsId)
             .orElseThrow(() -> new VinylNotFoundException(discogsId));
 

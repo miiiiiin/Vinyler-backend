@@ -17,7 +17,7 @@ import java.util.List;
 
 public interface UserService extends UserDetailsService {
     UserResponseDto registerUser(ServiceRegisterDto dto);
-    SliceResponse getVinylsLikedByUser(Long userId, User user, Long cursorId, int size);
+    SliceResponse<VinylDto> getVinylsLikedByUser(Long userId, User user, Long cursorId, int size);
     List<VinylDto> getVinylsListenedByUser(Long userId, User user);
     UserDto follow(Long userId, User user);
     UserDto unfollow(Long userId, User user);
