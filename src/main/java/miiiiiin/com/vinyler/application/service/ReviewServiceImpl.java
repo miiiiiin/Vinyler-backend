@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -31,6 +32,7 @@ public class ReviewServiceImpl implements ReviewService {
 //    private final UserVinylStatusRepository userVinylStatusRepository;
 
     @Override
+    @Transactional
     public ReviewResponseDto createReview(ReviewRequestDto request, User currentUser) {
         var vinylEntity = getVinylEntity(request.getDiscogsId());
 
