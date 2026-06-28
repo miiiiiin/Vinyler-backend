@@ -3,12 +3,12 @@ package miiiiiin.com.vinyler.application.entity.vinyl;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
 import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.user.entity.User;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * 사용자가 좋아요를 누르면 DB에 해당 Vinyl을 저장
@@ -79,90 +79,4 @@ public class Vinyl {
     @JsonIgnore  // 직렬화 시 likes를 무시
     private List<Like> likes = new ArrayList<>();
 
-    public static Vinyl of (LikeRequestDto requestDto, User user) {
-        var vinyl = new Vinyl();
-        vinyl.setDiscogsId(requestDto.discogsId());
-        vinyl.setTitle(requestDto.title());
-        vinyl.setLikesCount(vinyl.likesCount);
-        vinyl.setArtistsSort(requestDto.artistsSort());
-        vinyl.setNotes(requestDto.notes());
-        vinyl.setReleasedFormatted(requestDto.releasedFormatted());
-        vinyl.setUri(requestDto.uri());
-        vinyl.setStatus(requestDto.status());
-
-        // 리스트 데이터 변환 및 연관 관계 설정
-        vinyl.getImages().addAll(convertDtoToImages(requestDto, vinyl));
-        vinyl.getTracklist().addAll(convertDtoToTracklist(requestDto, vinyl));
-        vinyl.getFormats().addAll(convertDtoFormats(requestDto, vinyl));
-        vinyl.getVideos().addAll(convertDtoVideos(requestDto, vinyl));
-        vinyl.getArtists().addAll(convertDtoArtists(requestDto, vinyl));
-        // Vinyl 엔티티의 현재 로그인된 유저정보로 user 세팅
-        vinyl.setUser(user);
-        return vinyl;
-    }
-    // Vinyl을 매개변수로 전달하여 연관 관계 설정
-    private static List<Image> convertDtoToImages(LikeRequestDto requestDto, Vinyl vinyl) {
-        return requestDto.images().stream()
-                .map(img -> {
-                    Image image = new Image();
-                    image.setType(img.getType());
-                    image.setUri(img.getUri());
-                    // vinyl과 연관 관계 설정
-                    image.setVinyl(vinyl);
-                    return image;
-                })
-                .toList();
-    }
-
-    private static List<TrackList> convertDtoToTracklist(LikeRequestDto requestDto, Vinyl vinyl) {
-        return requestDto.tracklist().stream()
-                .map(trackList -> {
-                    TrackList list = new TrackList();
-                    list.setTitle(trackList.getTitle());
-                    list.setDuration(trackList.getDuration());
-                    list.setPosition(trackList.getPosition());
-                    // vinyl과 연관 관계 설정
-                    list.setVinyl(vinyl);
-                    return list;
-                })
-                .toList();
-    }
-
-    private static List<Format> convertDtoFormats(LikeRequestDto requestDto, Vinyl vinyl) {
-        return requestDto.formats().stream()
-                .map(formats -> {
-                    Format format = new Format();
-                    format.setName(formats.getName());
-                    format.setDescriptions(formats.getDescriptions());
-                    // vinyl과 연관 관계 설정
-                    format.setVinyl(vinyl);
-                    return format;
-                })
-                .toList();
-    }
-
-    private static List<Video> convertDtoVideos(LikeRequestDto requestDto, Vinyl vinyl) {
-        return requestDto.videos().stream()
-                .map(vid -> {
-                    Video video = new Video();
-                    video.setUri(vid.getUri());
-                    // vinyl과 연관 관계 설정
-                    video.setVinyl(vinyl);
-                    return video;
-                })
-                .toList();
-    }
-
-    private static List<ArtistDetail> convertDtoArtists(LikeRequestDto requestDto, Vinyl vinyl) {
-        return requestDto.artists().stream()
-                .map(artists -> {
-                    ArtistDetail artist = new ArtistDetail();
-                    artist.setName(artists.getName());
-                    artist.setResourceUrl(artists.getResourceUrl());
-                    // vinyl과 연관 관계 설정
-                    artist.setVinyl(vinyl);
-                    return artist;
-                })
-                .toList();
-    }
 }
