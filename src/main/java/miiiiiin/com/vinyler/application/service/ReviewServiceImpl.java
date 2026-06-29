@@ -64,8 +64,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional
     public ReviewResponseDto updateReview(Long reviewId, ReviewRequestDto request, User currentUser) {
         // 수정하고자 하는 대상 게시물 찾은 다음, 해당 게시물의 작성자와 현재 유저가 같은지를 검증
-        var reviewEntity = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
+        Review reviewEntity = getReviewEntity(reviewId);
 
         if (!reviewEntity.getUser().equals(currentUser)) {
             throw new UserNotAllowedException();
@@ -102,6 +101,22 @@ public class ReviewServiceImpl implements ReviewService {
 
         SliceImpl<ReviewDto> sliceContents = new SliceImpl<>(reviews, pageable, hasNext);
         return new SliceResponse<>(sliceContents, nextCursorId);
+    }
+
+    @Override
+    @Transactional
+    public void deleteReview(Long reviewId, User currentUser) {
+        Review reviewEntity = getReviewEntity(reviewId);
+        // 삭제하고자 하는 대상 게시물 찾은 다음, 해당 게시물의 작성자와 현재 유저가 같은지를 검증
+        if (!reviewEntity.getUser().equals(currentUser)) {
+            throw new UserNotAllowedException();
+        }
+        reviewRepository.delete(reviewEntity);
+    }
+
+    private Review getReviewEntity(Long reviewId) {
+        return reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewNotFoundException(reviewId));
     }
 
     private Vinyl getVinylEntity(Long discogsId) {

@@ -14,4 +14,6 @@ public interface ReviewService {
     ReviewDto getReviewById(Long reviewId, User user);
     ReviewResponseDto updateReview(Long reviewId, ReviewRequestDto requestDto, User user);
     SliceResponse<ReviewDto> getReviewsByDiscogsId(Long discogsId, Long cursorId, int size);
+
+    void deleteReview(Long reviewId, User user);
 }
