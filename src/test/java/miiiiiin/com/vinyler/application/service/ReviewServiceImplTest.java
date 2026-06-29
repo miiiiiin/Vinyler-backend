@@ -318,4 +318,52 @@ class ReviewServiceImplTest {
         assertThat(result.isHasNext()).isTrue();
         assertThat(result.getNextCursorId()).isEqualTo(2L);
     }
+
+    @Test
+    @DisplayName("리뷰 ID로 리뷰 삭제 - 본인 리뷰를 삭제하는 정상 케이스")
+    void deleteReview_success() {
+        // Given (testUser가 작성한 리뷰 반환)
+        long reviewId = 1L;
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(testReview));
+
+        // when
+        reviewService.deleteReview(reviewId, testUser);
+
+        // then
+        verify(reviewRepository, times(1)).delete(testReview);
+    }
+    @Test
+    @DisplayName("리뷰 ID로 리뷰 삭제 - 존재하지 않는 reviewId로 삭제 시도")
+    void deleteReview_ReviewNotFound_ThrowsException() {
+        // Given (존재하지 않는 리뷰 반환)
+        long reviewId = 999L;
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
+
+        // when
+        assertThatThrownBy(() -> reviewService.deleteReview(reviewId, testUser))
+                .isInstanceOf(ReviewNotFoundException.class);
+
+        // then
+        verify(reviewRepository, never()).delete(any(Review.class));
+    }
+
+    @Test
+    @DisplayName("리뷰 ID로 리뷰 삭제 -  anotherUser가 작성한 리뷰를 testUser가 삭제 시도")
+    void deleteReview_NotOwner_ThrowsException() {
+        // Given
+        User anotherUser = User.builder()
+                .userId(2L)
+                .email("another@example.com")
+                .nickname("anotheruser")
+                .build();
+        when(reviewRepository.findById(1L)).thenReturn(Optional.of(testReview)); // testUser가 작성한 리뷰
+
+
+        // when
+        assertThatThrownBy(() -> reviewService.deleteReview(1L, anotherUser))
+                .isInstanceOf(UserNotAllowedException.class);
+
+        // then
+        verify(reviewRepository, never()).delete(any(Review.class));
+    }
 }
