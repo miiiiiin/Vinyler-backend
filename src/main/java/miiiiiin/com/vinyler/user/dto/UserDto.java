@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import miiiiiin.com.vinyler.user.entity.User;
+import miiiiiin.com.vinyler.user.enums.ProfileVisibility;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -45,6 +46,9 @@ public class UserDto {
     @Schema(description = "현재 사용자가 팔로우 중인지 여부", example = "false")
     private boolean isFollowing;
 
+    @Schema(description = "프로필 공개 범위", example = "PUBLIC")
+    private ProfileVisibility visibility;
+
     public static UserDto from(User user, boolean isFollowing) {
         return UserDto.builder()
                 .id(user.getUserId())
@@ -56,6 +60,7 @@ public class UserDto {
                 .createdDate(user.getCreatedDate())
                 .modifiedDate(user.getModifiedDate())
                 .isFollowing(isFollowing)
+                .visibility(user.getVisibility())
                 .build();
     }
 }

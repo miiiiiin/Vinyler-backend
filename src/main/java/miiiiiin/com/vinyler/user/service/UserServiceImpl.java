@@ -16,6 +16,7 @@ import miiiiiin.com.vinyler.exception.follow.FollowAlreadyExistException;
 import miiiiiin.com.vinyler.exception.follow.FollowNotFoundException;
 import miiiiiin.com.vinyler.exception.follow.InvalidFollowException;
 import miiiiiin.com.vinyler.exception.user.UserAlreadyExistException;
+import miiiiiin.com.vinyler.exception.user.UserNotAllowedException;
 import miiiiiin.com.vinyler.exception.user.UserNotFoundException;
 import miiiiiin.com.vinyler.exception.vinyl.VinylNotFoundException;
 import miiiiiin.com.vinyler.global.Constants;
@@ -24,6 +25,7 @@ import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.dto.UserDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.entity.User;
+import miiiiiin.com.vinyler.user.enums.ProfileVisibility;
 import miiiiiin.com.vinyler.user.repository.UserRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -80,9 +82,13 @@ public class UserServiceImpl implements UserService {
         // 커서 페이징 size + 1 (+1로 다음 페이지(hasNext) 존재 여부 판단)
         Pageable pageable = PageRequest.of(0, size + 1);
 
-        var userEntity = getUserEntity(userId);
+        var targetUser = getUserEntity(userId);
+
+        // 접근 가능 여부 확인
+        validateVisibility(targetUser, currentUser);
+
         // DTO Projection 활용하여 가져온 사용자 별 찜한 음반 리스트
-        List<LikeVinylProjection> results = likeRepository.findVinylsLikedByUserWithCursor(userEntity, cursorId, pageable);
+        List<LikeVinylProjection> results = likeRepository.findVinylsLikedByUserWithCursor(targetUser, cursorId, pageable);
 
         // 결과가 size보다 많다는 의미
         boolean hasNext = results.size() > size;
@@ -107,8 +113,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public List<VinylDto> getVinylsListenedByUser(Long userId, User currentUser) {
-        var userEntity = getUserEntity(userId);
-        List<UserVinylStatus> listenedVinyls = userVinylStatusRepository.findByUserAndListened(userEntity, true);
+        var targetUser = getUserEntity(userId);
+        // 접근 가능 여부 확인
+        validateVisibility(targetUser, currentUser);
+        List<UserVinylStatus> listenedVinyls = userVinylStatusRepository.findByUserAndListened(targetUser, true);
         return listenedVinyls.stream().map(VinylDto::of).toList();
     }
 
@@ -182,6 +190,18 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * 사용자의 프로필 공개 여부 변경
+     */
+    @Override
+    @Transactional
+    public UserDto changeProfileVisibility(User currentUser, ProfileVisibility visibility) {
+        currentUser.setVisibility(visibility);
+        // SecurityContext에서 넘어온 엔티티는 detached 상태일 수 있으므로 명시적으로 저장
+        userRepository.save(currentUser);
+        return getUserInfo(currentUser);
+    }
+
+    /**
      * API를 호출하고 있는 유저가 팔로잉하고 있는지 상태 체크 (팔로워: currentUser, 팔로잉: user)
      */
     private UserDto getUserWithFollowingStatus(User currentUser, User user) {
@@ -192,6 +212,25 @@ public class UserServiceImpl implements UserService {
     private User getUserEntity(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
+    }
+
+    /**
+     * 대상 유저의 프로필 공개 범위에 따라 현재 요청자의 접근 가능 여부를 검증
+     * PUBLIC이면 통과, FOLLOWERS_ONLY면 팔로우 관계 확인, PRIVATE이면 본인만 허용
+     */
+    private void validateVisibility(User targetUser, User currentUser) {
+        if (targetUser.getVisibility() == ProfileVisibility.PUBLIC) return;
+
+        boolean isSelf = currentUser.getUserId().equals(targetUser.getUserId());
+        if (isSelf) return;
+
+        // 프로필 공개 범위 (FOLLOWERS_ONLY)
+        if (targetUser.getVisibility() == ProfileVisibility.FOLLOWERS_ONLY) {
+            boolean isFollowing = followRepository.findByFollowerAndFollowing(currentUser, targetUser).isPresent();
+            if (!isFollowing) throw new UserNotAllowedException();
+        } else { // PRIVATE
+            throw new UserNotAllowedException();
+        }
     }
 
     private User getUserEntity(Long userId) {
