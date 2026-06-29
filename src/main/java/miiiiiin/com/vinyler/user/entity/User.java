@@ -52,6 +52,7 @@ public class User extends BaseEntity {
     @Column
     private Long followingsCount = 0L;
 
+    @Builder.Default
     @Column(nullable = false)
     private ProfileVisibility visibility = ProfileVisibility.PUBLIC;
 
