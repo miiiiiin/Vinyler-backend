@@ -2,6 +2,7 @@ package miiiiiin.com.vinyler.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import miiiiiin.com.vinyler.user.enums.ProfileVisibility;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 //import org.springframework.security.core.GrantedAuthority;
@@ -50,6 +51,9 @@ public class User extends BaseEntity {
 
     @Column
     private Long followingsCount = 0L;
+
+    @Column(nullable = false)
+    private ProfileVisibility visibility = ProfileVisibility.PUBLIC;
 
     @Override
     public boolean equals(Object o) {
