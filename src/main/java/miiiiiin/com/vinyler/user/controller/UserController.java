@@ -13,6 +13,7 @@ import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.dto.UserDto;
 import miiiiiin.com.vinyler.user.dto.request.ClientRegisterReqeustDto;
+import miiiiiin.com.vinyler.user.dto.request.UpdateUserRequestDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -143,4 +144,19 @@ public class UserController {
         var response = userService.getUserInfo(userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @PatchMapping
+    @Operation(summary = "내 정보 수정", description = "현재 로그인한 사용자의 정보를 수정합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "수정 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "409", description = "이미 존재하는 닉네임")
+    })
+    public ResponseEntity<UserDto> updateUserInfo(
+            @RequestBody UpdateUserRequestDto request,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        var response = userService.updateUserInfo(userDetails.getUser(), request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 }

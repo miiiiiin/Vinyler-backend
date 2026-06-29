@@ -23,6 +23,7 @@ import miiiiiin.com.vinyler.global.Constants;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.dto.UserDto;
+import miiiiiin.com.vinyler.user.dto.request.UpdateUserRequestDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.entity.User;
 import miiiiiin.com.vinyler.user.enums.ProfileVisibility;
@@ -57,6 +58,24 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUserInfo(User currentUser) {
         return UserDto.from(currentUser, false);
+    }
+
+    @Override
+    @Transactional
+    public UserDto updateUserInfo(User currentUser, UpdateUserRequestDto dto) {
+        if (dto.nickname() != null && !dto.nickname().equals(currentUser.getNickname())) {
+            userRepository.findByNickname(dto.nickname()).ifPresent(
+                    u -> { throw new UserAlreadyExistException(dto.nickname());});
+            currentUser.setNickname(dto.nickname());
+        }
+
+        if (dto.profile() != null) currentUser.setProfile(dto.profile());
+        if (dto.birthday() != null) currentUser.setBirthday(dto.birthday());
+        if (dto.visibility() != null) currentUser.setVisibility(dto.visibility());
+
+        // SecurityContext에서 넘어온 엔티티는 detached 상태일 수 있으므로 명시적으로 저장
+        userRepository.save(currentUser);
+        return getUserInfo(currentUser);
     }
 
     @Override
@@ -187,18 +206,6 @@ public class UserServiceImpl implements UserService {
         var follower = getUserEntity(userId);
         var followEntities = followRepository.findByFollower(follower);
         return followEntities.stream().map(follow -> getUserWithFollowingStatus(currentUser, follow.getFollowing())).toList();
-    }
-
-    /**
-     * 사용자의 프로필 공개 여부 변경
-     */
-    @Override
-    @Transactional
-    public UserDto changeProfileVisibility(User currentUser, ProfileVisibility visibility) {
-        currentUser.setVisibility(visibility);
-        // SecurityContext에서 넘어온 엔티티는 detached 상태일 수 있으므로 명시적으로 저장
-        userRepository.save(currentUser);
-        return getUserInfo(currentUser);
     }
 
     /**

@@ -1,17 +1,12 @@
 package miiiiiin.com.vinyler.user.service;
 
-import jakarta.validation.Valid;
 import miiiiiin.com.vinyler.application.dto.VinylDto;
 import miiiiiin.com.vinyler.application.dto.response.SliceResponse;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.dto.UserDto;
-import miiiiiin.com.vinyler.user.dto.request.LoginRequestDto;
-import miiiiiin.com.vinyler.user.dto.response.LoginResponseDto;
+import miiiiiin.com.vinyler.user.dto.request.UpdateUserRequestDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
 import miiiiiin.com.vinyler.user.entity.User;
-import miiiiiin.com.vinyler.user.enums.ProfileVisibility;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
@@ -25,6 +20,5 @@ public interface UserService extends UserDetailsService {
     List<UserDto> getFollowersByUser(Long userId, User user);
     List<UserDto> getFollowingsByUser(Long userId, User user);
     UserDto getUserInfo(User user);
-
-    UserDto changeProfileVisibility(User currentUser, ProfileVisibility visibility);
+    UserDto updateUserInfo(User currentUser, UpdateUserRequestDto dto);
 }
