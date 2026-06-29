@@ -19,7 +19,9 @@ import miiiiiin.com.vinyler.security.UserDetailsImpl;
 import miiiiiin.com.vinyler.user.dto.ServiceRegisterDto;
 import miiiiiin.com.vinyler.user.dto.UserDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
+import miiiiiin.com.vinyler.user.dto.request.UpdateUserRequestDto;
 import miiiiiin.com.vinyler.user.entity.User;
+import miiiiiin.com.vinyler.user.enums.ProfileVisibility;
 import miiiiiin.com.vinyler.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -180,7 +182,74 @@ class UserServiceImplTest {
         assertThat(result).isNotNull();
         assertThat(result.getEmail()).isEqualTo(testUser.getEmail());
         assertThat(result.getNickname()).isEqualTo(testUser.getNickname());
+        assertThat(result.getVisibility()).isEqualTo(ProfileVisibility.PUBLIC);
         assertThat(result.isFollowing()).isFalse();
+    }
+
+    @Test
+    @DisplayName("유저 정보 수정 - 전체 필드 성공")
+    void updateUserInfo_AllFields_Success() {
+        // Given
+        UpdateUserRequestDto dto = new UpdateUserRequestDto(
+                "newnickname", "newprofile.jpg", LocalDate.of(1995, 5, 15), ProfileVisibility.PRIVATE
+        );
+        when(userRepository.findByNickname("newnickname")).thenReturn(Optional.empty());
+        when(userRepository.save(testUser)).thenReturn(testUser);
+
+        // When
+        UserDto result = userService.updateUserInfo(testUser, dto);
+
+        // Then
+        assertThat(result.getNickname()).isEqualTo("newnickname");
+        assertThat(result.getProfile()).isEqualTo("newprofile.jpg");
+        assertThat(result.getBirthday()).isEqualTo(LocalDate.of(1995, 5, 15));
+        assertThat(result.getVisibility()).isEqualTo(ProfileVisibility.PRIVATE);
+        verify(userRepository).save(testUser);
+    }
+
+    @Test
+    @DisplayName("유저 정보 수정 - 현재 닉네임과 동일하면 중복 체크 없음")
+    void updateUserInfo_SameNickname_NoCheck() {
+        // Given
+        UpdateUserRequestDto dto = new UpdateUserRequestDto("testuser", null, null, null);
+        when(userRepository.save(testUser)).thenReturn(testUser);
+
+        // When
+        userService.updateUserInfo(testUser, dto);
+
+        // Then
+        verify(userRepository, never()).findByNickname(any());
+        verify(userRepository).save(testUser);
+    }
+
+    @Test
+    @DisplayName("유저 정보 수정 - 닉네임 중복 시 예외 발생")
+    void updateUserInfo_NicknameDuplicate_ThrowsException() {
+        // Given
+        UpdateUserRequestDto dto = new UpdateUserRequestDto("duplicatenick", null, null, null);
+        when(userRepository.findByNickname("duplicatenick")).thenReturn(Optional.of(anotherUser));
+
+        // When & Then
+        assertThatThrownBy(() -> userService.updateUserInfo(testUser, dto))
+                .isInstanceOf(UserAlreadyExistException.class);
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("유저 정보 수정 - null 필드는 변경 없음")
+    void updateUserInfo_NullFields_NoChange() {
+        // Given
+        UpdateUserRequestDto dto = new UpdateUserRequestDto(null, null, null, null);
+        String originalNickname = testUser.getNickname();
+        when(userRepository.save(testUser)).thenReturn(testUser);
+
+        // When
+        UserDto result = userService.updateUserInfo(testUser, dto);
+
+        // Then
+        assertThat(result.getNickname()).isEqualTo(originalNickname);
+        verify(userRepository, never()).findByNickname(any());
+        verify(userRepository).save(testUser);
     }
 
     @Test
@@ -316,7 +385,7 @@ class UserServiceImplTest {
         Follow follow2 = Follow.of(testUser, thirdUser);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(followRepository.findByFollowing(testUser)).thenReturn(Arrays.asList(follow1, follow2));
+        when(followRepository.findByFollower(testUser)).thenReturn(Arrays.asList(follow1, follow2));
         when(followRepository.findByFollowerAndFollowing(eq(testUser), any())).thenReturn(Optional.empty());
 
         // When
