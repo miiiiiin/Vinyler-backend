@@ -21,4 +21,6 @@ public interface UserService extends UserDetailsService {
     List<UserDto> getFollowingsByUser(Long userId, User user);
     UserDto getUserInfo(User user);
     UserDto updateUserInfo(User currentUser, UpdateUserRequestDto dto);
+
+    void withdrawUser(User currentUser);
 }
