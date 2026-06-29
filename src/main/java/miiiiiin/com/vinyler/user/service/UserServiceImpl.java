@@ -208,6 +208,12 @@ public class UserServiceImpl implements UserService {
         return followEntities.stream().map(follow -> getUserWithFollowingStatus(currentUser, follow.getFollowing())).toList();
     }
 
+    @Override
+    @Transactional
+    public void withdrawUser(User currentUser) {
+        userRepository.delete(currentUser);
+    }
+
     /**
      * API를 호출하고 있는 유저가 팔로잉하고 있는지 상태 체크 (팔로워: currentUser, 팔로잉: user)
      */

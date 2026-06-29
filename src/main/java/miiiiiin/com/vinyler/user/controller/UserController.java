@@ -15,9 +15,10 @@ import miiiiiin.com.vinyler.user.dto.UserDto;
 import miiiiiin.com.vinyler.user.dto.request.ClientRegisterReqeustDto;
 import miiiiiin.com.vinyler.user.dto.request.UpdateUserRequestDto;
 import miiiiiin.com.vinyler.user.dto.response.UserResponseDto;
+import miiiiiin.com.vinyler.auth.filter.JwtTokenProvider;
+import miiiiiin.com.vinyler.auth.service.AuthService;
 import miiiiiin.com.vinyler.user.service.UserService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,8 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/register")
     @Operation(summary = "회원가입", description = "신규 회원을 등록합니다.")
@@ -159,4 +162,22 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @DeleteMapping
+    @Operation(summary = "회원 탈퇴", description = "현재 로그인한 사용자를 탈퇴 처리하고 세션을 무효화합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "탈퇴 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
+    public ResponseEntity<Void> withdrawUser(
+            @Parameter(description = "Bearer {accessToken}") @RequestHeader(value = HttpHeaders.AUTHORIZATION) String accessToken,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.withdrawUser(userDetails.getUser());
+
+        if (accessToken.startsWith(JwtTokenProvider.BEARER_PREFIX)) {
+            accessToken = accessToken.substring(JwtTokenProvider.BEARER_PREFIX.length());
+        }
+        authService.logout(accessToken);
+
+        return ResponseEntity.ok().build();
+    }
 }
