@@ -456,4 +456,25 @@ class UserServiceImplTest {
         assertThatThrownBy(() -> userService.follow(999L, testUser))
                 .isInstanceOf(UserNotFoundException.class);
     }
+
+    @Test
+    @DisplayName("회원 탈퇴 - soft delete 호출 성공")
+    void withdrawUser_Success() {
+        // When
+        userService.withdrawUser(testUser);
+
+        // Then
+        verify(userRepository, times(1)).delete(testUser);
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 - delete 호출 후 추가 save 없음")
+    void withdrawUser_NoExtraSave() {
+        // When
+        userService.withdrawUser(testUser);
+
+        // Then
+        verify(userRepository, never()).save(any(User.class));
+        verify(userRepository, never()).saveAll(anyList());
+    }
 }
