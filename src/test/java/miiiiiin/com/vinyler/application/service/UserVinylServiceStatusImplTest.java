@@ -5,7 +5,6 @@ import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
 import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
-import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +26,7 @@ import static org.mockito.Mockito.*;
 class UserVinylServiceStatusImplTest {
 
     @Mock
-    private VinylRepository vinylRepository;
+    private VinylService vinylService;
 
     @Mock
     private UserVinylStatusRepository userVinylStatusRepository;
@@ -79,10 +78,9 @@ class UserVinylServiceStatusImplTest {
     @DisplayName("감상 상태 토글 - 감상 표시 추가 (Vinyl 존재)")
     void toggleListenStatus_AddListen_VinylExists() {
         // Given
-        when(vinylRepository.findByDiscogsId(12345L)).thenReturn(Optional.of(testVinyl));
+        when(vinylService.findOrCreateVinyl(likeRequestDto, testUser)).thenReturn(testVinyl);
         when(userVinylStatusRepository.findByUserAndVinyl(testUser, testVinyl)).thenReturn(Optional.empty());
         when(userVinylStatusRepository.save(any(UserVinylStatus.class))).thenReturn(new UserVinylStatus());
-        when(vinylRepository.save(any(Vinyl.class))).thenReturn(testVinyl);
 
         // When
         UserVinylStatusDto result = userVinylStatusService.toggleListenStatus(likeRequestDto, testUser);
@@ -99,8 +97,7 @@ class UserVinylServiceStatusImplTest {
     @DisplayName("감상 상태 토글 - 감상 표시 추가 (Vinyl 존재하지 않음)")
     void toggleListenStatus_AddListen_VinylNotExists() {
         // Given
-        when(vinylRepository.findByDiscogsId(12345L)).thenReturn(Optional.empty());
-        when(vinylRepository.save(any(Vinyl.class))).thenReturn(testVinyl);
+        when(vinylService.findOrCreateVinyl(likeRequestDto, testUser)).thenReturn(testVinyl);
         when(userVinylStatusRepository.findByUserAndVinyl(testUser, testVinyl)).thenReturn(Optional.empty());
         when(userVinylStatusRepository.save(any(UserVinylStatus.class))).thenReturn(new UserVinylStatus());
 
@@ -110,7 +107,6 @@ class UserVinylServiceStatusImplTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.isListened()).isTrue();
-        verify(vinylRepository, times(2)).save(any(Vinyl.class)); // 생성 + 업데이트
         verify(userVinylStatusRepository, times(1)).save(any(UserVinylStatus.class));
     }
 
@@ -119,11 +115,10 @@ class UserVinylServiceStatusImplTest {
     void toggleListenStatus_RemoveListen() {
         // Given
         UserVinylStatus existingStatus = UserVinylStatus.of(testUser, testVinyl, true);
-        
-        when(vinylRepository.findByDiscogsId(12345L)).thenReturn(Optional.of(testVinyl));
+
+        when(vinylService.findOrCreateVinyl(likeRequestDto, testUser)).thenReturn(testVinyl);
         when(userVinylStatusRepository.findByUserAndVinyl(testUser, testVinyl))
                 .thenReturn(Optional.of(existingStatus));
-        when(vinylRepository.save(any(Vinyl.class))).thenReturn(testVinyl);
 
         // When
         UserVinylStatusDto result = userVinylStatusService.toggleListenStatus(likeRequestDto, testUser);
@@ -132,7 +127,6 @@ class UserVinylServiceStatusImplTest {
         assertThat(result).isNotNull();
         assertThat(result.isListened()).isFalse();
         verify(userVinylStatusRepository, times(1)).delete(existingStatus);
-        verify(vinylRepository, times(1)).save(testVinyl);
     }
 
     @Test
@@ -140,12 +134,11 @@ class UserVinylServiceStatusImplTest {
     void toggleListenStatus_FromNotListenedToListened() {
         // Given
         UserVinylStatus existingStatus = UserVinylStatus.of(testUser, testVinyl, false);
-        
-        when(vinylRepository.findByDiscogsId(12345L)).thenReturn(Optional.of(testVinyl));
+
+        when(vinylService.findOrCreateVinyl(likeRequestDto, testUser)).thenReturn(testVinyl);
         when(userVinylStatusRepository.findByUserAndVinyl(testUser, testVinyl))
                 .thenReturn(Optional.of(existingStatus));
         when(userVinylStatusRepository.save(any(UserVinylStatus.class))).thenReturn(existingStatus);
-        when(vinylRepository.save(any(Vinyl.class))).thenReturn(testVinyl);
 
         // When
         UserVinylStatusDto result = userVinylStatusService.toggleListenStatus(likeRequestDto, testUser);
@@ -160,10 +153,9 @@ class UserVinylServiceStatusImplTest {
     @DisplayName("감상 상태 토글 - 여러 번 토글 테스트")
     void toggleListenStatus_MultipleToggles() {
         // Given - 첫 번째 토글 (추가)
-        when(vinylRepository.findByDiscogsId(12345L)).thenReturn(Optional.of(testVinyl));
+        when(vinylService.findOrCreateVinyl(likeRequestDto, testUser)).thenReturn(testVinyl);
         when(userVinylStatusRepository.findByUserAndVinyl(testUser, testVinyl)).thenReturn(Optional.empty());
         when(userVinylStatusRepository.save(any(UserVinylStatus.class))).thenReturn(new UserVinylStatus());
-        when(vinylRepository.save(any(Vinyl.class))).thenReturn(testVinyl);
 
         // When - 첫 번째 토글
         UserVinylStatusDto result1 = userVinylStatusService.toggleListenStatus(likeRequestDto, testUser);
