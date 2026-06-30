@@ -55,6 +55,7 @@ public class UserDto {
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .profile(user.getProfile())
+                .birthday(user.getBirthday())
                 .followerCount(user.getFollowersCount())
                 .followingCount(user.getFollowingsCount())
                 .createdDate(user.getCreatedDate())

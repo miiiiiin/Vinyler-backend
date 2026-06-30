@@ -349,7 +349,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("팔로워 목록 조회 - 성공")
+    @DisplayName("팔로워 목록 조회 - 커서 페이징")
     void getFollowersByUser_Success() {
         // Given
         Follow follow1 = Follow.of(anotherUser, testUser);
@@ -361,19 +361,21 @@ class UserServiceImplTest {
         Follow follow2 = Follow.of(thirdUser, testUser);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(followRepository.findByFollowing(testUser)).thenReturn(Arrays.asList(follow1, follow2));
+        when(followRepository.findFollowersByUserWithCursor(eq(testUser), isNull(), any()))
+                .thenReturn(Arrays.asList(follow1, follow2));
         when(followRepository.findByFollowerAndFollowing(eq(testUser), any())).thenReturn(Optional.empty());
 
         // When
-        List<UserDto> result = userService.getFollowersByUser(1L, testUser);
+        SliceResponse<UserDto> result = userService.getFollowersByUser(1L, testUser, null, 10);
 
         // Then
-        assertThat(result).hasSize(2);
-        assertThat(result).extracting("email").contains("another@example.com", "third@example.com");
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent()).extracting("email").contains("another@example.com", "third@example.com");
+        assertThat(result.isHasNext()).isFalse();
     }
 
     @Test
-    @DisplayName("팔로잉 목록 조회 - 성공")
+    @DisplayName("팔로잉 목록 조회 - 커서 페이징")
     void getFollowingsByUser_Success() {
         // Given
         Follow follow1 = Follow.of(testUser, anotherUser);
@@ -385,14 +387,16 @@ class UserServiceImplTest {
         Follow follow2 = Follow.of(testUser, thirdUser);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(followRepository.findByFollower(testUser)).thenReturn(Arrays.asList(follow1, follow2));
+        when(followRepository.findFollowingsByUserWithCursor(eq(testUser), isNull(), any()))
+                .thenReturn(Arrays.asList(follow1, follow2));
         when(followRepository.findByFollowerAndFollowing(eq(testUser), any())).thenReturn(Optional.empty());
 
         // When
-        List<UserDto> result = userService.getFollowingsByUser(1L, testUser);
+        SliceResponse<UserDto> result = userService.getFollowingsByUser(1L, testUser, null, 10);
 
         // Then
-        assertThat(result).hasSize(2);
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.isHasNext()).isFalse();
     }
 
     @Test
@@ -408,7 +412,6 @@ class UserServiceImplTest {
                 .videos(new ArrayList<>()).artists(new ArrayList<>()).build();
         
         LikeVinylProjection projection1 = mock(LikeVinylProjection.class);
-        when(projection1.getLikeId()).thenReturn(1L);
         when(projection1.getVinylId()).thenReturn(1L);
         
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
