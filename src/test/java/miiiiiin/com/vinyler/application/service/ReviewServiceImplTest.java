@@ -200,7 +200,6 @@ class ReviewServiceImplTest {
         updateRequest.setContent("Updated review content");
 
         when(reviewRepository.findById(1L)).thenReturn(Optional.of(testReview));
-        when(reviewRepository.save(any(Review.class))).thenReturn(testReview);
 
         // When
         ReviewResponseDto result = reviewService.updateReview(1L, updateRequest, testUser);
@@ -208,9 +207,9 @@ class ReviewServiceImplTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.getReviewId()).isEqualTo(1L);
-        verify(reviewRepository, times(1)).save(any(Review.class));
         assertThat(testReview.getRating()).isEqualTo(4);
         assertThat(testReview.getContent()).isEqualTo("Updated review content");
+        verify(reviewRepository, never()).save(any(Review.class));
     }
 
     @Test
