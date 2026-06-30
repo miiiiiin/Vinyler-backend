@@ -117,10 +117,12 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "404", description = "유저를 찾을 수 없음")
     })
-    public ResponseEntity<List<UserDto>> getFollowersByUser(
+    public ResponseEntity<SliceResponse<UserDto>> getFollowersByUser(
             @Parameter(description = "조회할 유저 ID", example = "1") @PathVariable Long userId,
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        var response = userService.getFollowersByUser(userId, userDetails.getUser());
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @Parameter(description = "커서 ID (다음 페이지 시작점, 첫 요청 시 생략)") @RequestParam(required = false) Long cursorId,
+            @Parameter(description = "페이지 크기", example = "10") @RequestParam(defaultValue = "10") int size) {
+        var response = userService.getFollowersByUser(userId, userDetails.getUser(), cursorId, size);
         return ResponseEntity.ok(response);
     }
 
@@ -131,10 +133,12 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "404", description = "유저를 찾을 수 없음")
     })
-    public ResponseEntity<List<UserDto>> getFollowingsByUser(
+    public ResponseEntity<SliceResponse<UserDto>> getFollowingsByUser(
             @Parameter(description = "조회할 유저 ID", example = "1") @PathVariable Long userId,
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        var response = userService.getFollowingsByUser(userId, userDetails.getUser());
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @Parameter(description = "커서 ID (다음 페이지 시작점, 첫 요청 시 생략)") @RequestParam(required = false) Long cursorId,
+            @Parameter(description = "페이지 크기", example = "10") @RequestParam(defaultValue = "10") int size) {
+        var response = userService.getFollowingsByUser(userId, userDetails.getUser(), cursorId, size);
         return ResponseEntity.ok(response);
     }
 

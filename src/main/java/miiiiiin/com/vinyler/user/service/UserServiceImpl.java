@@ -159,6 +159,74 @@ public class UserServiceImpl implements UserService {
         return new SliceResponse<>(sliceContents, nextCursorId);
     }
 
+
+
+    /**
+     * userId의 팔로워 리스트
+     * 나를 팔로우한 사람들 (팔로워 목록)
+     */
+    @Override
+    public SliceResponse<UserDto> getFollowersByUser(Long userId, User currentUser, Long cursorId, int size) {
+        // 커서 페이징 size + 1 (+1로 다음 페이지(hasNext) 존재 여부 판단)
+        Pageable pageable = PageRequest.of(0, size + 1);
+
+        // 팔로잉하고 있는 해당 유저 존재하는지 확인 (팔로워 목록을 조회할 대상 유저)
+        var targetUser = getUserEntity(userId);
+
+        // targetUser를 팔로우하고 있는 Follow 행들을 커서 기반으로 조회
+        List<Follow> results = followRepository.findFollowersByUserWithCursor(targetUser, cursorId, pageable);
+
+        // 결과가 size보다 많다는 의미
+        boolean hasNext = results.size() > size;
+        // 마지막 1개를 제외한 size개만 클라이언트에 응답 => subList(0, size)를 이용해 앞쪽 size개만 자름
+        List<Follow> contents = hasNext ? results.subList(0, size) : results;
+
+        // follow.getFollower() : 실제 팔로워 유저
+        // (currentUser가 각 팔로워를 팔로우하고 있는지 isFollowing 체크 포함)
+        List<UserDto> userDtos = contents.stream()
+                .map(follow -> getUserWithFollowingStatus(currentUser, follow.getFollower()))
+                .toList();
+
+        // 다음 요청에서 커서로 사용할 ID = 클라이언트에 반환해준 마지막 요소의 ID (contents.get(last)) : Follow.id
+        Long nextCursorId = hasNext ? contents.get(contents.size() - 1).getId() : null;
+
+        SliceImpl<UserDto> sliceContents = new SliceImpl<>(userDtos, PageRequest.of(0, size), hasNext);
+        return new SliceResponse<>(sliceContents, nextCursorId);
+    }
+
+    /**
+     * userId가 팔로워 (userId가 팔로잉하고 있는 리스트)
+     * 내가 팔로우한 사람들 (팔로잉 목록)
+     */
+    @Override
+    public SliceResponse<UserDto> getFollowingsByUser(Long userId, User currentUser, Long cursorId, int size) {
+        // 커서 페이징 size + 1 (+1로 다음 페이지(hasNext) 존재 여부 판단)
+        Pageable pageable = PageRequest.of(0, size + 1);
+
+        // 팔로잉하고 있는 해당 유저 존재하는지 확인 (팔로워 목록을 조회할 대상 유저)
+        var targetUser = getUserEntity(userId);
+
+        // targetUser가 팔로잉하고있는 Follow 행들을 커서 기반으로 조회
+        List<Follow> results = followRepository.findFollowingsByUserWithCursor(targetUser, cursorId, pageable);
+
+        // 결과가 size보다 많다는 의미
+        boolean hasNext = results.size() > size;
+        // 마지막 1개를 제외한 size개만 클라이언트에 응답 => subList(0, size)를 이용해 앞쪽 size개만 자름
+        List<Follow> contents = hasNext ? results.subList(0, size) : results;
+
+        // follow.getFollowing : targetUser(나)가 팔로우한 유저
+        // (currentUser가 각 팔로워를 팔로우하고 있는지 isFollowing 체크 포함)
+        List<UserDto> userDtos = contents.stream()
+                .map(follow -> getUserWithFollowingStatus(currentUser, follow.getFollowing()))
+                .toList();
+
+        // 다음 요청에서 커서로 사용할 ID = 클라이언트에 반환해준 마지막 요소의 ID (contents.get(last)) : Follow.id
+        Long nextCursorId = hasNext ? contents.get(contents.size() - 1).getId() : null;
+
+        SliceImpl<UserDto> sliceContents = new SliceImpl<>(userDtos, PageRequest.of(0, size), hasNext);
+        return new SliceResponse<>(sliceContents, nextCursorId);
+    }
+
     @Override
     public UserDto follow(Long userId, User currentUser) {
         var following = getUserEntity(userId);
@@ -203,29 +271,6 @@ public class UserServiceImpl implements UserService {
 
         userRepository.saveAll(List.of(currentUser, following));
         return UserDto.from(following, false);
-    }
-
-    /**
-     * userId의 팔로워 리스트
-     * 나를 팔로우한 사람들 (팔로워 목록)
-     */
-    @Override
-    public List<UserDto> getFollowersByUser(Long userId, User currentUser) {
-        // 팔로잉하고 있는 해당 유저 존재하는지 확인
-        var following = getUserEntity(userId);
-        var followEntities = followRepository.findByFollowing(following);
-        return followEntities.stream().map(follow -> getUserWithFollowingStatus(currentUser, follow.getFollower())).toList();
-    }
-
-    /**
-     * userId가 팔로워 (userId가 팔로잉하고 있는 리스트)
-     * 내가 팔로우한 사람들 (팔로잉 목록)
-     */
-    @Override
-    public List<UserDto> getFollowingsByUser(Long userId, User currentUser) {
-        var follower = getUserEntity(userId);
-        var followEntities = followRepository.findByFollower(follower);
-        return followEntities.stream().map(follow -> getUserWithFollowingStatus(currentUser, follow.getFollowing())).toList();
     }
 
     @Override
