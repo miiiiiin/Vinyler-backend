@@ -53,6 +53,7 @@ public class User extends BaseEntity {
     private Long followingsCount = 0L;
 
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProfileVisibility visibility = ProfileVisibility.PUBLIC;
 
