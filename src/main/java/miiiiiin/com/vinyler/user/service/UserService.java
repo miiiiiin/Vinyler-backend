@@ -17,8 +17,8 @@ public interface UserService extends UserDetailsService {
     SliceResponse<VinylDto> getVinylsListenedByUser(Long userId, User user, Long cursorId, int size);
     UserDto follow(Long userId, User user);
     UserDto unfollow(Long userId, User user);
-    List<UserDto> getFollowersByUser(Long userId, User user);
-    List<UserDto> getFollowingsByUser(Long userId, User user);
+    SliceResponse<UserDto> getFollowersByUser(Long userId, User user, Long cursorId, int size);
+    SliceResponse<UserDto> getFollowingsByUser(Long userId, User user, Long cursorId, int size);
     UserDto getUserInfo(User user);
     UserDto updateUserInfo(User currentUser, UpdateUserRequestDto dto);
 
