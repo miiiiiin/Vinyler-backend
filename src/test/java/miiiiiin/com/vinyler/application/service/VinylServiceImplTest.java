@@ -94,7 +94,7 @@ class VinylServiceImplTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.isIsLiking()).isTrue();
+        assertThat(result.isLiking()).isTrue();
         assertThat(result.getVinylId()).isEqualTo(1L);
         assertThat(result.getUserId()).isEqualTo(1L);
         assertThat(testVinyl.getLikesCount()).isEqualTo(6L);
@@ -116,7 +116,7 @@ class VinylServiceImplTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.isIsLiking()).isTrue();
+        assertThat(result.isLiking()).isTrue();
         verify(vinylRepository, times(2)).save(any(Vinyl.class)); // 한 번은 생성, 한 번은 likesCount 업데이트
         verify(likeRepository, times(1)).save(any(Like.class));
     }
@@ -134,7 +134,7 @@ class VinylServiceImplTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.isIsLiking()).isFalse();
+        assertThat(result.isLiking()).isFalse();
         assertThat(testVinyl.getLikesCount()).isEqualTo(4L);
         verify(likeRepository, times(1)).delete(testLike);
         verify(vinylRepository, times(1)).save(testVinyl);
@@ -154,7 +154,7 @@ class VinylServiceImplTest {
 
         // Then
         assertThat(testVinyl.getLikesCount()).isEqualTo(0L);
-        assertThat(result.isIsLiking()).isFalse();
+        assertThat(result.isLiking()).isFalse();
     }
 
     @Test
@@ -169,7 +169,7 @@ class VinylServiceImplTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.isIsLiking()).isTrue();
+        assertThat(result.isLiking()).isTrue();
         assertThat(result.getVinylId()).isEqualTo(1L);
         assertThat(result.getUserId()).isEqualTo(1L);
         verify(vinylRepository, times(1)).findByDiscogsId(12345L);
@@ -188,7 +188,7 @@ class VinylServiceImplTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.isIsLiking()).isFalse();
+        assertThat(result.isLiking()).isFalse();
         verify(vinylRepository, times(1)).findByDiscogsId(12345L);
         verify(likeRepository, times(1)).findByUserAndVinyl(testUser, testVinyl);
     }

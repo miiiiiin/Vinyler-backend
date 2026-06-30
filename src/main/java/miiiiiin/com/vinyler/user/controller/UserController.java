@@ -64,17 +64,19 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/listened")
-    @Operation(summary = "감상한 Vinyl 목록 조회", description = "특정 유저가 감상한 Vinyl 목록을 조회합니다.")
+    @Operation(summary = "감상한 Vinyl 목록 조회", description = "특정 유저가 감상한 Vinyl 목록을 커서 기반 페이징으로 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "403", description = "접근 권한 없음"),
             @ApiResponse(responseCode = "404", description = "유저를 찾을 수 없음")
     })
-    public ResponseEntity<List<VinylDto>> getVinylsListenedByUser(
+    public ResponseEntity<SliceResponse<VinylDto>> getVinylsListenedByUser(
             @Parameter(description = "조회할 유저 ID", example = "1") @PathVariable Long userId,
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        var response = userService.getVinylsListenedByUser(userId, userDetails.getUser());
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @Parameter(description = "커서 ID (다음 페이지 시작점, 첫 요청 시 생략)") @RequestParam(required = false) Long cursorId,
+            @Parameter(description = "페이지 크기", example = "10") @RequestParam(defaultValue = "10") int size) {
+        var response = userService.getVinylsListenedByUser(userId, userDetails.getUser(), cursorId, size);
         return ResponseEntity.ok(response);
     }
 

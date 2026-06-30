@@ -429,6 +429,8 @@ class UserServiceImplTest {
     @DisplayName("사용자가 감상한 Vinyl 목록 조회 - 성공")
     void getVinylsListenedByUser_Success() {
         // Given
+        Long cursorId = null;
+        int size = 2;
         Vinyl vinyl1 = Vinyl.builder().vinylId(1L).discogsId(100L).title("Vinyl 1")
                 .images(new ArrayList<>()).tracklist(new ArrayList<>()).formats(new ArrayList<>())
                 .videos(new ArrayList<>()).artists(new ArrayList<>()).build();
@@ -436,14 +438,15 @@ class UserServiceImplTest {
         UserVinylStatus status1 = UserVinylStatus.of(testUser, vinyl1, true);
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(userVinylStatusRepository.findByUserAndListened(testUser, true))
+        when(userVinylStatusRepository.findListenedByUserWithCursor(eq(testUser), isNull(), any()))
                 .thenReturn(List.of(status1));
 
         // When
-        List<VinylDto> result = userService.getVinylsListenedByUser(1L, testUser);
+        SliceResponse<VinylDto> result = userService.getVinylsListenedByUser(1L, testUser, cursorId, size);
 
         // Then
-        assertThat(result).hasSize(1);
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.isHasNext()).isFalse();
     }
 
     @Test
