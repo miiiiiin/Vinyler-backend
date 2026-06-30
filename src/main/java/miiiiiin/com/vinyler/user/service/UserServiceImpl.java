@@ -1,6 +1,5 @@
 package miiiiiin.com.vinyler.user.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.VinylDto;
 import miiiiiin.com.vinyler.application.dto.projection.LikeVinylProjection;
@@ -35,8 +34,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -131,12 +132,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public List<VinylDto> getVinylsListenedByUser(Long userId, User currentUser) {
+    public SliceResponse<VinylDto> getVinylsListenedByUser(Long userId, User currentUser, Long cursorId, int size) {
+        // 커서 페이징 size + 1 (+1로 다음 페이지(hasNext) 존재 여부 판단)
+        Pageable pageable = PageRequest.of(0, size + 1);
+
         var targetUser = getUserEntity(userId);
+
         // 접근 가능 여부 확인
         validateVisibility(targetUser, currentUser);
-        List<UserVinylStatus> listenedVinyls = userVinylStatusRepository.findByUserAndListened(targetUser, true);
-        return listenedVinyls.stream().map(VinylDto::of).toList();
+
+        List<UserVinylStatus> results = userVinylStatusRepository.findListenedByUserWithCursor(targetUser, cursorId, pageable);
+        // 결과가 size보다 많다는 의미
+        boolean hasNext = results.size() > size;
+        // 마지막 1개를 제외한 size개만 클라이언트에 응답 => subList(0, size)를 이용해 앞쪽 size개만 자름
+        List<UserVinylStatus> contents = hasNext ? results.subList(0, size) : results;
+
+        // 필요한 연관 관계 직접 조회 및 VinylDto로 구성 (유저가 감상한 음반 목록 조회)
+        List<VinylDto> vinylDtos = contents.stream()
+                .map(VinylDto::of)
+                .toList();
+
+        // 다음 요청에서 커서로 사용할 ID = 클라이언트에 반환해준 마지막 요소의 ID (contents.get(last))
+        Long nextCursorId = hasNext ? contents.get(contents.size() - 1).getId() : null;
+
+        SliceImpl<VinylDto> sliceContents = new SliceImpl<>(vinylDtos, PageRequest.of(0, size), hasNext);
+        return new SliceResponse<>(sliceContents, nextCursorId);
     }
 
     @Override

@@ -14,7 +14,7 @@ import java.util.List;
 public interface UserService extends UserDetailsService {
     UserResponseDto registerUser(ServiceRegisterDto dto);
     SliceResponse<VinylDto> getVinylsLikedByUser(Long userId, User user, Long cursorId, int size);
-    List<VinylDto> getVinylsListenedByUser(Long userId, User user);
+    SliceResponse<VinylDto> getVinylsListenedByUser(Long userId, User user, Long cursorId, int size);
     UserDto follow(Long userId, User user);
     UserDto unfollow(Long userId, User user);
     List<UserDto> getFollowersByUser(Long userId, User user);
@@ -23,4 +23,5 @@ public interface UserService extends UserDetailsService {
     UserDto updateUserInfo(User currentUser, UpdateUserRequestDto dto);
 
     void withdrawUser(User currentUser);
+
 }
