@@ -36,37 +36,16 @@ public class Vinyl {
     private Long likesCount = 0L;
 
     @Column(nullable = true)
+    private Long reviewsCount = 0L;
+
+    @Column(nullable = true)
     private String title;
 
     @Column(name = "artists_sort")
     private String artistsSort;
 
-    @Column(columnDefinition = "TEXT")
-    private String notes;
-
     @Column(name = "released_formatted")
     private String releasedFormatted;
-
-    @Column
-    private String uri;
-
-    @Column
-    private String status;
-
-    @OneToMany(mappedBy = "vinyl", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Image> images = new ArrayList<>();
-
-    @OneToMany(mappedBy = "vinyl", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TrackList> tracklist = new ArrayList<>();
-
-    @OneToMany(mappedBy = "vinyl", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Format> formats = new ArrayList<>();
-
-    @OneToMany(mappedBy = "vinyl", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ArtistDetail> artists = new ArrayList<>();
-
-    @OneToMany(mappedBy = "vinyl", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Video> videos = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id")

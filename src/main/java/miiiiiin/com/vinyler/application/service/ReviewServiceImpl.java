@@ -45,6 +45,10 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         var review = reviewRepository.save(Review.of(request.getRating(), request.getContent(), currentUser, vinylEntity));
+
+        vinylEntity.setReviewsCount(vinylEntity.getReviewsCount() + 1);
+        vinylRepository.save(vinylEntity);
+
         return ReviewResponseDto.from(review);
     }
 
@@ -112,6 +116,10 @@ public class ReviewServiceImpl implements ReviewService {
             throw new UserNotAllowedException();
         }
         reviewRepository.delete(reviewEntity);
+
+        var vinylEntity = reviewEntity.getVinyl();
+        vinylEntity.setReviewsCount(Math.max(0, vinylEntity.getReviewsCount() - 1));
+        vinylRepository.save(vinylEntity);
     }
 
     private Review getReviewEntity(Long reviewId) {

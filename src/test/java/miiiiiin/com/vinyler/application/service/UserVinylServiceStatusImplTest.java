@@ -14,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -51,26 +50,13 @@ class UserVinylServiceStatusImplTest {
                 .discogsId(12345L)
                 .title("Test Album")
                 .artistsSort("Test Artist")
-                .images(new ArrayList<>())
-                .tracklist(new ArrayList<>())
-                .formats(new ArrayList<>())
-                .videos(new ArrayList<>())
-                .artists(new ArrayList<>())
                 .build();
 
         likeRequestDto = new LikeRequestDto(
                 12345L,
                 "Test Album",
                 "Test Artist",
-                "Test notes",
-                "Accepted",
-                "https://example.com/vinyl",
-                "2023",
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new ArrayList<>()
+                "2023"
         );
     }
 

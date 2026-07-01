@@ -28,15 +28,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     @Query("""
       SELECT
           l.likeId as likeId,
-          v.vinylId as vinylId,
-          v.discogsId as discogsId,
-          v.title as title,
-          v.artistsSort as artistsSort,
-          v.likesCount as likesCount,
-          v.notes as notes,
-          v.status as status,
-          v.uri as uri,
-          v.releasedFormatted as releasedFormatted
+          v.vinylId as vinylId
        FROM Like l
        JOIN l.vinyl v
        WHERE l.user = :user

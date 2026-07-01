@@ -4,11 +4,6 @@ import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
 import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
 import miiiiiin.com.vinyler.application.entity.Like;
-import miiiiiin.com.vinyler.application.entity.vinyl.ArtistDetail;
-import miiiiiin.com.vinyler.application.entity.vinyl.Format;
-import miiiiiin.com.vinyler.application.entity.vinyl.Image;
-import miiiiiin.com.vinyler.application.entity.vinyl.TrackList;
-import miiiiiin.com.vinyler.application.entity.vinyl.Video;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
@@ -55,28 +50,10 @@ public class VinylServiceImpl implements VinylService {
         vinyl.setDiscogsId(requestDto.discogsId());
         vinyl.setTitle(requestDto.title());
         vinyl.setLikesCount(0L);
+        vinyl.setReviewsCount(0L);
         vinyl.setArtistsSort(requestDto.artistsSort());
-        vinyl.setNotes(requestDto.notes());
         vinyl.setReleasedFormatted(requestDto.releasedFormatted());
-        vinyl.setUri(requestDto.uri());
-        vinyl.setStatus(requestDto.status());
         vinyl.setUser(user);
-
-        vinyl.getImages().addAll(requestDto.images().stream()
-                .map(img -> { Image i = new Image(); i.setType(img.getType()); i.setUri(img.getUri()); i.setVinyl(vinyl); return i; })
-                .toList());
-        vinyl.getTracklist().addAll(requestDto.tracklist().stream()
-                .map(t -> { TrackList tl = new TrackList(); tl.setTitle(t.getTitle()); tl.setDuration(t.getDuration()); tl.setPosition(t.getPosition()); tl.setVinyl(vinyl); return tl; })
-                .toList());
-        vinyl.getFormats().addAll(requestDto.formats().stream()
-                .map(f -> { Format fmt = new Format(); fmt.setName(f.getName()); fmt.setDescriptions(f.getDescriptions()); fmt.setVinyl(vinyl); return fmt; })
-                .toList());
-        vinyl.getVideos().addAll(requestDto.videos().stream()
-                .map(v -> { Video vid = new Video(); vid.setUri(v.getUri()); vid.setVinyl(vinyl); return vid; })
-                .toList());
-        vinyl.getArtists().addAll(requestDto.artists().stream()
-                .map(a -> { ArtistDetail art = new ArtistDetail(); art.setName(a.getName()); art.setResourceUrl(a.getResourceUrl()); art.setVinyl(vinyl); return art; })
-                .toList());
 
         return vinyl;
     }

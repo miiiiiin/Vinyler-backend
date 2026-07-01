@@ -35,7 +35,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -407,9 +406,7 @@ class UserServiceImplTest {
         Long cursorId = null;
         int size = 2;
 
-        Vinyl vinyl1 = Vinyl.builder().vinylId(1L).discogsId(100L).title("Vinyl 1")
-                .images(new ArrayList<>()).tracklist(new ArrayList<>()).formats(new ArrayList<>())
-                .videos(new ArrayList<>()).artists(new ArrayList<>()).build();
+        Vinyl vinyl1 = Vinyl.builder().vinylId(1L).discogsId(100L).title("Vinyl 1").build();
         
         LikeVinylProjection projection1 = mock(LikeVinylProjection.class);
         when(projection1.getVinylId()).thenReturn(1L);
@@ -434,9 +431,7 @@ class UserServiceImplTest {
         // Given
         Long cursorId = null;
         int size = 2;
-        Vinyl vinyl1 = Vinyl.builder().vinylId(1L).discogsId(100L).title("Vinyl 1")
-                .images(new ArrayList<>()).tracklist(new ArrayList<>()).formats(new ArrayList<>())
-                .videos(new ArrayList<>()).artists(new ArrayList<>()).build();
+        Vinyl vinyl1 = Vinyl.builder().vinylId(1L).discogsId(100L).title("Vinyl 1").build();
         
         UserVinylStatus status1 = UserVinylStatus.of(testUser, vinyl1, true);
 

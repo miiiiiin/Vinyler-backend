@@ -6,8 +6,6 @@ import lombok.Data;
 import miiiiiin.com.vinyler.application.entity.*;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 
-import java.util.List;
-
 @Builder
 @Data
 @Schema(description = "Vinyl(LP 음반) 정보")
@@ -27,32 +25,11 @@ public class VinylDto {
     @Schema(description = "찜 수", example = "128")
     private Long likesCount;
 
-    @Schema(description = "음반 노트")
-    private String notes;
-
-    @Schema(description = "음반 상태", example = "Accepted")
-    private String status;
-
-    @Schema(description = "Discogs URI", example = "https://www.discogs.com/release/1234567")
-    private String uri;
+    @Schema(description = "리뷰 수", example = "12")
+    private Long reviewsCount;
 
     @Schema(description = "출시일 (포맷 문자열)", example = "1959")
     private String releasedFormatted;
-
-    @Schema(description = "트랙 목록")
-    private List<TrackListDto> tracklist;
-
-    @Schema(description = "이미지 목록")
-    private List<ImageDto> images;
-
-    @Schema(description = "포맷 목록")
-    private List<FormatDto> formats;
-
-    @Schema(description = "비디오 목록")
-    private List<VideoDto> videos;
-
-    @Schema(description = "아티스트 목록")
-    private List<ArtistDetailDto> artists;
 
     public static VinylDto of(Like like) {
         Vinyl vinyl = like.getVinyl();
@@ -72,16 +49,11 @@ public class VinylDto {
         return VinylDto.builder()
             .vinylId(vinyl.getVinylId())
             .discogsId(vinyl.getDiscogsId())
+            .title(vinyl.getTitle())
             .artistsSort(vinyl.getArtistsSort())
-            .status(vinyl.getStatus())
-            .uri(vinyl.getUri())
-            .notes(vinyl.getNotes())
+            .likesCount(vinyl.getLikesCount())
+            .reviewsCount(vinyl.getReviewsCount())
             .releasedFormatted(vinyl.getReleasedFormatted())
-            .tracklist(vinyl.getTracklist().stream().map(TrackListDto::of).toList())
-            .images(vinyl.getImages().stream().map(ImageDto::of).toList())
-            .formats(vinyl.getFormats().stream().map(FormatDto::of).toList())
-            .videos(vinyl.getVideos().stream().map(VideoDto::of).toList())
-            .artists(vinyl.getArtists().stream().map(ArtistDetailDto::of).toList())
             .build();
     }
 }
