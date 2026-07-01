@@ -1,11 +1,14 @@
 package miiiiiin.com.vinyler.application.service;
 
 import lombok.RequiredArgsConstructor;
+import miiiiiin.com.vinyler.application.dto.VinylDetailDto;
 import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
 import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
 import miiiiiin.com.vinyler.application.entity.Like;
+import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
+import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.global.Constants;
 import miiiiiin.com.vinyler.user.entity.User;
@@ -18,6 +21,7 @@ public class VinylServiceImpl implements VinylService {
 
     private final VinylRepository vinylRepository;
     private final LikeRepository likeRepository;
+    private final UserVinylStatusRepository userVinylStatusRepository;
 
     @Override
     @Transactional
@@ -59,17 +63,22 @@ public class VinylServiceImpl implements VinylService {
     }
 
     @Override
-    public VinylLikeDto getLikeStatus(Long discogsId, User currentUser) {
+    public VinylDetailDto getVinylDetail(Long discogsId, User currentUser) {
         var vinylEntity = vinylRepository.findByDiscogsId(discogsId)
             .orElseThrow(() -> new RuntimeException(Constants.ALBUM_NOT_FOUND));
 
-        // 사용자와 Vinyl에 대한 Like 조회
-        var likeEntity = likeRepository.findByUserAndVinyl(currentUser, vinylEntity);
+        boolean isLiking = likeRepository.findByUserAndVinyl(currentUser, vinylEntity).isPresent();
+        boolean isListened = userVinylStatusRepository.findByUserAndVinyl(currentUser, vinylEntity)
+            .map(UserVinylStatus::isListened)
+            .orElse(false);
 
-        if (likeEntity.isPresent()) {
-            return VinylLikeDto.from(vinylEntity, currentUser, true);
-        } else {
-            return VinylLikeDto.from(vinylEntity, currentUser, false);
-        }
+        return VinylDetailDto.builder()
+            .vinylId(vinylEntity.getVinylId())
+            .discogsId(vinylEntity.getDiscogsId())
+            .likesCount(vinylEntity.getLikesCount())
+            .reviewsCount(vinylEntity.getReviewsCount())
+            .isLiking(isLiking)
+            .isListened(isListened)
+            .build();
     }
 }

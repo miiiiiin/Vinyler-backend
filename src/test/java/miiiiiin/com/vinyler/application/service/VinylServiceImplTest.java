@@ -1,10 +1,13 @@
 package miiiiiin.com.vinyler.application.service;
 
+import miiiiiin.com.vinyler.application.dto.VinylDetailDto;
 import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
 import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
 import miiiiiin.com.vinyler.application.entity.Like;
+import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
+import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.global.Constants;
 import miiiiiin.com.vinyler.user.entity.User;
@@ -32,6 +35,9 @@ class VinylServiceImplTest {
     @Mock
     private LikeRepository likeRepository;
 
+    @Mock
+    private UserVinylStatusRepository userVinylStatusRepository;
+
     @InjectMocks
     private VinylServiceImpl vinylService;
 
@@ -54,6 +60,7 @@ class VinylServiceImplTest {
                 .title("Test Album")
                 .artistsSort("Test Artist")
                 .likesCount(5L)
+                .reviewsCount(3L)
                 .build();
 
         likeRequestDto = new LikeRequestDto(
@@ -144,49 +151,56 @@ class VinylServiceImplTest {
     }
 
     @Test
-    @DisplayName("좋아요 상태 조회 - 좋아요 한 경우")
-    void getLikeStatus_IsLiking() {
+    @DisplayName("Vinyl 상세 조회 - 찜/감상 모두 한 경우")
+    void getVinylDetail_LikingAndListened() {
         // Given
+        UserVinylStatus listenedStatus = UserVinylStatus.of(testUser, testVinyl, true);
         when(vinylRepository.findByDiscogsId(12345L)).thenReturn(Optional.of(testVinyl));
         when(likeRepository.findByUserAndVinyl(testUser, testVinyl)).thenReturn(Optional.of(testLike));
+        when(userVinylStatusRepository.findByUserAndVinyl(testUser, testVinyl)).thenReturn(Optional.of(listenedStatus));
 
         // When
-        VinylLikeDto result = vinylService.getLikeStatus(12345L, testUser);
+        VinylDetailDto result = vinylService.getVinylDetail(12345L, testUser);
 
         // Then
         assertThat(result).isNotNull();
         assertThat(result.isLiking()).isTrue();
+        assertThat(result.isListened()).isTrue();
         assertThat(result.getVinylId()).isEqualTo(1L);
-        assertThat(result.getUserId()).isEqualTo(1L);
+        assertThat(result.getDiscogsId()).isEqualTo(12345L);
+        assertThat(result.getLikesCount()).isEqualTo(5L);
+        assertThat(result.getReviewsCount()).isEqualTo(3L);
         verify(vinylRepository, times(1)).findByDiscogsId(12345L);
         verify(likeRepository, times(1)).findByUserAndVinyl(testUser, testVinyl);
     }
 
     @Test
-    @DisplayName("좋아요 상태 조회 - 좋아요 하지 않은 경우")
-    void getLikeStatus_NotLiking() {
+    @DisplayName("Vinyl 상세 조회 - 찜/감상 모두 하지 않은 경우")
+    void getVinylDetail_NotLikingNotListened() {
         // Given
         when(vinylRepository.findByDiscogsId(12345L)).thenReturn(Optional.of(testVinyl));
         when(likeRepository.findByUserAndVinyl(testUser, testVinyl)).thenReturn(Optional.empty());
+        when(userVinylStatusRepository.findByUserAndVinyl(testUser, testVinyl)).thenReturn(Optional.empty());
 
         // When
-        VinylLikeDto result = vinylService.getLikeStatus(12345L, testUser);
+        VinylDetailDto result = vinylService.getVinylDetail(12345L, testUser);
 
         // Then
         assertThat(result).isNotNull();
         assertThat(result.isLiking()).isFalse();
+        assertThat(result.isListened()).isFalse();
         verify(vinylRepository, times(1)).findByDiscogsId(12345L);
         verify(likeRepository, times(1)).findByUserAndVinyl(testUser, testVinyl);
     }
 
     @Test
-    @DisplayName("좋아요 상태 조회 - Vinyl이 존재하지 않을 때 예외 발생")
-    void getLikeStatus_VinylNotFound_ThrowsException() {
+    @DisplayName("Vinyl 상세 조회 - Vinyl이 존재하지 않을 때 예외 발생")
+    void getVinylDetail_VinylNotFound_ThrowsException() {
         // Given
         when(vinylRepository.findByDiscogsId(99999L)).thenReturn(Optional.empty());
 
         // When & Then
-        assertThatThrownBy(() -> vinylService.getLikeStatus(99999L, testUser))
+        assertThatThrownBy(() -> vinylService.getVinylDetail(99999L, testUser))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage(Constants.ALBUM_NOT_FOUND);
         verify(likeRepository, never()).findByUserAndVinyl(any(), any());
