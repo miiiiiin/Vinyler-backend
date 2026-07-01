@@ -14,8 +14,12 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update # jpa가 엔티티 스캔해서 엔티티와 db 테이블을 비교하여 갱신해줌
+      ddl-auto: validate # 스키마 변경은 Flyway가 전담, Hibernate는 엔티티-스키마 일치 여부만 검증
     show-sql: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true # Flyway 이력이 없는 기존 DB를 baseline으로 간주하고 그 이후 마이그레이션만 적용
 
   elasticsearch:
     uris: http://localhost:9200

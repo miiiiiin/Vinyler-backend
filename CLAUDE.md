@@ -64,6 +64,27 @@ miiiiiin.com.vinyler
 - **Follow**: `follower` → `following` 방향. `User.followersCount` / `followingsCount` 카운트 컬럼을 직접 관리
 - **User**: soft delete (`@SQLDelete` + `@Where(deleted_date IS NULL)`)
 
+### Discogs API 데이터 라이선스 및 캐싱 정책
+
+Discogs API 콘텐츠는 두 종류로 나뉘며, 종류에 따라 저장/사용 규칙이 다르다.
+
+- **CC0 데이터** (CC0 라이선스, 재사용 제약 없음): 발매 제목·설명·날짜·형식·트랙리스트·바코드/식별자·크레딧·버전·URL, 아티스트 이름·설명·관련 발매, 레이블/프로듀서/제조사/유통사 이름·연락처·참고사항. Vinyl 엔티티가 다루는 데이터는 전부 이 범주에 속한다.
+- **제한된 데이터** (CC0 아님): Discogs 유저 데이터(유저명, 유저 이미지, 실명/홈페이지/위치/약력/컬렉션/위시리스트), 마켓플레이스 데이터(재고·주문·리스팅·수수료·가격·판매 이력), 이미지(퍼블릭 도메인/CC0/공정사용 요건 미충족 시). **Vinyler는 현재 이 범주의 데이터를 다루지 않는다** (마켓플레이스 시세, Discogs 유저 프로필 연동 없음).
+
+**저장/캐싱 공통 규칙** (CC0·제한 데이터 모두 적용, 이용약관 근거):
+- Discogs 웹/앱에 게시된 정보보다 **6시간 이상 오래된 콘텐츠를 표시 금지**
+- **서비스 제공에 필요한 기간을 초과하여 캐시/저장 금지** — "영구 캐시"로 취급하면 안 됨
+
+**제한된 데이터 추가 제약** (CC0에는 없음): 제3자 전송 금지, 상업적 목적 사용 금지, 타인의 개인정보·지식재산권 침해 방식 사용 금지. (Discogs가 라이선스를 부여하는 대상이므로 저장 자체는 허용되나 위 용도로만 사용 가능)
+
+**Vinyl 엔티티 설계 원칙** (위 규칙에서 도출, 현재 코드는 미반영 상태 — 리팩토링 필요):
+- `Vinyl`은 `Like`/`Review`/`UserVinylStatus`의 FK 앵커이기도 해서, 유저가 찜/리뷰한 음반의 row 자체를 삭제할 수는 없다. 다만 **영구 보존이 정당화되는 필드는 최소 식별 정보(`discogsId`, `title`, `artistsSort`, `releasedFormatted`, `uri`)로 한정**해야 한다 — "서비스 제공에 필요한" 데이터로 방어 가능한 범위.
+- `notes`, `tracklist`, `formats`, `artists`, `images`, `videos` 등 풍부한 콘텐츠는 FK 앵커 목적상 영구 저장이 필요하지 않다. 현재는 `CascadeType.ALL`로 Postgres에 영구 저장되고 있는데(하위 엔티티: Image, TrackList, Format, ArtistDetail, Video), 이는 "필요 기간 초과 저장" 리스크가 있으므로 **Discogs API 실시간 조회 또는 Redis TTL ≤ 6시간 캐싱으로 전환**하는 방향이 바람직하다.
+
+**저작권/출처 표시 의무** (프론트엔드·API 문서 등 사용자 대면 영역에 반영 필요):
+- "이 애플리케이션은 Discogs의 API를 사용하지만 Discogs와 제휴, 후원 또는 보증 관계가 없습니다. 'Discogs'는 Zink Media, LLC의 상표입니다." 문구를 이용약관/설명서에 표시
+- Discogs API에서 가져온 데이터 옆에 "Discogs에서 제공하는 데이터입니다" 안내 + 해당 discogs.com 페이지로의 하이퍼링크(nofollow 등 검색엔진 배제 처리 금지) 포함
+
 ### 페이징 패턴
 
 리스트 조회는 커서 기반 페이징을 사용. `size+1`개를 조회해 `hasNext` 판단 후 마지막 요소 제거. 응답은 `SliceResponse<T>` (content, hasNext, nextCursorId, size) 형태로 반환.

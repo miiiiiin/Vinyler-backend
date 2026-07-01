@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.UserVinylStatusDto;
+import miiiiiin.com.vinyler.application.dto.VinylDetailDto;
 import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
 import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
 import miiiiiin.com.vinyler.application.service.UserVinylStatusService;
@@ -53,16 +54,16 @@ public class VinylController {
     }
 
     @GetMapping("/{discogs_id}")
-    @Operation(summary = "Vinyl 찜 상태 조회", description = "특정 Vinyl에 대한 현재 사용자의 찜 상태를 조회합니다.")
+    @Operation(summary = "Vinyl 상세 메타 조회", description = "특정 Vinyl(Discogs ID 기준)의 DB 상 찜/리뷰 수와 현재 사용자의 찜/감상 상태를 조회합니다. 트랙리스트/이미지 등 Discogs 원본 데이터는 클라이언트가 Discogs API를 직접 호출해 조합합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "404", description = "Vinyl을 찾을 수 없음")
     })
-    public ResponseEntity<VinylLikeDto> getLikeStatus(
+    public ResponseEntity<VinylDetailDto> getVinylDetail(
             @Parameter(description = "Discogs Release ID", example = "1234567") @PathVariable(name = "discogs_id") Long discogsId,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        var response = vinylService.getLikeStatus(discogsId, userDetails.getUser());
+        var response = vinylService.getVinylDetail(discogsId, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

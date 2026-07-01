@@ -63,6 +63,7 @@ class ReviewServiceImplTest {
                 .discogsId(12345L)
                 .title("Test Album")
                 .artistsSort("Test Artist")
+                .reviewsCount(0L)
                 .build();
 
         testReview = Review.builder()
@@ -86,6 +87,7 @@ class ReviewServiceImplTest {
         when(vinylRepository.findByDiscogsId(12345L)).thenReturn(Optional.of(testVinyl));
         when(reviewRepository.findByUserAndVinyl(testUser, testVinyl)).thenReturn(Optional.empty());
         when(reviewRepository.save(any(Review.class))).thenReturn(testReview);
+        when(vinylRepository.save(any(Vinyl.class))).thenReturn(testVinyl);
 
         // When
         ReviewResponseDto result = reviewService.createReview(reviewRequestDto, testUser);
@@ -94,7 +96,9 @@ class ReviewServiceImplTest {
         assertThat(result).isNotNull();
         assertThat(result.getReviewId()).isEqualTo(1L);
         assertThat(result.getDiscogsId()).isEqualTo(12345L);
+        assertThat(testVinyl.getReviewsCount()).isEqualTo(1L);
         verify(reviewRepository, times(1)).save(any(Review.class));
+        verify(vinylRepository, times(1)).save(testVinyl);
     }
 
     @Test
@@ -323,13 +327,17 @@ class ReviewServiceImplTest {
     void deleteReview_success() {
         // Given (testUser가 작성한 리뷰 반환)
         long reviewId = 1L;
+        testVinyl.setReviewsCount(1L);
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(testReview));
+        when(vinylRepository.save(any(Vinyl.class))).thenReturn(testVinyl);
 
         // when
         reviewService.deleteReview(reviewId, testUser);
 
         // then
+        assertThat(testVinyl.getReviewsCount()).isEqualTo(0L);
         verify(reviewRepository, times(1)).delete(testReview);
+        verify(vinylRepository, times(1)).save(testVinyl);
     }
     @Test
     @DisplayName("리뷰 ID로 리뷰 삭제 - 존재하지 않는 reviewId로 삭제 시도")
