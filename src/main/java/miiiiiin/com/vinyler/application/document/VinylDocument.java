@@ -15,7 +15,7 @@ import java.lang.reflect.Type;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Document(indexName = "vinyls") // 매핑될 ES 인덱스 이름 지정
-@Setting(settingPath = "elasticsearch/vinyl-setting.json")
+@Setting(settingPath = "elasticsearch/vinyl-settings.json")
 public class VinylDocument {
 
     @Id
