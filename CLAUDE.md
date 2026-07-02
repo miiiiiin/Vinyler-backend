@@ -26,6 +26,7 @@ docker-compose up -d
 
 ## 인프라 요구사항
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- Elasticsearch: `http://localhost:9200` — 공식 이미지가 아닌 커스텀 빌드가 필요 (`docker-compose build elasticsearch`), 자세한 내용은 아래 [Elasticsearch 검색](#elasticsearch-검색-진행-중) 참고
 
 ## 아키텍처 개요
 
@@ -100,3 +101,16 @@ Discogs API 콘텐츠는 두 종류로 나뉘며, 종류에 따라 저장/사용
 ### Kakao OAuth2
 
 `application-dev.yml`에 설정. `SocialOAuth2UserService` + `SocialOAuth2User`로 구현. `SecurityConfig`에서 oauth2Login 설정이 주석 처리되어 있어 현재 비활성 상태.
+
+### Elasticsearch 검색 (진행 중)
+
+Vinyl 검색 기능을 위해 Elasticsearch 도입 중. **로컬 개발 환경 구성은 완료, 색인/검색 애플리케이션 코드는 미착수.**
+
+**환경 구성** (`docker-compose.yml`, `docker/elasticsearch/Dockerfile`):
+- ES 8.15.0 기반에 Nori(한국어 형태소 분석기) 플러그인을 설치한 커스텀 이미지를 빌드해서 사용. 공식 이미지엔 Nori가 기본 포함되어 있지 않아 Dockerfile로 `elasticsearch-plugin install analysis-nori`를 빌드 타임에 실행함
+- 로컬 전용 설정: `xpack.security.enabled: false`로 인증 비활성화 (ES 8.x는 기본값이 `true`라 미설정 시 모든 요청이 401). **운영 배포 시 재검토 필요**
+- `discovery.type: single-node`(단일 노드 부팅), `esdata` volume(컨테이너 재생성해도 색인 데이터 유지)
+- Spring 연결: `application.yml`의 `spring.elasticsearch.uris: http://localhost:9200`
+- 별도 네트워크(`es-bridge` 등) 불필요 — 같은 compose 파일 내 서비스는 기본 네트워크로 서비스명 통신 가능. Kibana/Logstash도 아직 미도입 (필요해지면 같은 이유로 커스텀 네트워크 없이 추가 가능)
+
+**남은 작업**: `VinylDocument`(Nori 매핑 포함 인덱스 설계), `VinylSearchRepository`, Vinyl 생성/수정 시 ES 동기화 로직(`VinylServiceImpl`), 검색 API 컨트롤러
