@@ -7,7 +7,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.enums.VinylSortType;
+import miiiiiin.com.vinyler.application.dto.response.PopularKeywordDto;
 import miiiiiin.com.vinyler.application.dto.response.VinylSearchResultDto;
+import miiiiiin.com.vinyler.application.service.PopularKeywordService;
 import miiiiiin.com.vinyler.application.service.VinylElasticSearchService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/vinyls")
 @RequiredArgsConstructor
@@ -24,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class VinylSearchController {
 
     private final VinylElasticSearchService vinylSearchService;
+    private final PopularKeywordService popularKeywordService;
 
     @GetMapping("/search")
     @Operation(summary = "Vinyl 검색", description = "제목/아티스트를 키워드로 검색합니다. sort로 '리뷰 많은 순(REVIEWS)' 또는 '찜 많은 순(LIKES)'을 선택할 수 있습니다.")
@@ -46,6 +51,15 @@ public class VinylSearchController {
 
         Page<VinylSearchResultDto> result = vinylSearchService.search(keyword, sort, page, size);
         return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @GetMapping("/search/popular-keywords")
+    @Operation(summary = "인기 검색어", description = "가장 많이 검색된 키워드를 상위 N개 반환")
+    public ResponseEntity<List<PopularKeywordDto>> popularKeywords(
+            @Parameter(description = "가져올 개수", example = "10")
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        return ResponseEntity.ok(popularKeywordService.getTopKeywords(limit));
     }
 }
 

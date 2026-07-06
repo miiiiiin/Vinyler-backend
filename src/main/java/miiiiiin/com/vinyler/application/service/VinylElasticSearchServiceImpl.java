@@ -14,8 +14,12 @@ import org.springframework.stereotype.Service;
 public class VinylElasticSearchServiceImpl implements VinylElasticSearchService {
 
     private final VinylerElasticSearchRepository vinylSearchRepository;
+    private final PopularKeywordService popularKeywordService;
     @Override
     public Page<VinylSearchResultDto> search(String keyword, VinylSortType sortType, int page, int size) {
+        // 검색어 집계 (인기 검색어용)
+        popularKeywordService.record(keyword);
+
         // page/size 정렬 기준을 Pageable로 조립 (정렬 필드는 enum이 알고 있음)
         Pageable pageable = PageRequest.of(page, size, sortType.toSort());
 
