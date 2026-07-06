@@ -54,9 +54,4 @@ public class VinylDocument {
                 .reviewsCount(vinyl.getReviewsCount())
                 .build();
     }
-
-
-
-
-
 }
