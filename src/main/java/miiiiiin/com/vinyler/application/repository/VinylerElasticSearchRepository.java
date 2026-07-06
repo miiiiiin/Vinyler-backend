@@ -12,7 +12,8 @@ public interface VinylerElasticSearchRepository extends ElasticsearchRepository<
         {
             "multi_match" : {
                 "query" : "?0",
-                "fields" : ["title", "artistsSort"]
+                "fields" : ["title^2", "artistsSort"],
+                "fuzziness" : "AUTO"
             }
         }
     """)

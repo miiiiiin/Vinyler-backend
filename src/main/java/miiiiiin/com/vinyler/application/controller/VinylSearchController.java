@@ -38,8 +38,8 @@ public class VinylSearchController {
             @Parameter(description = "정렬 기준", example = "REVIEWS")
             @RequestParam(defaultValue = "REVIEWS")VinylSortType sort,
 
-            @Parameter(description = "페이지 번호(1부터)", example = "1")
-            @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "페이지 번호(0부터)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
 
             @Parameter(description = "페이지 크기", example = "10")
             @RequestParam(defaultValue = "10") int size) {
