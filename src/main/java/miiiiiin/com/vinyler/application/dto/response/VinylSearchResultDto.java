@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import miiiiiin.com.vinyler.application.document.VinylDocument;
 
-@Getter
 @Builder
 @Schema(description = "Vinyl 검색 결과(엘라스틱 서치)")
 public record VinylSearchResultDto(
