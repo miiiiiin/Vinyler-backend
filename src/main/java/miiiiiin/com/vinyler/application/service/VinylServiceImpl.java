@@ -7,11 +7,13 @@ import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
 import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
+import miiiiiin.com.vinyler.application.event.VinylIndexSyncEvent;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
 import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.global.Constants;
 import miiiiiin.com.vinyler.user.entity.User;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +24,17 @@ public class VinylServiceImpl implements VinylService {
     private final VinylRepository vinylRepository;
     private final LikeRepository likeRepository;
     private final UserVinylStatusRepository userVinylStatusRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
     public Vinyl findOrCreateVinyl(LikeRequestDto requestDto, User user) {
         return vinylRepository.findByDiscogsId(requestDto.discogsId())
-                .orElseGet(() -> vinylRepository.save(buildVinylFromDto(requestDto, user)));
+                .orElseGet(() -> {
+                    Vinyl saved = vinylRepository.save(buildVinylFromDto(requestDto, user));
+                    eventPublisher.publishEvent(new VinylIndexSyncEvent(saved.getDiscogsId()));
+                    return saved;
+                });
     }
 
     @Override
@@ -41,11 +48,15 @@ public class VinylServiceImpl implements VinylService {
         if (likeEntity.isPresent()) {
             likeRepository.delete(likeEntity.get());
             vinylEntity.setLikesCount(Math.max(0, vinylEntity.getLikesCount() - 1));
-            return VinylLikeDto.from(vinylRepository.save(vinylEntity), currentUser, false);
+            var result = VinylLikeDto.from(vinylRepository.save(vinylEntity), currentUser, false);
+            eventPublisher.publishEvent(new VinylIndexSyncEvent(vinylEntity.getDiscogsId()));
+            return result;
         } else {
             likeRepository.save(Like.of(currentUser, vinylEntity));
             vinylEntity.setLikesCount(vinylEntity.getLikesCount() + 1);
-            return VinylLikeDto.from(vinylRepository.save(vinylEntity), currentUser, true);
+            var result = VinylLikeDto.from(vinylRepository.save(vinylEntity), currentUser, true);
+            eventPublisher.publishEvent(new VinylIndexSyncEvent(vinylEntity.getDiscogsId()));
+            return result;
         }
     }
 

@@ -7,6 +7,7 @@ import miiiiiin.com.vinyler.application.dto.response.ReviewResponseDto;
 import miiiiiin.com.vinyler.application.dto.response.SliceResponse;
 import miiiiiin.com.vinyler.application.entity.Review;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
+import miiiiiin.com.vinyler.application.event.VinylIndexSyncEvent;
 import miiiiiin.com.vinyler.application.repository.ReviewRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
 import miiiiiin.com.vinyler.exception.review.ReviewAlreadyExistException;
@@ -14,6 +15,7 @@ import miiiiiin.com.vinyler.exception.review.ReviewNotFoundException;
 import miiiiiin.com.vinyler.exception.user.UserNotAllowedException;
 import miiiiiin.com.vinyler.exception.vinyl.VinylNotFoundException;
 import miiiiiin.com.vinyler.user.entity.User;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
@@ -28,6 +30,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final VinylRepository vinylRepository;
+    private final ApplicationEventPublisher eventPublisher;
 //    private final UserVinylStatusRepository userVinylStatusRepository;
 
     @Override
@@ -48,6 +51,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         vinylEntity.setReviewsCount(vinylEntity.getReviewsCount() + 1);
         vinylRepository.save(vinylEntity);
+        eventPublisher.publishEvent(new VinylIndexSyncEvent(vinylEntity.getDiscogsId()));
 
         return ReviewResponseDto.from(review);
     }
@@ -120,6 +124,7 @@ public class ReviewServiceImpl implements ReviewService {
         var vinylEntity = reviewEntity.getVinyl();
         vinylEntity.setReviewsCount(Math.max(0, vinylEntity.getReviewsCount() - 1));
         vinylRepository.save(vinylEntity);
+        eventPublisher.publishEvent(new VinylIndexSyncEvent(vinylEntity.getDiscogsId()));
     }
 
     private Review getReviewEntity(Long reviewId) {
