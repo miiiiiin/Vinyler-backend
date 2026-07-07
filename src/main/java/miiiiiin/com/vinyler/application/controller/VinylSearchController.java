@@ -64,5 +64,14 @@ public class VinylSearchController {
     ) {
         return ResponseEntity.ok(popularKeywordService.getTopKeywords(limit, hours));
     }
+
+    @GetMapping("/search/autocomplete")
+    @Operation(summary = "검색 자동완성", description = "입력한 접두어로 시작하는 음반 제목/아티스트를 상위 N개 추천한다")
+    public ResponseEntity<List<VinylSearchResultDto>> autocomplete(
+            @Parameter(description = "입력 중인 검색어", example = "재")
+            @RequestParam String prefix
+    ) {
+        return ResponseEntity.ok(vinylSearchService.autocomplete(prefix));
+    }
 }
 
