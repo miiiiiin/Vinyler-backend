@@ -57,9 +57,12 @@ public class VinylSearchController {
     @Operation(summary = "인기 검색어", description = "가장 많이 검색된 키워드를 상위 N개 반환")
     public ResponseEntity<List<PopularKeywordDto>> popularKeywords(
             @Parameter(description = "가져올 개수", example = "10")
-            @RequestParam(defaultValue = "10") int limit
+            @RequestParam(defaultValue = "10") int limit,
+
+            @Parameter(description = "최근 몇 시간을 합산할지", example = "2")
+            @RequestParam(defaultValue = "2") int hours
     ) {
-        return ResponseEntity.ok(popularKeywordService.getTopKeywords(limit));
+        return ResponseEntity.ok(popularKeywordService.getTopKeywords(limit, hours));
     }
 }
 
