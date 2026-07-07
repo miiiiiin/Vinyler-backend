@@ -9,6 +9,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class VinylElasticSearchServiceImpl implements VinylElasticSearchService {
@@ -26,5 +28,15 @@ public class VinylElasticSearchServiceImpl implements VinylElasticSearchService 
         // 엘라스틱 서치 검색 실행 -> 색인 문서를 응답 DTO로 반환
         return vinylSearchRepository.searchByKeyword(keyword, pageable)
                 .map(VinylSearchResultDto::from);
+    }
+
+    @Override
+    public List<VinylSearchResultDto> autocomplete(String prefix) {
+        if (prefix ==null || prefix.isBlank()) return List.of();
+        // 상위 5개
+        Pageable top = PageRequest.of(0, 5);
+        return vinylSearchRepository.autocomplete(prefix.trim(), top)
+                .map(VinylSearchResultDto::from)
+                .getContent();
     }
 }
