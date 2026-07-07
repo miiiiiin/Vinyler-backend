@@ -10,6 +10,17 @@ public interface VinylerElasticSearchRepository extends ElasticsearchRepository<
 
     @Query("""
         {
+            "multi_match": {
+                "query": "?0",
+                "type": "bool_prefix",
+                "fields": ["suggest", "suggest._2gram", "suggest._3gram"]
+            }
+        }
+    """)
+    Page<VinylDocument> autocomplete(String prefix, Pageable pageable);
+
+    @Query("""
+        {
             "multi_match" : {
                 "query" : "?0",
                 "fields" : ["title^2", "artistsSort"],

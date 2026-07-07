@@ -44,6 +44,10 @@ public class VinylDocument {
     @Field(type = FieldType.Long)
     private Long reviewsCount;
 
+    /** 자동완성 전용 (title + artistsSort 합쳐서 담음) */
+    @Field(type = FieldType.Search_As_You_Type)
+    private String suggest;
+
     public static VinylDocument from(Vinyl vinyl) {
         return VinylDocument.builder()
                 .discogsId(vinyl.getDiscogsId())
@@ -52,6 +56,7 @@ public class VinylDocument {
                 .releasedFormatted(vinyl.getReleasedFormatted())
                 .likesCount(vinyl.getLikesCount())
                 .reviewsCount(vinyl.getReviewsCount())
+                .suggest(vinyl.getTitle() + " " + vinyl.getArtistsSort())
                 .build();
     }
 }
