@@ -30,6 +30,9 @@ public class VinylElasticSearchServiceImplTest {
     @Mock
     private VinylerElasticSearchRepository vinylSearchRepository;
 
+    @Mock
+    private PopularKeywordService popularKeywordService;
+
     @InjectMocks
     private VinylElasticSearchServiceImpl service;
 
@@ -52,6 +55,7 @@ public class VinylElasticSearchServiceImplTest {
         Page<VinylSearchResultDto> result = service.search("재즈", VinylSortType.LIKES, 0, 20);
 
         // then (리포지토리에 넘어간 Pageable의 정렬이 likesCount DESC인지)
+        // repo에 어떤 정렬로 요청했는지 (VinylSortType.LIKES -> likesCount DESC로 변환되는지)
         ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
         verify(vinylSearchRepository).searchByKeyword(eq("재즈"), captor.capture());
         Sort.Order order = captor.getValue().getSort().getOrderFor("likesCount");
@@ -66,4 +70,6 @@ public class VinylElasticSearchServiceImplTest {
 
 
 
-    }
+
+
+}
