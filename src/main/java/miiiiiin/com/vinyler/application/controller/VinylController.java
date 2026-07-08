@@ -10,6 +10,8 @@ import miiiiiin.com.vinyler.application.dto.UserVinylStatusDto;
 import miiiiiin.com.vinyler.application.dto.VinylDetailDto;
 import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
 import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
+import miiiiiin.com.vinyler.application.dto.response.PopularVinylDto;
+import miiiiiin.com.vinyler.application.service.PopularVinylService;
 import miiiiiin.com.vinyler.application.service.UserVinylStatusService;
 import miiiiiin.com.vinyler.application.service.VinylService;
 import miiiiiin.com.vinyler.security.UserDetailsImpl;
@@ -17,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/vinyls")
@@ -26,6 +30,7 @@ public class VinylController {
 
     private final VinylService vinylService;
     private final UserVinylStatusService uservinylStatusService;
+    private final PopularVinylService popularVinylService;
 
     @PostMapping("/likes")
     @Operation(summary = "찜 토글", description = "Vinyl을 찜하거나 찜 취소합니다. 이미 찜한 경우 취소, 아닌 경우 찜 처리됩니다.")
@@ -65,5 +70,12 @@ public class VinylController {
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails) {
         var response = vinylService.getVinylDetail(discogsId, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/popular")
+    @Operation(summary = "인기 음반 랭킹", description = "좋아요 많은 순 상위 N개 음반을 반환합니다.")
+    public ResponseEntity<List<PopularVinylDto>> popular(
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(popularVinylService.getTop(limit));
     }
 }

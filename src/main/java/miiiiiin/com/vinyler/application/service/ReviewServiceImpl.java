@@ -7,6 +7,7 @@ import miiiiiin.com.vinyler.application.dto.response.ReviewResponseDto;
 import miiiiiin.com.vinyler.application.dto.response.SliceResponse;
 import miiiiiin.com.vinyler.application.entity.Review;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
+import miiiiiin.com.vinyler.application.event.ReviewChangedEvent;
 import miiiiiin.com.vinyler.application.event.VinylIndexSyncEvent;
 import miiiiiin.com.vinyler.application.repository.ReviewRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +54,8 @@ public class ReviewServiceImpl implements ReviewService {
         vinylEntity.setReviewsCount(vinylEntity.getReviewsCount() + 1);
         vinylRepository.save(vinylEntity);
         eventPublisher.publishEvent(new VinylIndexSyncEvent(vinylEntity.getDiscogsId()));
+        // 리뷰 이벤트 발행 (인기 LP)
+        eventPublisher.publishEvent(new ReviewChangedEvent(UUID.randomUUID().toString(), vinylEntity.getDiscogsId(), +2));
 
         return ReviewResponseDto.from(review);
     }
@@ -125,6 +129,8 @@ public class ReviewServiceImpl implements ReviewService {
         vinylEntity.setReviewsCount(Math.max(0, vinylEntity.getReviewsCount() - 1));
         vinylRepository.save(vinylEntity);
         eventPublisher.publishEvent(new VinylIndexSyncEvent(vinylEntity.getDiscogsId()));
+        // 리뷰 삭제 시 인기 LP 점수 차감
+        eventPublisher.publishEvent(new ReviewChangedEvent(UUID.randomUUID().toString(), vinylEntity.getDiscogsId(), -2));
     }
 
     private Review getReviewEntity(Long reviewId) {
