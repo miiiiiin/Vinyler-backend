@@ -8,6 +8,7 @@ import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.application.event.VinylIndexSyncEvent;
+import miiiiiin.com.vinyler.application.event.VinylLikedEvent;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
 import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
@@ -17,6 +18,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class VinylServiceImpl implements VinylService {
@@ -25,6 +28,7 @@ public class VinylServiceImpl implements VinylService {
     private final LikeRepository likeRepository;
     private final UserVinylStatusRepository userVinylStatusRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final PopularVinylService popularVinylService;
 
     @Override
     @Transactional
@@ -50,12 +54,16 @@ public class VinylServiceImpl implements VinylService {
             vinylEntity.setLikesCount(Math.max(0, vinylEntity.getLikesCount() - 1));
             var result = VinylLikeDto.from(vinylRepository.save(vinylEntity), currentUser, false);
             eventPublisher.publishEvent(new VinylIndexSyncEvent(vinylEntity.getDiscogsId()));
+            // 취소 : -1
+            eventPublisher.publishEvent(new VinylLikedEvent(UUID.randomUUID().toString(), vinylEntity.getDiscogsId(), -1));
             return result;
         } else {
             likeRepository.save(Like.of(currentUser, vinylEntity));
             vinylEntity.setLikesCount(vinylEntity.getLikesCount() + 1);
             var result = VinylLikeDto.from(vinylRepository.save(vinylEntity), currentUser, true);
             eventPublisher.publishEvent(new VinylIndexSyncEvent(vinylEntity.getDiscogsId()));
+            // 좋아요 : +1
+            eventPublisher.publishEvent(new VinylLikedEvent(UUID.randomUUID().toString(), vinylEntity.getDiscogsId(), +1));
             return result;
         }
     }
