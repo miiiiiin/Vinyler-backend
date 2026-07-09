@@ -17,7 +17,7 @@ public class PopularVinylService {
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String KEY = "vinyl:popularity";
 
-    // 쓰기: 좋아요 발생 시 점수 가감 (+1 좋아요 / -1 취소)
+    // ZINCRBY 쓰기: 좋아요 발생 시 점수 가감 (+1 좋아요 / -1 취소)
     public void addScore(Long discogsId, double delta) {
         redisTemplate.opsForZSet().incrementScore(KEY, String.valueOf(discogsId), delta);
     }
