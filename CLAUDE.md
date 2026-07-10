@@ -114,3 +114,30 @@ Vinyl 검색 기능을 위해 Elasticsearch 도입 중. **로컬 개발 환경 �
 - 별도 네트워크(`es-bridge` 등) 불필요 — 같은 compose 파일 내 서비스는 기본 네트워크로 서비스명 통신 가능. Kibana/Logstash도 아직 미도입 (필요해지면 같은 이유로 커스텀 네트워크 없이 추가 가능)
 
 **남은 작업**: `VinylDocument`(Nori 매핑 포함 인덱스 설계), `VinylSearchRepository`, Vinyl 생성/수정 시 ES 동기화 로직(`VinylServiceImpl`), 검색 API 컨트롤러
+
+### 인기 LP 랭킹 (이벤트 기반 집계)
+
+**파이프라인**
+
+```
+좋아요/리뷰 → ApplicationEvent → Producer(AFTER_COMMIT, XADD)
+→ Redis Stream → Consumer(Consumer Group, XREADGROUP)
+→ 멱등성(SETNX) → ZINCRBY → Sorted Set → GET /popular(ZREVRANGE + DB 제목 조합)
+```
+
+**설계 선택과 이유**
+
+| 선택 | 왜 |
+|---|---|
+| ApplicationEvent | 도메인 로직을 집계/인프라에서 분리 |
+| @TransactionalEventListener(AFTER_COMMIT) | 롤백된 좋아요가 랭킹에 반영되는 것 방지 |
+| Redis Stream | 컨슈머가 죽어도 이벤트 유실 X, 재처리 가능 |
+| Consumer Group + 수동 ACK | "어디까지 읽었나" 기억 + 실패 시 pending 재처리 |
+| SETNX(processed:{eventId}) | at-least-once 배달의 중복을 멱등하게 방어 |
+| Sorted Set | 집계 때 정렬 선불 → 조회 O(logN+N) |
+
+**한계 (트레이드오프)**
+- exactly-once 아님: 커밋~XADD, 도장~집계 사이 좁은 유실/중복 창 존재 → 완전 보장은 Outbox 필요 (현재는 그 직전 단계)
+
+**API**
+- `GET /api/v1/vinyls/popular?limit=10` — 인기 음반 상위 N (rank, discogsId, score, title, artistsSort)

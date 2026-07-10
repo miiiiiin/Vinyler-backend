@@ -12,4 +12,7 @@ import java.util.Optional;
 public interface VinylRepository extends JpaRepository<Vinyl, Long> {
     List<Vinyl> findByUser(User user);
     Optional<Vinyl> findByDiscogsId(Long discogsId);
+
+    /** 일괄 조회 */
+    List<Vinyl> findByDiscogsIdIn(List<Long> discogsIds);
 }
