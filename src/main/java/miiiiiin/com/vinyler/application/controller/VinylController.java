@@ -73,8 +73,9 @@ public class VinylController {
     }
 
     @GetMapping("/popular")
-    @Operation(summary = "인기 음반 랭킹", description = "좋아요 많은 순 상위 N개 음반을 반환합니다.")
+    @Operation(summary = "인기 음반 랭킹", description = "찜/리뷰 점수 기준 상위 N개 음반을 반환합니다.")
     public ResponseEntity<List<PopularVinylDto>> popular(
+            @Parameter(description = "가져올 개수", example = "10")
             @RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(popularVinylService.getTop(limit));
     }
