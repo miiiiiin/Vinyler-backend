@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import miiiiiin.com.vinyler.application.dto.VinylDetailDto;
 import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
 import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
+import miiiiiin.com.vinyler.application.dto.response.DiscogsReleaseDto;
+import miiiiiin.com.vinyler.application.dto.response.VinylDetailResponse;
 import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
@@ -12,6 +14,7 @@ import miiiiiin.com.vinyler.application.event.VinylLikedEvent;
 import miiiiiin.com.vinyler.application.repository.LikeRepository;
 import miiiiiin.com.vinyler.application.repository.UserVinylStatusRepository;
 import miiiiiin.com.vinyler.application.repository.VinylRepository;
+import miiiiiin.com.vinyler.discogs.service.VinylDetailCacheService;
 import miiiiiin.com.vinyler.global.Constants;
 import miiiiiin.com.vinyler.user.entity.User;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,6 +32,7 @@ public class VinylServiceImpl implements VinylService {
     private final UserVinylStatusRepository userVinylStatusRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final PopularVinylService popularVinylService;
+    private final VinylDetailCacheService vinylDetailCacheService;
 
     @Override
     @Transactional
@@ -82,22 +86,32 @@ public class VinylServiceImpl implements VinylService {
     }
 
     @Override
-    public VinylDetailDto getVinylDetail(Long discogsId, User currentUser) {
-        var vinylEntity = vinylRepository.findByDiscogsId(discogsId)
-            .orElseThrow(() -> new RuntimeException(Constants.ALBUM_NOT_FOUND));
+    public VinylDetailResponse getVinylDetail(Long discogsId, User currentUser) {
+        // 실시간 필드: Redis 캐시 확인 -> 없으면 Discogs 호출
+        // 여기서 진짜 없으면 404, discogs 장애면 503
+        DiscogsReleaseDto release = vinylDetailCacheService.getReleaseDetail(discogsId); // redis
 
-        boolean isLiking = likeRepository.findByUserAndVinyl(currentUser, vinylEntity).isPresent();
-        boolean isListened = userVinylStatusRepository.findByUserAndVinyl(currentUser, vinylEntity)
-            .map(UserVinylStatus::isListened)
-            .orElse(false);
 
-        return VinylDetailDto.builder()
-            .vinylId(vinylEntity.getVinylId())
-            .discogsId(vinylEntity.getDiscogsId())
-            .likesCount(vinylEntity.getLikesCount())
-            .reviewsCount(vinylEntity.getReviewsCount())
-            .isLiking(isLiking)
-            .isListened(isListened)
-            .build();
+        // 메타: 있으면 실제값, 없으면 기본값
+        var vinylEntity = vinylRepository.findByDiscogsId(discogsId);
+        long likesCount = vinylEntity.map(Vinyl::getLikesCount).orElse(0L);
+        long reviewsCount= vinylEntity.map(Vinyl::getReviewsCount).orElse(0L);
+        boolean isLiking = vinylEntity
+                .flatMap(v -> likeRepository.findByUserAndVinyl(currentUser, v))
+                .isPresent();
+
+        boolean isListened = vinylEntity
+                .flatMap(v -> userVinylStatusRepository.findByUserAndVinyl(currentUser, v))
+                .map(UserVinylStatus::isListened)
+                .orElse(false);
+
+        // redis/실시간 호출 데이터 + db 메타데이터 합쳐 반환
+        return VinylDetailResponse.builder()
+                .release(release)
+                .likesCount(likesCount)
+                .reviewsCount(reviewsCount)
+                .isLiking(isLiking)
+                .isListened(isListened)
+                .build();
     }
 }

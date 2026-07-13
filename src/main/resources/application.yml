@@ -42,6 +42,11 @@ springdoc:
   paths-to-match:
     - /api/v1/**
 
+discogs:
+  base-url: https://api.discogs.com
+  token: ${DISCOGS_TOKEN}
+  user-agent: Vinyler/2.0 +https://github.com/miiiiiin/Vinyler-backend
+
 logging:
   level:
     org.springframework.security: DEBUG
@@ -61,3 +66,5 @@ data:
     host: localhost # 로컬 테스트 시
     port: 6379
     password: systempass
+
+

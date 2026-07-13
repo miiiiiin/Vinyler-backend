@@ -11,6 +11,7 @@ import miiiiiin.com.vinyler.application.dto.VinylDetailDto;
 import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
 import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
 import miiiiiin.com.vinyler.application.dto.response.PopularVinylDto;
+import miiiiiin.com.vinyler.application.dto.response.VinylDetailResponse;
 import miiiiiin.com.vinyler.application.service.PopularVinylService;
 import miiiiiin.com.vinyler.application.service.UserVinylStatusService;
 import miiiiiin.com.vinyler.application.service.VinylService;
@@ -59,15 +60,19 @@ public class VinylController {
     }
 
     @GetMapping("/{discogs_id}")
-    @Operation(summary = "Vinyl 상세 메타 조회", description = "특정 Vinyl(Discogs ID 기준)의 DB 상 찜/리뷰 수와 현재 사용자의 찜/감상 상태를 조회합니다. 트랙리스트/이미지 등 Discogs 원본 데이터는 클라이언트가 Discogs API를 직접 호출해 조합합니다.")
-    @ApiResponses({
+    @Operation(summary = "Vinyl 상세 조회",
+            description = "Discogs ID로 상세 조회. " +
+                    "트랙리스트/이미지/노트 등 Discogs 원본은 서버가 프록시하며 Redis에 5시간 캐시됨(rate limit 방어). " +
+                    "여기에 DB 상 찜/리뷰 수와 현재 사용자의 찜/감상 상태를 합쳐 반환")
+            @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "404", description = "Vinyl을 찾을 수 없음")
     })
-    public ResponseEntity<VinylDetailDto> getVinylDetail(
+    public ResponseEntity<VinylDetailResponse> getVinylDetail(
             @Parameter(description = "Discogs Release ID", example = "1234567") @PathVariable(name = "discogs_id") Long discogsId,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        // 프록시+캐시
         var response = vinylService.getVinylDetail(discogsId, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

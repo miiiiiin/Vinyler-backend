@@ -141,3 +141,49 @@ Vinyl 검색 기능을 위해 Elasticsearch 도입 중. **로컬 개발 환경 �
 
 **API**
 - `GET /api/v1/vinyls/popular?limit=10` — 인기 음반 상위 N (rank, discogsId, score, title, artistsSort)
+
+### 상세 조회 캐싱 (Discogs 프록시 + Redis, #95)
+
+**왜**
+모바일 앱이 상세 화면마다 Discogs API를 직접 호출 → (유저 수 × 조회 수)가 그대로 Discogs 호출량이 되어 rate limit(인증 시 분당 ~60회)에 쉽게 걸림. 클라이언트별 캐시는 기기마다 따로라 전체 호출량이 안 줄어듦.
+
+**해결**
+Discogs 호출 주체를 백엔드로 옮기고(프록시), 응답을 Redis에 공유 캐시(TTL 6h). 같은 음반은 6시간 동안 캐시 HIT → Discogs 미호출. rate limit 방어 + Discogs ToS("6시간 초과 표시 금지 / 영구 저장 금지")를 동시에 충족.
+
+**파이프라인**
+
+```
+GET /vinyls/{discogsId}
+  → VinylDetailCacheService: Redis 확인
+       HIT  → 캐시 JSON 파싱 후 반환 (Discogs 미호출)
+       MISS → DiscogsClient 호출 → Redis SET (TTL 6h) → 반환
+  → DiscogsReleaseDto(실시간 원본) + DB 메타(찜/리뷰 수, 내 상태) 합쳐
+    VinylDetailResponse 반환
+```
+
+**구성요소**
+
+| 클래스 | 역할 |
+|---|---|
+| DiscogsProperties | application.yml의 discogs.* 값 매핑 (base-url/token/user-agent) |
+| DiscogsClientConfig | RestClient 빈 조립 (공통 헤더·타임아웃) |
+| DiscogsClient | `GET /releases/{id}` 호출 + 상태별 예외 번역 |
+| VinylDetailCacheService | Cache-Aside (Redis 확인 → MISS 시 호출·저장). 캐시는 원본 문자열, 파싱은 읽을 때 |
+
+**설계 선택과 이유**
+
+| 선택 | 왜 |
+|---|---|
+| 백엔드 프록시로 전환 | 클라이언트별 캐시는 공유 안 됨 → 서버 캐시라야 전체 호출량 감소 |
+| Redis TTL 6h | rate limit 방어 + Discogs ToS 상한(6h)에 정확히 대응 |
+| 캐시에 원본 JSON 문자열 저장 | DTO 바뀌어도 캐시 안 깨짐. 파싱 규칙은 읽을 때 최신 적용 |
+| release로 묶은 응답 | Discogs 원본/우리 DB 메타 경계 명확 + 매핑 코드 없음 |
+| 404→404, 그 외 실패→503 | "없는 음반"과 "Discogs 일시 장애(재시도 가능)"를 구분 |
+
+**엣지 케이스**
+- DB에 row 없는 음반: 존재 판단 주체가 DB→Discogs로 이동. 메타만 0/false로 채워 정상 오픈
+- User-Agent 필수: 없으면 Discogs가 403. RestClient 빈에 defaultHeader로 고정
+- 타임아웃: connect 2s / read 3s로 "Discogs 하나 느려서 앱 전체 멈춤" 방지
+
+**API**
+- `GET /api/v1/vinyls/{discogsId}` — 상세(캐시된 Discogs 원본 + DB 메타)
