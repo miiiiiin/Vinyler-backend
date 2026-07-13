@@ -61,3 +61,8 @@ data:
     host: localhost # 로컬 테스트 시
     port: 6379
     password: systempass
+
+  discogs:
+    base-url: https://api.discogs.com
+    token: ${DISCOGS_TOKEN:}          # 실제 토큰은 dev/prod yml 또는 환경변수로 주입
+    user-agent: Vinyler/1.0
