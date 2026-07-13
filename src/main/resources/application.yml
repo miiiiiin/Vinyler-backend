@@ -42,6 +42,10 @@ springdoc:
   paths-to-match:
     - /api/v1/**
 
+discogs:
+  base-url: https://api.discogs.com
+  token: ${DISCOGS_TOKEN}
+  user-agent: Vinyler/2.0 +https://github.com/miiiiiin/Vinyler-backend
 
 logging:
   level:

@@ -16,7 +16,7 @@ public class DiscogsClient {
     public String getReleaseRaw(Long discogsId) {
         try {
             return restClient.get()
-                    .uri("/release/{id}", discogsId)
+                    .uri("/releases/{id}", discogsId)
                     .retrieve()
                     // discogs가 404 -> 진짜 없는 음반 -> 여기서도 404
                     .onStatus(status -> status.value() == 404,
