@@ -42,10 +42,6 @@ springdoc:
   paths-to-match:
     - /api/v1/**
 
-  discogs:
-    base-url: https://api.discogs.com
-    token: "nkzSqEWNIhLJfxQKBjlX"          # 실제 토큰은 dev/prod yml 또는 환경변수로 주입
-    user-agent: Vinyler/1.0
 
 logging:
   level:
