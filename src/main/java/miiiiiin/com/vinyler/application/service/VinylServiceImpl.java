@@ -88,21 +88,28 @@ public class VinylServiceImpl implements VinylService {
     @Override
     public VinylDetailResponse getVinylDetail(Long discogsId, User currentUser) {
         // 실시간 필드: Redis 캐시 확인 -> 없으면 Discogs 호출
+        // 여기서 진짜 없으면 404, discogs 장애면 503
         DiscogsReleaseDto release = vinylDetailCacheService.getReleaseDetail(discogsId); // redis
 
-        var vinylEntity = vinylRepository.findByDiscogsId(discogsId)
-            .orElseThrow(() -> new RuntimeException(Constants.ALBUM_NOT_FOUND));
 
-        boolean isLiking = likeRepository.findByUserAndVinyl(currentUser, vinylEntity).isPresent();
-        boolean isListened = userVinylStatusRepository.findByUserAndVinyl(currentUser, vinylEntity)
-            .map(UserVinylStatus::isListened)
-            .orElse(false);
+        // 메타: 있으면 실제값, 없으면 기본값
+        var vinylEntity = vinylRepository.findByDiscogsId(discogsId);
+        long likesCount = vinylEntity.map(Vinyl::getLikesCount).orElse(0L);
+        long reviewsCount= vinylEntity.map(Vinyl::getReviewsCount).orElse(0L);
+        boolean isLiking = vinylEntity
+                .flatMap(v -> likeRepository.findByUserAndVinyl(currentUser, v))
+                .isPresent();
+
+        boolean isListened = vinylEntity
+                .flatMap(v -> userVinylStatusRepository.findByUserAndVinyl(currentUser, v))
+                .map(UserVinylStatus::isListened)
+                .orElse(false);
 
         // redis/실시간 호출 데이터 + db 메타데이터 합쳐 반환
         return VinylDetailResponse.builder()
                 .release(release)
-                .likesCount(vinylEntity.getLikesCount())
-                .reviewsCount(vinylEntity.getReviewsCount())
+                .likesCount(likesCount)
+                .reviewsCount(reviewsCount)
                 .isLiking(isLiking)
                 .isListened(isListened)
                 .build();
