@@ -1,4 +1,4 @@
-package miiiiiin.com.vinyler.config.discogs;
+package miiiiiin.com.vinyler.discogs.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
