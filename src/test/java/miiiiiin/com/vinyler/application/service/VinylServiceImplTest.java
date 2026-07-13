@@ -3,6 +3,7 @@ package miiiiiin.com.vinyler.application.service;
 import miiiiiin.com.vinyler.application.dto.VinylDetailDto;
 import miiiiiin.com.vinyler.application.dto.VinylLikeDto;
 import miiiiiin.com.vinyler.application.dto.request.LikeRequestDto;
+import miiiiiin.com.vinyler.application.dto.response.VinylDetailResponse;
 import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.UserVinylStatus;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
@@ -160,16 +161,15 @@ class VinylServiceImplTest {
         when(userVinylStatusRepository.findByUserAndVinyl(testUser, testVinyl)).thenReturn(Optional.of(listenedStatus));
 
         // When
-        VinylDetailDto result = vinylService.getVinylDetail(12345L, testUser);
+        VinylDetailResponse result = vinylService.getVinylDetail(12345L, testUser);
 
         // Then
         assertThat(result).isNotNull();
         assertThat(result.isLiking()).isTrue();
         assertThat(result.isListened()).isTrue();
-        assertThat(result.getVinylId()).isEqualTo(1L);
-        assertThat(result.getDiscogsId()).isEqualTo(12345L);
-        assertThat(result.getLikesCount()).isEqualTo(5L);
-        assertThat(result.getReviewsCount()).isEqualTo(3L);
+        assertThat(result.release().id()).isEqualTo(12345L);
+        assertThat(result.likesCount()).isEqualTo(5L);
+        assertThat(result.reviewsCount()).isEqualTo(3L);
         verify(vinylRepository, times(1)).findByDiscogsId(12345L);
         verify(likeRepository, times(1)).findByUserAndVinyl(testUser, testVinyl);
     }
@@ -183,7 +183,7 @@ class VinylServiceImplTest {
         when(userVinylStatusRepository.findByUserAndVinyl(testUser, testVinyl)).thenReturn(Optional.empty());
 
         // When
-        VinylDetailDto result = vinylService.getVinylDetail(12345L, testUser);
+        VinylDetailResponse result = vinylService.getVinylDetail(12345L, testUser);
 
         // Then
         assertThat(result).isNotNull();
