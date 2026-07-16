@@ -18,7 +18,7 @@ public class VinylDetailCacheService {
     private final DiscogsClient discogsClient;
     private final ObjectMapper objectMapper;
 
-    /** Redis 캐시 레이어 적용 (Key: discogs:release:{discogsId}, TTL: 10~30분) */
+    /** Redis 캐시 레이어 적용 (Key: discogs:release:{discogsId}, TTL: 5시간) */
     private static final String KEY_PREFIX = "discogs:release:";
     private static final Duration TTL = Duration.ofHours(5); // 라이선스 상한 시간은 6시간이지만, 5시간으로 고정
 
