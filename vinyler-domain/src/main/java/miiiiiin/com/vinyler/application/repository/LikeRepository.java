@@ -1,6 +1,6 @@
 package miiiiiin.com.vinyler.application.repository;
 
-import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.repository.query.Param;
 import miiiiiin.com.vinyler.application.dto.projection.LikeVinylProjection;
 import miiiiiin.com.vinyler.application.entity.Like;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;

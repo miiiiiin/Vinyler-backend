@@ -7,7 +7,7 @@ import lombok.Setter;
 import miiiiiin.com.vinyler.application.entity.vinyl.Vinyl;
 import miiiiiin.com.vinyler.user.entity.BaseEntity;
 import miiiiiin.com.vinyler.user.entity.User;
-import net.minidev.json.annotate.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
