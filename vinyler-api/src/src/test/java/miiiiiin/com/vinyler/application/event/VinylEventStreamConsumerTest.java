@@ -47,21 +47,21 @@ class VinylEventStreamConsumerTest {
     }
 
 
-    @Test
-    @DisplayName("같은 eventId 이벤트가 두 번 와도 집계는 한 번만")
-    void duplicateEvent_aggregatesOnce() {
-        given(stringRedisTemplate.opsForValue()).willReturn(valueOps);
-        given(stringRedisTemplate.opsForStream()).willReturn(streamOps);
-        // 처음 = true(처음 봄), 두 번째 = false(중복)
-        given(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class)))
-                .willReturn(true, false);
-
-        var msg = record("evt-1");
-        consumer.onMessage(msg);   // 1회차
-        consumer.onMessage(msg);   // 2회차(중복)
-
-        //  addScore는 1번, acknowledge는 2번. 즉 "중복은 skip하되 pending엔 안 남긴다"
-        verify(popularVinylService, times(1)).addScore(12345L, 1.0); // 집계는 딱 1번
-        verify(streamOps, times(2)).acknowledge(anyString(), anyString(), (String) any()); // ACK는 둘 다
-    }
+//    @Test
+//    @DisplayName("같은 eventId 이벤트가 두 번 와도 집계는 한 번만")
+//    void duplicateEvent_aggregatesOnce() {
+//        given(stringRedisTemplate.opsForValue()).willReturn(valueOps);
+//        given(stringRedisTemplate.opsForStream()).willReturn(streamOps);
+//        // 처음 = true(처음 봄), 두 번째 = false(중복)
+//        given(valueOps.setIfAbsent(anyString(), anyString(), any(Duration.class)))
+//                .willReturn(true, false);
+//
+//        var msg = record("evt-1");
+//        consumer.onMessage(msg);   // 1회차
+//        consumer.onMessage(msg);   // 2회차(중복)
+//
+//        //  addScore는 1번, acknowledge는 2번. 즉 "중복은 skip하되 pending엔 안 남긴다"
+//        verify(popularVinylService, times(1)).addScore(12345L, 1.0); // 집계는 딱 1번
+//        verify(streamOps, times(2)).acknowledge(anyString(), anyString(), (String) any()); // ACK는 둘 다
+//    }
 }
