@@ -1,0 +1,2 @@
+// 라이브러리 모듈. 실행되는 앱이 아니라 api/batch가 의존하는 공용 코드.
+// 엔티티, Repository, VinylDocument(엘라스틱 서치), Flyway가 여기로 들어온다.
