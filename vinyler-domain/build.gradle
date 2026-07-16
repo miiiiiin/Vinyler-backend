@@ -1,0 +1,16 @@
+// 라이브러리 모듈. 실행되는 앱이 아니라 api/batch가 의존하는 도메인 코드.
+// 엔티티, Repository, VinylDocument(엘라스틱서치 색인 문서)가 들어온다.
+// 실행 주체가 아니므로 web/security/flyway/DB 드라이버는 여기 두지 않는다.
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    // 엔티티, Repository가 쓰는 영속성 스택은 api 로 노출한다.
+    // 이러면 api/batch 가 도메인 타입을 쓸 때 JpaRepository 등 상위 타입이 자동으로 따라온다.
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    api 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
+    // 엔티티에서 @JsonIgnore 사용 (직렬화 어노테이션만 필요, databind 는 불필요)
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
+}
